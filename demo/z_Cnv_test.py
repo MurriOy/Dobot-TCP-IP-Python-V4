@@ -1,13 +1,13 @@
 """
-传送带测试
+Conveyor test
 
-演示传送带跟踪功能的使用
+Demonstrate the use of conveyor tracking functionality
 """
 
 import sys
 import os
 
-# 添加父目录到路径，以便导入dobot_sdk
+# Add parent directory to path for importing dobot_sdk
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dobot_sdk import DobotRobot
@@ -16,31 +16,31 @@ import time
 
 
 def main():
-    # 修改为实际机器人IP
+    # Modify to actual robot IP
     ROBOT_IP = "192.168.5.1"
     
     try:
         with DobotRobot(ROBOT_IP) as robot:
             print("=" * 50)
-            print("传送带测试")
+            print("Conveyor Test")
             print("=" * 50)
             
-            # 初始化
+            # Initialize
             robot.robot_control.RequestControl()
             robot.robot_control.ClearError()
             robot.robot_control.EnableRobot(load=1.0)
             
-            # 查询机器人模式
+            # Query robot mode
             mode_response = robot.robot_control.RobotMode()
-            print(f"机器人模式: {mode_response}")
+            print(f"Robot mode: {mode_response}")
             
             while True:
-                # 初始化传送带
-                print("\n初始化传送带...")
+                # Initialize conveyor
+                print("\nInitializing conveyor...")
                 robot.plugins.CnvInit(1)
                 
-                # 移动至拍照/等待位
-                print("移动至等待位...")
+                # Move to photo/waiting position
+                print("Moving to waiting position...")
                 robot.motion.MovJ(
                     [-29.3427, -386.0646, 248.1024, 180.0000, -0.0000, -154.3856],
                     CoordinateType.CARTESIAN,
@@ -48,15 +48,15 @@ def main():
                 )
                 time.sleep(3)
                 
-                # 轮询检测传送带是否有物体到位
-                print("\n等待物体进入抓取区域...")
+                # Poll conveyor for object detection
+                print("\nWaiting for object to enter gripping area...")
                 while True:
                     cnv_status = robot.plugins.GetCnvObject(0)
-                    print(f"传送带状态: {cnv_status}")
+                    print(f"Conveyor status: {cnv_status}")
                     
-                    # 解析返回状态
+                    # Parse returned status
                     try:
-                        # 响应格式类似: "GetCnvObject,{status},GetCnvObject();"
+                        # Response format similar to: "GetCnvObject,{status},GetCnvObject();"
                         start = cnv_status.find("{") + 1
                         end = cnv_status.find("}")
                         if start > 0 and end > start:
@@ -64,44 +64,44 @@ def main():
                             if len(status_values) > 3:
                                 object_detected = int(status_values[3])
                                 if object_detected == 1:
-                                    print("检测到物体!")
+                                    print("Object detected!")
                                     break
                     except Exception as e:
-                        print(f"解析状态失败: {e}")
+                        print(f"Parse status failed: {e}")
                     
                     time.sleep(0.2)
                 
-                # 启动同步跟随
-                print("\n启动传送带同步...")
+                # Start synchronized following
+                print("\nStarting conveyor synchronization...")
                 robot.plugins.StartSyncCnv()
                 
-                # 执行传送带跟随运动
-                print("执行传送带跟随运动...")
+                # Execute conveyor following motion
+                print("Executing conveyor following motion...")
                 robot.plugins.CnvMovL([0, 0, 0, 0, 0, 153])
                 time.sleep(2)
                 
-                # 触发吸盘或夹具 (DO6)
-                print("触发吸盘...")
+                # Trigger suction cup or gripper (DO6)
+                print("Triggering suction cup...")
                 robot.io.DO(6, 1)
                 
-                # 下降抓取
-                print("下降抓取...")
+                # Descend to grip
+                print("Descending to grip...")
                 robot.plugins.CnvMovL([0, 0, -50, 0, 0, 153])
                 time.sleep(3)
                 
-                # 停止同步
-                print("停止传送带同步...")
+                # Stop synchronization
+                print("Stopping conveyor synchronization...")
                 robot.plugins.StopSyncCnv()
                 
-                # 查询机器人模式
+                # Query robot mode
                 mode_response = robot.robot_control.RobotMode()
-                print(f"机器人模式: {mode_response}")
+                print(f"Robot mode: {mode_response}")
                 
-                # 停止运动
+                # Stop motion
                 robot.robot_control.Stop()
                 
-                # 移动至放置位置
-                print("移动至放置位置...")
+                # Move to placement position
+                print("Moving to placement position...")
                 robot.motion.MovL(
                     [212.5693, -395.0977, 209.9998, 179.9999, -0.0001, -154.3857],
                     CoordinateType.CARTESIAN,
@@ -109,11 +109,11 @@ def main():
                 )
                 time.sleep(3)
                 
-                # 释放吸盘
+                # Release suction cup
                 robot.io.DO(6, 0)
                 
-                # 返回待机位
-                print("返回待机位...")
+                # Return to standby position
+                print("Returning to standby position...")
                 robot.motion.MovJ(
                     [-29.3427, -386.0646, 248.1024, 180.0000, -0.0000, -154.3856],
                     CoordinateType.CARTESIAN,
@@ -122,9 +122,9 @@ def main():
                 time.sleep(3)
             
     except KeyboardInterrupt:
-        print("\n用户中断")
+        print("\nUser interrupted")
     except Exception as e:
-        print(f"\n错误: {e}")
+        print(f"\nError: {e}")
         import traceback
         traceback.print_exc()
 

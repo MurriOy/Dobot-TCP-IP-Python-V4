@@ -1,13 +1,13 @@
 """
-伺服控制测试
+Servo control test
 
-演示ServoP动态跟随功能，生成圆周运动轨迹
+Demonstrate ServoP dynamic following functionality, generate circular motion trajectory
 """
 
 import sys
 import os
 
-# 添加父目录到路径，以便导入dobot_sdk
+# Add parent directory to path for importing dobot_sdk
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import math
@@ -17,15 +17,15 @@ from dobot_sdk import CoordinateType
 
 
 def parse_dobot_response(response_str: str) -> tuple:
-    """解析Dobot返回的字符串格式数据，提取各部分内容
+    """Parse string format data returned by Dobot, extract each part
 
-    格式示例: 'part1,{1,2,3},part3'
+    Format example: 'part1,{1,2,3},part3'
 
     Args:
-        response_str: 待解析的字符串
+        response_str: String to parse
 
     Returns:
-        tuple: (前缀部分, 数字列表, 后缀部分)，解析失败返回None
+        tuple: (prefix, number list, suffix), returns None if parsing fails
     """
     first_comma_idx = response_str.find(',')
     if first_comma_idx == -1:
@@ -59,14 +59,14 @@ def parse_dobot_response(response_str: str) -> tuple:
 
 
 def generate_circular_trajectory(radius: float, num_points: int) -> list:
-    """生成圆周运动轨迹点
+    """Generate circular motion trajectory points
 
     Args:
-        radius: 圆周半径(mm)
-        num_points: 轨迹点数
+        radius: Circular radius (mm)
+        num_points: Number of trajectory points
 
     Returns:
-        list: 轨迹点列表，每个点为[x, y, z, rx, ry, rz]
+        list: List of trajectory points, each point is [x, y, z, rx, ry, rz]
     """
     trajectory_points = []
     for i in range(num_points):
@@ -87,12 +87,12 @@ def generate_circle_smooth(radius=50, total_points=300):
     return points
 
 def execute_trajectory_at_frequency(robot, trajectory_points, frequency_hz: float):
-    """以指定频率执行轨迹点序列
+    """Execute trajectory point sequence at specified frequency
 
     Args:
-        robot: DobotRobot实例
-        trajectory_points: 轨迹点列表
-        frequency_hz: 执行频率(Hz)
+        robot: DobotRobot instance
+        trajectory_points: List of trajectory points
+        frequency_hz: Execution frequency (Hz)
     """
     start_time = time.time()
     interval = 1.0 / frequency_hz
@@ -101,7 +101,7 @@ def execute_trajectory_at_frequency(robot, trajectory_points, frequency_hz: floa
         expected_time = start_time + (i + 1) * interval
         cycle_start = time.time()
 
-        # 使用新SDK的ServoP接口
+        # Use new SDK ServoP interface
         robot.motion.ServoP(target_point)
 
         cycle_duration = time.time() - cycle_start
@@ -111,94 +111,94 @@ def execute_trajectory_at_frequency(robot, trajectory_points, frequency_hz: floa
         if delay_needed > 0:
             time.sleep(delay_needed)
         else:
-            print(f"周期 {i + 1} 超时 {-delay_needed:.3f} 秒")
+            print(f"Cycle {i + 1} timeout {-delay_needed:.3f} seconds")
 
 def wait_for_robot_ready(robot, target_state=5.0, polling_interval=0.1):
-    """等待机器人进入就绪状态
+    """Wait for robot to reach ready state
 
     Args:
-        robot: DobotRobot实例
-        target_state: 目标状态值
-        polling_interval: 轮询间隔(秒)
+        robot: DobotRobot instance
+        target_state: Target state value
+        polling_interval: Polling interval (seconds)
     """
     while True:
         status_response = robot.robot_control.RobotMode()
         parsed = parse_dobot_response(status_response)
 
         if parsed is None:
-            print("机器人状态解析失败")
+            print("Robot state parsing failed")
             time.sleep(polling_interval)
             continue
 
         _, state_data, _ = parsed
 
         if state_data and state_data[0] == target_state:
-            print(f"机器人已就绪，状态: {state_data}")
+            print(f"Robot ready, state: {state_data}")
             break
 
         time.sleep(polling_interval)
 
 
 def main():
-    # 修改为实际机器人IP
+    # Modify to actual robot IP
     ROBOT_IP = "192.168.5.1"
     
     try:
         with DobotRobot(ROBOT_IP) as robot:
             print("=" * 50)
-            print("伺服控制测试 - 圆周轨迹跟随")
+            print("Servo Control Test - Circular Trajectory Following")
             print("=" * 50)
             
-            # 初始化
+            # Initialize
             robot.robot_control.RequestControl()
             robot.robot_control.ClearError()
             robot.robot_control.EnableRobot(load=1.0)
             
-            # 激活用户坐标系0
+            # Activate user coordinate system 0
             robot.robot_control.User(0)
             
-            # 获取当前位置
+            # Get current position
             pose_response = robot.robot_control.GetPose()
             parsed_pose = parse_dobot_response(pose_response)
 
             if parsed_pose is None:
-                print("错误: 位置信息解析失败")
+                print("Error: Position information parsing failed")
                 return
 
             _, current_position, _ = parsed_pose
-            print(f"当前位置: {current_position}")
+            print(f"Current position: {current_position}")
 
-            # 设置用户坐标系1（以当前位置为原点）
+            # Set user coordinate system 1 (using current position as origin)
             set_user_result = robot.robot_control.SetUser(1, current_position)
-            print(f"设置用户坐标系结果: {set_user_result}")
+            print(f"Set user coordinate system result: {set_user_result}")
 
-            # 切换到用户坐标系1
+            # Switch to user coordinate system 1
             robot.robot_control.User(1)
 
-            # 移动到轨迹起始点（用户坐标系中的相对位置）
+            # Move to trajectory starting point (relative position in user coordinate system)
             start_point = [50, 0, 0, 0, 0, 0]
-            print(f"\n移动到轨迹起始点: {start_point}")
+            print(f"\nMoving to trajectory starting point: {start_point}")
             robot.motion.MovL(start_point, CoordinateType.CARTESIAN)
             time.sleep(3)
 
-            # 等待机器人就绪
+            # Wait for robot to be ready
             wait_for_robot_ready(robot)
 
-            # 生成圆周轨迹
+            # Generate circular trajectory
             # trajectory_points = generate_circular_trajectory(radius=50, num_points=300)
             trajectory_points = generate_circle_smooth(radius=50, total_points=300)
-            print(f"\n生成 {len(trajectory_points)} 个轨迹点")
+            print(f"\nGenerated {len(trajectory_points)} trajectory points")
 
-            # 执行轨迹控制
-            print("开始执行轨迹控制...")
+            # Execute trajectory control
+            print("Starting trajectory control execution...")
             execute_trajectory_at_frequency(robot, trajectory_points, frequency_hz=33.0)
 
-            print("\n轨迹执行完成")
+            print("\nTrajectory execution completed")
 
     except KeyboardInterrupt:
-        print("\n用户中断")
+        print("\nUser interrupted")
     except Exception as e:
-        print(f"\n错误: {e}")
+        print(f"\nError: {e}")
         import traceback
         traceback.print_exc()
 

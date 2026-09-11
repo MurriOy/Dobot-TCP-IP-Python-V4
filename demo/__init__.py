@@ -1,7 +1,7 @@
 """
 DOBOT SDK Demo Package
 
-包含机器人控制的演示程序和图形化界面
+Contains robot control demonstration programs and graphical interface
 """
 
 __version__ = "2.0.0"

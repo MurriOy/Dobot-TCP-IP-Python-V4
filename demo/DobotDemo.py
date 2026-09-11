@@ -1,11 +1,11 @@
 """
-DobotDemo - 机器人控制类
+DobotDemo - Robot control class
 """
 
 import sys
 import os
 
-# 添加父目录到路径，以便导入dobot_sdk
+# Add parent directory to path for importing dobot_sdk
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dobot_sdk import DobotRobot
@@ -21,7 +21,7 @@ class DobotDemo:
         self.feedData = None
         self.__globalLockValue = threading.Lock()
         
-        # 初始化反馈数据结构
+        # Initialize feedback data structure
         class item:
             def __init__(self):
                 self.robotMode = -1
@@ -34,34 +34,34 @@ class DobotDemo:
         self.feedData = item()
 
     def start(self):
-        """启动机器人并使能"""
+        """Start robot and enable"""
         try:
-            # 使用新SDK的上下文管理器
+            # Use new SDK context manager
             self.robot = DobotRobot(self.ip)
             self.robot.Connect()
             
-            # 请求TCP控制模式
+            # Request TCP control mode
             self.robot.robot_control.RequestControl()
             
-            # 清除报警
+            # Clear alarms
             self.robot.robot_control.ClearError()
             
-            # 使能机器人
+            # Enable robot
             response = self.robot.robot_control.EnableRobot()
             if "Failed" in response:
-                print("使能失败: 检查29999端口是否被占用")
+                print("Enable failed: Check if port 29999 is occupied")
                 return
-            print("使能成功")
+            print("Enable successful")
 
-            # 启动状态反馈线程
+            # Start status feedback thread
             self.robot.StartFeedbackMonitor(callback=self._feed_callback)
             sleep(1)
 
-            # 定义两个目标点
+            # Define two target points
             point_a = [146.3759, -283.4321, 332.3956, 177.7879, -1.8540, 147.5821]
             point_b = [146.3759, -283.4321, 432.3956, 177.7879, -1.8540, 147.5821]
 
-            # 走点循环
+            # Point movement loop
             from dobot_sdk import CoordinateType
             while True:
                 status = self.robot.GetStatus()
@@ -77,12 +77,12 @@ class DobotDemo:
                 sleep(2)
 
         except Exception as e:
-            print(f"启动失败: {e}")
+            print(f"Startup failed: {e}")
             import traceback
             traceback.print_exc()
 
     def _feed_callback(self, status):
-        """状态反馈回调函数"""
+        """Status feedback callback function"""
         with self.__globalLockValue:
             self.feedData.robotMode = status.robot_mode.value
             self.feedData.DigitalInputs = status.digital_inputs
@@ -90,34 +90,34 @@ class DobotDemo:
             self.feedData.robotCurrentCommandID = status.current_command_id
 
     def RunPoint(self, point_list):
-        """走点指令（使用新SDK）"""
+        """Point movement command (using new SDK)"""
         from dobot_sdk import CoordinateType
         
-        # 执行关节运动
+        # Execute joint movement
         response = self.robot.motion.MovJ(point_list, CoordinateType.CARTESIAN)
         print(f"MovJ: {response}")
         
-        # 解析指令ID
+        # Parse command ID
         currentCommandID = self.parseResultId(response)[1]
-        print(f"指令 ID: {currentCommandID}")
+        print(f"Command ID: {currentCommandID}")
         
-        # 等待运动完成
+        # Wait for movement to complete
         while True:
-            print(f"当前模式: {self.feedData.robotMode}")
+            print(f"Current mode: {self.feedData.robotMode}")
             if self.feedData.robotMode == 5 and self.feedData.robotCurrentCommandID == currentCommandID:
-                print("运动结束")
+                print("Movement completed")
                 break
             sleep(0.1)
 
     def parseResultId(self, valueRecv):
-        """解析返回值"""
+        """Parse return value"""
         if "Not Tcp" in valueRecv:
             print("Control Mode Is Not Tcp")
             return [1]
         return [int(num) for num in re.findall(r'-?\d+', valueRecv)] or [2]
 
     def __del__(self):
-        """析构函数"""
+        """Destructor"""
         if self.robot:
             try:
                 self.robot.StopFeedbackMonitor()
