@@ -1,195 +1,334 @@
-# TCP-IP-Python-V4 项目说明文档
+<div align="center">
+  
+<img src="assets/CR3A.png" alt="Dobot SDK V4" style="max-width: 400px; margin-bottom: 20px;" />
 
-## 项目概述
+<h1>Dobot TCP/IP Python SDK V4</h1>
 
-本项目是越疆机器人TCP-IP-CR-Python-V4二次开发API程序，用于通过TCP/IP协议控制越疆机器人。项目提供了完整的机器人控制接口，包括运动控制、状态监控、报警处理等功能。
+**Dobot Robot Python SDK V4**  
+High-Performance Robot Control Framework Based on TCP/IP Protocol  
+Supports CRA, E6, CRAF, NovaLite and Other V4 Series Robots
 
-## 环境要求
+[English](README.md) · [简体中文](README.zh.md) · [📖 Full API Documentation](assets/SDK_API文档_完整版.md)
 
-### Python版本
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-blue?style=flat-square)](https://github.com/dobot-cn/TCP-IP-Python-V4-main)
+[![Python](https://img.shields.io/badge/Python-3.8%2B-green?style=flat-square)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+[![GitHub Issues](https://img.shields.io/github/issues/dobot-cn/TCP-IP-Python-V4-main?style=flat-square)](https://github.com/dobot-cn/TCP-IP-Python-V4-main/issues)
 
-- Python 3.6 或更高版本
-
-### 必需安装的库
-
-```bash
-# 基础数值计算库
-pip install numpy
-
-# JSON数据处理（Python内置，无需安装）
-# import json
-
-# 网络通信（Python内置，无需安装）
-# import socket
-
-# 多线程支持（Python内置，无需安装）
-# import threading
-
-# 时间处理（Python内置，无需安装）
-# import time
-
-# 正则表达式（Python内置，无需安装）
-# import re
-
-# GUI界面库（如果使用ui.py）
-pip install tkinter  # 通常Python自带
-```
-
-### 网络配置要求
-
-- 本机IP地址需设置为192.168.X.X网段
-- 机器人需切换至TCP/IP模式
-- 确保29999和30004端口未被占用
-
-## 主要程序文件及功能
-
-### 1. main.py
-
-**功能**: 项目主入口文件
-
-- 演示基本的机器人连接和控制流程
-- 包含完整的机器人操作示例
-- 适合初学者了解项目结构
-
-### 2. dobot_api.py
-
-**功能**: 核心API接口文件
-
-- **DobotApi**: 基础通信类，处理TCP连接
-- **DobotApiDashboard**: 机器人控制接口类
-  - 机器人使能/下使能
-  - 运动控制指令（MovJ, MovL, Arc等）
-  - 状态查询和设置
-  - 报警信息获取（包含新增的GetError接口）
-- **DobotApiFeedBack**: 状态反馈类
-  - 实时获取机器人状态信息
-  - 监控机器人运行模式
-  - 获取当前指令ID
-- **MyType**: 数据类型定义
-- **alarm_controller**: 控制器报警处理
-- **alarm_servo**: 伺服报警处理
-
-### 3. ui.py
-
-**功能**: 图形用户界面程序
-
-- 提供可视化的机器人控制界面
-- 集成了机器人连接、运动控制、状态显示等功能
-- 支持实时显示机器人状态和报警信息
-- 优先使用GetError接口获取报警信息，失败时回退到原有方式
-
-### 4. 测试和示例文件
-
-#### get_error_example.py
-
-**功能**: GetError接口使用示例
-
-- 提供RobotErrorMonitor类，用于报警监控
-- 演示如何获取和处理多语言报警信息
-- 包含报警信息保存到文件的功能
-- 注释采用中英文对照
-
-### 5. 文档文件
-
-#### GetError_README.md
-
-**功能**: GetError接口中文说明文档
-
-- 详细说明GetError接口的使用方法
-- 包含接口参数、返回值、示例代码等
-- 提供故障排除和注意事项
-
-#### GetError_README_EN.md
-
-**功能**: GetError接口英文说明文档
-
-- GetError_README.md的英文版本
-- 便于国际用户理解和使用
-
-## 项目目录结构
-
-TCP-IP-Python-V4/
-├── main.py                    # 主程序入口
-├── dobot_api.py               # 核心API接口
-├── ui.py                      # 图形界面程序
-├── PythonExample.py           # Python示例
-├── get_error_example.py       # GetError使用示例
-├── GetError_README.md         # GetError中文文档
-├── GetError_README_EN.md      # GetError英文文档
-├── README.md                  # 项目说明文档
-└── files/                     # 其他支持文件
-
-## 快速开始
-
-### 1. 环境准备
-
-```bash
-# 克隆项目
-git clone https://github.com/Dobot-Arm/TCP-IP-CR-Python-V4.git
-
-# 安装依赖
-pip install numpy
-```
-
-### 2. 网络配置
-
-- 设置本机IP为192.168.X.X网段
-- 确保机器人处于TCP/IP模式
-
-### 3. 运行程序
-
-# 运行主程序
-python main.py
-
-# 或运行图形界面
-python main_UI.py
-
-
-## 常见问题解决
-
-### 1. ModuleNotFoundError: No module named 'numpy'
-
-**解决方法**: 安装numpy库
-
-```bash
-pip install numpy
-```
-
-### 2. Connection refused, IP:Port has been occupied
-
-**解决方法**: 检查29999端口是否被占用，关闭占用该端口的程序
-
-### 3. Control Mode Is Not Tcp
-
-**解决方法**: 在DobotStudio Pro中将机器人模式切换至TCP/IP模式
-
-### 4. 机器人状态异常
-
-| 输出信息                             | 机器状态     | 解决方法                 |
-| ------------------------------------ | ------------ | ------------------------ |
-| Command execution failed             | 指令执行失败 | 检查指令参数和机器人状态 |
-| The robot is in an error state       | 机器错误状态 | 清除报警后重试           |
-| The robot is in emergency stop state | 急停状态     | 释放急停按钮             |
-| The robot is in power down state     | 下电状态     | 给机器人上电             |
-
-## 注意事项
-
-1. **安全第一**: 运行示例前请确保机器人处于安全位置，防止发生碰撞
-2. **网络配置**: 确保网络配置正确，IP地址在同一网段
-3. **端口占用**: 确保29999和30004端口未被其他程序占用
-4. **机器人模式**: 确保机器人处于TCP/IP控制模式
-5. **权限问题**: 某些操作可能需要管理员权限
-
-## 技术支持
-
-如遇到问题，请参考：项目README.md文档
-
-- GetError相关文档
-- 示例代码和测试程序
-- 越疆官方技术支持
+</div>
 
 ---
 
-**版本**: V4
-**更新日期**: 2025-9-5
-**维护**: dobot_futingxing
+## Quick Start
+
+### Requirements
+
+| Requirement | Version |
+|-------------|---------|
+| **Python** | 3.8+ |
+| **numpy** | ≥1.19.0 |
+| **requests** | ≥2.25.0 |
+
+### Installation
+
+**Development Mode Installation:**
+
+```bash
+git clone -b feature/v4-optimization https://github.com/dobot-cn/TCP-IP-Python-V4-main.git
+pip install -e .
+```
+
+**Direct Import (No Installation):**
+
+Suitable for development/debugging scenarios or when you do not want to modify the Python environment.
+
+```python
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from dobot_sdk import DobotRobot
+```
+
+**Directory Structure Requirement:**
+```
+TCP-IP-Python-V4-main/
+├── dobot_sdk/                  ← SDK core package
+├── examples/                   ← Examples directory (place your script here)
+│   └── your_script.py
+└── README.md
+```
+
+**Notes:**
+- Assumes the script is located in the `examples/` directory, automatically getting the project root
+- If the script is in a different location, adjust the number of `os.path.dirname()` calls
+
+**Update or Reinstall:**
+
+```bash
+# Uninstall the package
+pip uninstall dobot_sdk -y
+
+# Reinstall with latest changes
+pip install -e .
+
+# Verify installation
+pip show dobot_sdk
+```
+
+### Network Connection
+
+| Config | Description |
+|--------|-------------|
+| **Robot IP** | 192.168.1.100 (default) |
+| **Dashboard Port** | 29999 |
+| **Feedback Port** | 30004/30005/30006 |
+| **PC IP** | Must be in 192.168.X.X subnet |
+
+---
+
+## Usage Examples
+
+### 1. Basic Connection
+
+```python
+from dobot_sdk import DobotRobot
+
+ROBOT_IP = "192.168.1.100"
+
+# Using context manager (Recommended)
+with DobotRobot(ROBOT_IP) as robot:
+    # Initialization
+    robot.robot_control.RequestControl()
+    robot.robot_control.ClearError()
+    robot.robot_control.EnableRobot(load=1.0)
+
+    # Perform operations...
+    robot.robot_control.SpeedFactor(50)
+
+    # Disable robot
+    robot.robot_control.DisableRobot()
+```
+
+### 2. Motion Control
+
+```python
+from dobot_sdk import DobotRobot
+from dobot_sdk import CoordinateType
+
+with DobotRobot("192.168.1.100") as robot:
+    robot.robot_control.RequestControl()
+    robot.robot_control.EnableRobot()
+
+    # Cartesian space motion
+    robot.motion.MovJ(
+        pose=[400, 0, 300, 180, 0, 0],
+        coord_type=CoordinateType.CARTESIAN
+    )
+
+    # Linear motion
+    robot.motion.MovL(
+        pose=[400, 100, 300, 180, 0, 0],
+        coord_type=CoordinateType.CARTESIAN
+    )
+```
+
+### 3. IO Control
+
+```python
+from dobot_sdk import DobotRobot
+
+with DobotRobot("192.168.1.100") as robot:
+    robot.robot_control.EnableRobot()
+
+    # Digital output (per arm SDK docs: DO(index, status))
+    robot.io.DO(1, 1)    # Turn on DO1
+    robot.io.DO(1, 0)    # Turn off DO1
+
+    # Read input
+    di_status = robot.io.DI(1)  # Read DI1
+```
+
+---
+
+## Running Examples
+
+```bash
+# Run example code
+cd examples
+python 01_basic_connection.py
+python 02_motion_control.py
+python 03_error_monitor.py
+
+# Run GUI
+cd demo
+python main_UI.py
+```
+
+---
+
+## Project Structure
+
+```
+TCP-IP-Python-V4-main/
+├── dobot_sdk/              # SDK Core Package
+│   ├── api/                # API Interface Layer
+│   ├── core/               # Core Communication Layer
+│   ├── protocol/           # Protocol Layer
+│   └── models/             # Data Models
+├── demo/                   # Demo Programs
+├── examples/               # Example Code
+├── tests/                  # Test Code
+├── assets/                 # Resource Files
+│   ├── CR3A.png            # Robot Image
+│   ├── SDK_API文档_完整版.md    # Full API Documentation
+│   ├── error_controller_README.md  # HTTP Error Interface Documentation
+│   ├── 手臂二开md文档/          # Arm SDK Development Docs
+│   └── DOBOT TCP_IP二次开发接口文档_V4.6.6_20260410_cn.pdf  # Official Interface Doc (PDF)
+├── pyproject.toml          # Project Config
+├── requirements.txt        # Dependencies
+├── README.md               # English README
+└── README.zh.md            # Chinese README
+```
+
+---
+
+## API Reference
+
+### Main Control Class
+
+```python
+from dobot_sdk import DobotRobot, CoordinateType
+```
+
+| Module | Description |
+|--------|-------------|
+| `robot.robot_control` | Basic control (enable, mode, coordinate system, status query, etc.) |
+| `robot.motion` | Motion control (MovJ/MovL/Arc/Circle, etc.) |
+| `robot.io` | IO control |
+| `robot.communication` | Communication control |
+| `robot.plugins` | Plugin module (force control, conveyor tracking, etc.) |
+
+### Logging Control
+
+```python
+from dobot_sdk import get_logger, set_log_level, get_log_directory
+
+# Set log level: DEBUG, INFO, WARNING, ERROR
+set_log_level("DEBUG")
+
+# Get logger instance
+logger = get_logger()
+
+# Get log file directory
+log_dir = get_log_directory()  # Returns: dobot_sdk/logs/
+```
+
+| Function | Description |
+|----------|-------------|
+| `set_log_level(level)` | Set log level (DEBUG/INFO/WARNING/ERROR) |
+| `get_logger()` | Get SDK logger instance |
+| `get_log_directory()` | Get log file storage directory |
+
+**Log Features:**
+- Auto-rotate log files (max 5 files, 10MB each)
+- Cross-platform compatible (Windows/Ubuntu)
+- Structured log format with timestamp and module info
+- Automatically logs API calls, commands, and responses
+
+### Connection Management
+
+```python
+from dobot_sdk import DobotRobot
+
+# Create robot with custom timeout settings
+robot = DobotRobot(
+    "192.168.1.100",
+    connect_timeout=10.0,   # Connection timeout in seconds
+    receive_timeout=15.0    # Receive timeout in seconds
+)
+
+# Enable auto-reconnect with connection status callback
+def on_connection_status(is_connected):
+    print(f"Connection status: {'Connected' if is_connected else 'Disconnected'}")
+
+robot.EnableAutoReconnect(enable=True, callback=on_connection_status)
+
+# Check connection status
+if robot.IsConnected:
+    print("Robot is connected")
+```
+
+| Function | Description |
+|----------|-------------|
+| `robot.SetTimeout(connect_timeout, receive_timeout)` | Set timeout settings |
+| `robot.EnableAutoReconnect(enable, callback)` | Enable/disable auto-reconnect |
+| `robot.IsConnected` | Check connection status (property) |
+
+**Connection Features:**
+- **Connection Timeout**: Default 5 seconds; **Receive Timeout**: Default 10 seconds, prevents blocking on receive operations
+- **Auto-reconnect**: Automatically attempts to reconnect when connection is lost
+- **Exponential Backoff**: Reconnect delay increases exponentially (1s, 2s, 4s, ..., max 30s)
+- **Connection Callback**: Get notified when connection status changes
+
+### Example Code
+
+For more detailed examples, see:
+- `examples/` - Functionally categorized example code
+- `demo/` - Complete demo programs
+
+---
+
+## Supported Models
+
+| Series | Models |
+|--------|--------|
+| **CRA Series** | CR3A, CR5, CR10, CR16, etc. |
+| **E6 Series** | E6, E6 Pro, etc. |
+| **CRAF Series** | CRAF5, etc. |
+| **NovaLite Series** | NovaLite, etc. |
+| **Other V4 Series** | Robots supporting TCP/IP protocol |
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [SDK_API文档_完整版.md](assets/SDK_API文档_完整版.md) | Full API Documentation |
+| [DOBOT TCP_IP二次开发接口文档](assets/DOBOT%20TCP_IP二次开发接口文档_V4.6.6_20260410_cn.pdf) | Official Interface Document (PDF) |
+| [error_controller_README.md](assets/error_controller_README.md) | HTTP Error Interface Documentation |
+
+---
+
+## Important Notes
+
+> ⚠️ **Safety First**: Make sure the robot is in a safe position before running
+
+1. **Network Configuration**: Ensure IP addresses are in the same subnet
+2. **Port Occupancy**: Ensure ports 29999 and 30004 are not occupied
+3. **Robot Mode**: Ensure robot is in TCP/IP control mode
+4. **Coordinate Type**: All motion instructions must explicitly specify CoordinateType
+
+---
+
+## Version Information
+
+| Info | Content |
+|------|---------|
+| **Current Version** | 2.0.0 |
+| **Python Requirement** | ≥3.8 |
+| **Main Dependencies** | numpy≥1.19.0, requests≥2.25.0 |
+
+---
+
+## License
+
+[MIT License](LICENSE)
+
+<div align="center">
+
+Built by Dobot-Arm
+
+</div>
+>>>>>>> feature/v4-optimization
