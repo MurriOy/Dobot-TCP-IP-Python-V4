@@ -1,7 +1,7 @@
 """
-示例6: 力控和传送带
+Example 6: Force Control and Conveyor
 
-演示力传感器控制和传送带跟踪功能
+Demonstrates force sensor control and conveyor tracking functionality
 """
 
 from dobot_sdk import DobotRobot
@@ -15,95 +15,95 @@ def main():
     try:
         with DobotRobot(ROBOT_IP) as robot:
             print("=" * 50)
-            print("6. 力控和传送带示例")
+            print("6. Force Control and Conveyor Example")
             print("=" * 50)
             
-            # 初始化
+            # Initialize
             robot.robot_control.RequestControl()
             robot.robot_control.ClearError()
             robot.robot_control.EnableRobot(load=1.0)
             robot.robot_control.SpeedFactor(30)
             
-            # ========== 力传感器控制 ==========
-            print("\n--- 力传感器控制 ---")
+            # ========== Force Sensor Control ==========
+            print("\n--- Force Sensor Control ---")
             
-            # 检查是否有力传感器
-            print("开启力传感器...")
+            # Enable force sensor
+            print("Enabling force sensor...")
             response = robot.plugins.EnableFTSensor(1)
-            print(f"响应: {response}")
+            print(f"Response: {response}")
             time.sleep(1)
             
-            # 力传感器归零
-            print("力传感器归零...")
+            # Force sensor zeroing
+            print("Force sensor zeroing...")
             response = robot.plugins.SixForceHome()
-            print(f"响应: {response}")
+            print(f"Response: {response}")
             time.sleep(1)
             
-            # 获取力传感器数据
-            print("读取力传感器数据...")
+            # Get force sensor data
+            print("Reading force sensor data...")
             for i in range(3):
                 force_data = robot.plugins.GetForce()
-                print(f"力数据 {i+1}: {force_data}")
+                print(f"Force data {i+1}: {force_data}")
                 time.sleep(0.5)
             
-            # 进入力控拖拽模式
-            print("\n进入力控拖拽模式...")
+            # Enter force control drag mode
+            print("\nEntering force control drag mode...")
             response = robot.plugins.ForceDriveMode(1)
-            print(f"响应: {response}")
-            print("等待5秒，可手动拖拽机器人...")
+            print(f"Response: {response}")
+            print("Waiting 5 seconds, you can manually drag the robot...")
             time.sleep(5)
             
-            # 退出力控拖拽模式
-            print("退出力控拖拽模式...")
+            # Exit force control drag mode
+            print("Exiting force control drag mode...")
             response = robot.plugins.ForceDriveMode(0)
-            print(f"响应: {response}")
+            print(f"Response: {response}")
             
-            # 关闭力传感器
-            print("关闭力传感器...")
+            # Disable force sensor
+            print("Disabling force sensor...")
             response = robot.plugins.EnableFTSensor(0)
-            print(f"响应: {response}")
+            print(f"Response: {response}")
             
-            # ========== 传送带控制（演示） ==========
-            print("\n--- 传送带控制 ---")
+            # ========== Conveyor Control (Demo) ==========
+            print("\n--- Conveyor Control ---")
             
-            # 注意：实际使用传送带需要先配置编码器
-            print("开启传送带...")
+            # Note: Actual conveyor use requires encoder configuration first
+            print("Enabling conveyor...")
             response = robot.plugins.CnvInit(1)
-            print(f"响应: {response}")
+            print(f"Response: {response}")
             
-            # 开启传送带跟踪
-            print("开启传送带跟踪...")
+            # Enable conveyor tracking
+            print("Enabling conveyor tracking...")
             response = robot.plugins.StartSyncCnv()
-            print(f"响应: {response}")
+            print(f"Response: {response}")
             
-            # 模拟传送带跟踪运动
-            print("等待工件进入抓取区域...")
+            # Simulate conveyor tracking motion
+            print("Waiting for workpiece to enter gripping area...")
             # response = robot.plugins.GetCnvObject(0)
-            # print(f"工件检测响应: {response}")
+            # print(f"Workpiece detection response: {response}")
             
-            print("停止传送带跟踪...")
+            print("Stopping conveyor tracking...")
             response = robot.plugins.StopSyncCnv()
-            print(f"响应: {response}")
+            print(f"Response: {response}")
             
-            print("关闭传送带...")
+            print("Disabling conveyor...")
             response = robot.plugins.CnvInit(0)
-            print(f"响应: {response}")
+            print(f"Response: {response}")
             
-            # 返回安全位置
-            print("\n返回安全位置...")
+            # Return to safe position
+            print("\nReturning to safe position...")
             safe_pose = [0, -30, -60, 0, 90, 0]
             robot.motion.MovJ(safe_pose, CoordinateType.JOINT)
             time.sleep(3)
             
-            # 下使能
+            # Disable robot
             robot.robot_control.DisableRobot()
             
             print("\n" + "=" * 50)
-            print("✅ 力控和传送带示例完成")
+            print("Force control and conveyor example completed")
             print("=" * 50)
             
     except Exception as e:
-        print(f"\n❌ 错误: {e}")
+        print(f"\nError: {e}")
         import traceback
         traceback.print_exc()
 

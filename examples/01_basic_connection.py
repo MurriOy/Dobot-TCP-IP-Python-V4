@@ -1,7 +1,7 @@
 """
-示例1: 基础连接和使能
+Example 1: Basic Connection and Enabling
 
-演示如何连接机器人、使能、设置参数并安全关闭
+Demonstrates how to connect to the robot, enable it, set parameters, and safely shut down
 """
 import os
 import sys
@@ -11,55 +11,55 @@ import time
 
 
 def main():
-    # 机器人IP地址（根据实际情况修改）
+    # Robot IP address (modify according to actual setup)
     ROBOT_IP = "192.168.5.1"
     
-    # 使用上下文管理器（推荐方式）
+    # Using context manager (recommended approach)
     try:
         with DobotRobot(ROBOT_IP) as robot:
             print("=" * 50)
-            print("1. 连接成功")
+            print("1. Connection successful")
             print("=" * 50)
             
-            # 请求TCP控制模式
-            print("请求TCP控制模式...")
+            # Request TCP control mode
+            print("Requesting TCP control mode...")
             response = robot.robot_control.RequestControl()
-            print(f"响应: {response}")
+            print(f"Response: {response}")
             
-            # 清除报警（如果有）
-            print("清除报警...")
+            # Clear alarms (if any)
+            print("Clearing alarms...")
             robot.robot_control.ClearError()
             
-            # 使能机器人（设置1kg负载）
-            print("使能机器人...")
+            # Enable robot (set 1kg load)
+            print("Enabling robot...")
             response = robot.robot_control.EnableRobot(load=1.0)
-            print(f"响应: {response}")
+            print(f"Response: {response}")
             
-            # 设置全局速度比例
+            # Set global speed ratio
             speed = 50
-            print(f"设置全局速度为 {speed}%...")
+            print(f"Setting global speed to {speed}%...")
             robot.robot_control.SpeedFactor(speed)
             
-            # 获取机器人状态
-            print("\n获取机器人状态...")
+            # Get robot status
+            print("\nGetting robot status...")
             mode = robot.robot_control.RobotMode()
-            print(f"机器人模式: {mode}")
+            print(f"Robot mode: {mode}")
             
-            # 等待2秒
-            print(f"\n等待 {2} 秒...")
+            # Wait 2 seconds
+            print(f"\nWaiting {2} seconds...")
             time.sleep(2)
             
-            # 下使能机器人
-            print("\n下使能机器人...")
+            # Disable robot
+            print("\nDisabling robot...")
             response = robot.robot_control.DisableRobot()
-            print(f"响应: {response}")
+            print(f"Response: {response}")
             
             print("\n" + "=" * 50)
-            print("✅ 基础连接示例完成")
+            print("Basic connection example completed")
             print("=" * 50)
             
     except Exception as e:
-        print(f"\n❌ 错误: {e}")
+        print(f"\nError: {e}")
         import traceback
         traceback.print_exc()
 
