@@ -12,7 +12,7 @@ import time
 
 def main():
     # Robot IP address (modify according to actual setup)
-    ROBOT_IP = "192.168.5.1"
+    ROBOT_IP = "192.168.100.51"
     
     # Using context manager (recommended approach)
     try:

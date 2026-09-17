@@ -1,1152 +1,1152 @@
-# 手臂二开md文档段落三
+# Arm Secondary Development MD Documentation - Part Three
 
-## 2.8 轨迹恢复指令
+## 2.8 Path Recovery Commands
 
-功能概述
+Functional Overview
 
-暂停状态支持点动功能开启后，工程暂停时，用户可下发MoveJog、RunTo和进出拖拽模式的指令，改变机器人的位姿。继续工程前，用户可通过轨迹恢复指令将机器人恢复至暂停时的点位，避免继续工程后机器人动作异常。
+When the pause state supports jog functionality enabled, during project pause, the user can send MoveJog, RunTo, and drag mode entry/exit commands to change the robot's posture. Before resuming the project, the user can use the path recovery command to restore the robot to the paused position, preventing abnormal robot motion after resuming the project.
 
-指令列表
+Command List
 
-| **指令**             | **功能**       | **指令类型** |
-| ------------------ | ------------ | -------- |
-| SetResumeOffset    | 设置轨迹恢复的回退距离  | 立即指令     |
-| PathRecovery       | 开始轨迹恢复       | 立即指令     |
-| PathRecoveryStop   | 轨迹恢复过程中停止机器人 | 立即指令     |
-| PathRecoveryStatus | 查询轨迹恢复状态     | 立即指令     |
+| **Command**         | **Function**              | **Command Type** |
+| ------------------ | ----------------------- | ------------ |
+| SetResumeOffset    | Set path recovery return distance | Immediate Command |
+| PathRecovery       | Start path recovery       | Immediate Command |
+| PathRecoveryStop   | Stop robot during path recovery | Immediate Command |
+| PathRecoveryStatus | Query path recovery status | Immediate Command |
 
 SetResumeOffset
 
-原型
+Prototype
 
 SetResumeOffset(distance)
 
-描述
+Description
 
-该指令仅用于焊接工艺。设置轨迹恢复的目标点位相对暂停时的点位沿焊缝回退的距离。
+This command is only used for welding processes. Sets the return distance of the path recovery target point relative to the paused position along the weld seam.
 
-说明：
+Note:
 
-该指令仅在焊接过程中（即WeldArcSpeed生效时）生效。
+This command only takes effect during welding (i.e., when WeldArcSpeed is active).
 
-该指令需要先设置回退距离再暂停，才能正常规划回退点。
+This command requires setting the return distance before pausing in order to properly plan the return point.
 
-必选参数
+Required Parameters
 
-| **参数名**  | **类型** | **说明**                       |
-| -------- | ------ | ---------------------------- |
-| distance | double | 设置暂停后，轨迹恢复时沿前进方向回退的距离，单位：mm。 |
+| **Parameter Name** | **Type** | **Description**                                          |
+| -------------- | ------ | ------------------------------------------------------- |
+| distance | double | Sets the return distance along the forward direction during path recovery after pausing, unit: mm. |
 
-返回
+Return
 
 ErrorID,\{},SetResumeOffset(distance);
 
 PathRecovery
 
-原型
+Prototype
 
 PathRecovery()
 
-描述
+Description
 
-开始轨迹恢复：工程暂停后，控制机器人回到暂停时的位姿。
+Start path recovery: After the project is paused, control the robot to return to the posture at the time of pausing.
 
-说明：
+Note:
 
-该指令仅控制机器人回到暂停时的位姿，如需继续工程需要再下发Continue指令。
+This command only controls the robot to return to the posture at the time of pausing. To continue the project, the Continue command needs to be sent.
 
-该指令为异步接口，下发后立刻返回，机器人是否已返回了暂停时的位姿需要通过 PathRecoveryStatus指令判断。
+This command is an asynchronous interface that returns immediately after sending. Whether the robot has returned to the posture at the time of pausing needs to be determined through the PathRecoveryStatus command.
 
-返回
+Return
 
 ErrorID,\{},PathRecovery();
 
 PathRecoveryStop
 
-原型
+Prototype
 
 PathRecoveryStop()
 
-描述
+Description
 
-轨迹恢复的过程中停止机器人。
+Stop the robot during path recovery.
 
-返回
+Return
 
 ErrorID,\{},PathRecoveryStop();
 
 PathRecoveryStatus
 
-原型
+Prototype
 
 PathRecoveryStatus()
 
-描述
+Description
 
-查询轨迹恢复的状态。
+Query the path recovery status.
 
-返回
+Return
 
 ErrorID,\{status},PathRecoveryStatus();
 
-其中status表示轨迹恢复的状态：
+Where status indicates the path recovery status:
 
-0：已回到暂停时的位姿。
+0: Returned to the posture at the time of pausing.
 
-1：未回到暂停时的位姿，与暂停时的位姿偏差较小。
+1: Not returned to the posture at the time of pausing, with a small deviation from the posture at the time of pausing.
 
-2：未回到暂停时的位姿，与暂停时的位姿偏差较大。
+2: Not returned to the posture at the time of pausing, with a large deviation from the posture at the time of pausing.
 
-指令示例
+Command Example
 
-SetResumeOffset(10); //设置焊接回退距离为10mm
+SetResumeOffset(10); // Set welding return distance to 10mm
 
-MovL(P1);//按全局速度直线运动至P1点
+MovL(P1);// Linear motion to point P1 at global speed
 
-WeldArcSpeed(10);//设置焊接速度为10mm/s
+WeldArcSpeed(10);// Set welding speed to 10mm/s
 
-WeldArcSpeedStart();//开启焊接速度开关
+WeldArcSpeedStart();// Turn on welding speed switch
 
-MovL(P2);//按设置的焊接速度直线运动至P2点
+MovL(P2);// Linear motion to point P2 at set welding speed
 
-WeldArcSpeedEnd();//关闭焊接速度开关
+WeldArcSpeedEnd();// Turn off welding speed switch
 
-//通过实时反馈信息或RobotMode轮询获取到工程暂停状态后
+// After obtaining the project pause status through real-time feedback or RobotMode polling
 
-RunTo(P); //将暂停状态的机器人运动至安全点，进行人工处理
+RunTo(P); // Move the paused robot to a safe point for manual handling
 
-PathRecovery(); //机器人返回偏移后（沿焊缝回退10mm）的暂停点
+PathRecovery(); // Robot returns to the offset position (return 10mm along the weld seam) at the paused point
 
-PathRecoveryStop(); //轨迹恢复过程中发现异常，停止机器人。
+PathRecoveryStop(); // Stop the robot when an anomaly is detected during path recovery.
 
-RunTo(P); //再将机器人运动至安全点，进行人工处理
+RunTo(P); // Move the robot to a safe point again for manual handling
 
-PathRecovery(); //机器人返回偏移后的暂停点
+PathRecovery(); // Robot returns to the offset paused point
 
 if(PathRecoveryStatus()=0)
 
 \{
 
-//机器人已回到偏移后的暂停点
+// Robot has returned to the offset paused point
 
-Continue(); //继续运行工程
+Continue(); // Continue running the project
 
 }
 
-## 2.9 日志导出指令
+## 2.9 Log Export Commands
 
-功能概述
+Functional Overview
 
-该组指令用于导出机器人日志和查看导出状态。
+This group of commands is used to export robot logs and view export status.
 
-指令列表
+Command List
 
-| **指令**          | **功能**      | **指令类型** |
-| --------------- | ----------- | -------- |
-| LogExportUSB    | 将机器人日志导出至U盘 | 立即指令     |
-| GetExportStatus | 获取日志导出状态    | 立即指令     |
+| **Command**       | **Function**          | **Command Type** |
+| --------------- | ------------------- | ------------ |
+| LogExportUSB    | Export robot logs to USB drive | Immediate Command |
+| GetExportStatus | Get log export status | Immediate Command |
 
 LogExportUSB
 
-原型
+Prototype
 
 LogExportUSB(range)
 
-描述
+Description
 
-将机器人日志导出至插在机器人控制柜USB接口的U盘根目录。
+Export robot logs to the root directory of the USB drive inserted into the robot control cabinet's USB interface.
 
-说明：
+Note:
 
-导出日志时建议只插入一个U盘，避免导出失败。
+When exporting logs, it is recommended to insert only one USB drive to avoid export failure.
 
-如果U盘包含多个分区，日志会导出至第一个分区。部分存储设备（例如用作启动盘的U盘）第一个分区为隐藏分区，会导致在Windows中无法直接查看到导出的日志。
+If the USB drive contains multiple partitions, the logs will be exported to the first partition. Some storage devices (e.g., USB drives used as boot drives) have a hidden first partition, which may cause the exported logs to not be directly visible in Windows.
 
-请勿在导出过程终拔出U盘，否则可能导致文件损坏，必须格式化U盘才可再次导出。
+Do not remove the USB drive during the export process, as this may cause file corruption, and the USB drive must be formatted before exporting again.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                                                |
-| ------- | ------ | ----------------------------------------------------- |
-| range   | int    | 导出范围。 0：导出logs/all 和logs/user文件夹的内容。 1：导出logs文件夹所有内容。 |
+| **Parameter Name** | **Type** | **Description**                                                           |
+| ------------ | ------ | ----------------------------------------------------------------------- |
+| range   | int    | Export range. 0: Export contents of logs/all and logs/user folders. 1: Export all contents of the logs folder. |
 
-返回
+Return
 
 ErrorID,\{},LogExportUSB(range);
 
-该指令下发会立刻返回，请通过GetExportStatus获取日志导出状态。如果在导出过程中下发该指令，会返回-1，表示指令执行失败。
+This command returns immediately after sending. Please use GetExportStatus to get the log export status. If this command is sent during the export process, it will return -1, indicating command execution failure.
 
-示例
+Example
 
 LogExportUSB(0)
 
-导出logs/all和logs/user文件夹的内容至U盘。
+Export contents of logs/all and logs/user folders to the USB drive.
 
 GetExportStatus
 
-原型
+Prototype
 
 GetExportStatus()
 
-描述
+Description
 
-获取日志导出的状态。
+Get the log export status.
 
-返回
+Return
 
 ErrorID,\{status},GetExportStatus();
 
-其中status表示日志导出状态。
+Where status indicates the log export status.
 
-0：未开始导出
+0: Export not started
 
-1：导出中
+1: Exporting
 
-2：导出完成
+2: Export complete
 
-3：导出失败，找不到U盘
+3: Export failed, USB drive not found
 
-4：导出失败，U盘空间不足
+4: Export failed, insufficient USB drive space
 
-5：导出失败，导出过程中U盘被拔出
+5: Export failed, USB drive removed during export
 
-导出完成和导出失败的状态会保持到下次用户使用导出功能。
+The export complete and export failure status will be maintained until the user uses the export function again.
 
-## 2.10 力控指令
+## 2.10 Force Control Commands
 
-功能概述
+Functional Overview
 
-越疆支持选配六维力传感器，并通过力控插件实现力控功能的开关及设置。 力控拖拽是指基于末端受力分析的拖拽示教功能，即用户施加一个力在末端六维力传感器上，机器人顺应力的方向进行运行，运动速度和力的大小在一定范围内成正比。实际应用中，用户还可约束机器人的运动方向，使其只能沿一个或几个方向运动。
+Dobot supports optional six-axis force sensors and implements force control function on/off and settings through the force control plugin. Force-controlled drag refers to drag-and-drop teaching functionality based on end-effector force analysis. When the user applies a force on the six-axis force sensor at the end-effector, the robot moves in the direction of the force, and the movement speed is proportional to the force magnitude within a certain range. In practical applications, the user can also constrain the robot's movement direction to move only along one or several directions.
 
-指令列表
+Command List
 
-| **指令**               | **功能**                     | **指令类型** |
-| -------------------- | -------------------------- | -------- |
-| EnableFTSensor       | 开启/关闭力传感器                  | 立即指令     |
-| SixForceHome         | 力传感器回零                     | 立即指令     |
-| GetForce             | 获取力传感器数值                   | 立即指令     |
-| ForceDriveMode       | 进入力控拖拽模式                   | 立即指令     |
-| ForceDriveSpeed      | 设置力控拖拽速度                   | 立即指令     |
-| FCForceMode          | 以用户指定的参数开启力控               | 队列指令     |
-| FCSetDeviation       | 设置力控模式下的位移和姿态偏差            | 立即指令     |
-| FCSetForceLimit      | 设置最大力限制                    | 立即指令     |
-| FCSetMass            | 设置力控模式下各方向的惯性系数            | 立即指令     |
-| FCSetStiffness       | 设置力控模式下各方向的弹性系数            | 立即指令     |
-| FCSetDamping         | 设置力控模式下各方向的阻尼系数            | 立即指令     |
-| FCOff                | 退出力控模式                     | 队列指令     |
-| FCSetForceSpeedLimit | 设置各方向的力控调节速度               | 立即指令     |
-| FCSetForce           | 实时调整恒力设置                   | 立即指令     |
-| SetFCCollision       | 设置力传感器碰撞检测的阈值参数（仅适用CRAF机型） | 立即指令     |
-| FCCollisionSwitch    | 开启/关闭力传感器碰撞检测开关（仅适用CRAF机型） | 立即指令     |
+| **Command**            | **Function**                             | **Command Type** |
+| -------------------- | -------------------------------------- | ------------ |
+| EnableFTSensor       | Enable/disable force sensor                  | Immediate Command |
+| SixForceHome         | Force sensor homing                     | Immediate Command |
+| GetForce             | Get force sensor values                   | Immediate Command |
+| ForceDriveMode       | Enter force-controlled drag mode                   | Immediate Command |
+| ForceDriveSpeed      | Set force-controlled drag speed                   | Immediate Command |
+| FCForceMode          | Enable force control with user-specified parameters               | Queue Command     |
+| FCSetDeviation       | Set displacement and attitude deviation in force control mode            | Immediate Command |
+| FCSetForceLimit      | Set maximum force limit                    | Immediate Command |
+| FCSetMass            | Set inertia coefficients in each direction in force control mode            | Immediate Command |
+| FCSetStiffness       | Set elasticity coefficients in each direction in force control mode            | Immediate Command |
+| FCSetDamping         | Set damping coefficients in each direction in force control mode            | Immediate Command |
+| FCOff                | Exit force control mode                     | Queue Command     |
+| FCSetForceSpeedLimit | Set force control adjustment speed in each direction               | Immediate Command |
+| FCSetForce           | Real-time adjustment of constant force settings                   | Immediate Command |
+| SetFCCollision       | Set force sensor collision detection threshold parameters (CRAF models only) | Immediate Command |
+| FCCollisionSwitch    | Enable/disable force sensor collision detection switch (CRAF models only) | Immediate Command |
 
 EnableFTSensor
 
-原型
+Prototype
 
 EnableFTSensor(status)
 
-描述
+Description
 
-开启/关闭力传感器。
+Enable/disable the force sensor.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**              |
-| ------- | ------ | ------------------- |
-| status  | int    | 力传感器开关，1表示开启，0表示关闭。 |
+| **Parameter Name** | **Type** | **Description**             |
+| ------- | ------ | ---------------------- |
+| status  | int    | Force sensor switch, 1 for enable, 0 for disable. |
 
-返回
+Return
 
 ErrorID,\{},EnableFTSensor(status);
 
-示例
+Example
 
 EnableFTSensor(1)
 
-打开力传感器。
+Turn on the force sensor.
 
 SixForceHome
 
-原型
+Prototype
 
 SixForceHome()
 
-描述
+Description
 
-将力传感器当前数值置0，即以传感器当前受力状态作为零点。
+Set the current force sensor value to 0, using the current sensor force state as the zero point.
 
-返回
+Return
 
 ErrorID,\{},SixForceHome();
 
-示例
+Example
 
 SixForceHome()
 
-将力传感器当前数值置0。
+Set the current force sensor value to 0.
 
 GetForce
 
-原型
+Prototype
 
 GetForce(tool)
 
-描述
+Description
 
-获取力传感器当前数值。
+Get the current force sensor values.
 
-可选参数
+Optional Parameters
 
-| **参数名** | **类型** | **说明**                                         |
-| ------- | ------ | ---------------------------------------------- |
-| tool    | int    | 用于指定获取数值时参考的工具坐标系，取值范围：\[0,50]。 不指定时使用全局工具坐标系。 |
+| **Parameter Name** | **Type** | **Description**                                        |
+| ------- | ------ | ------------------------------------------------- |
+| tool    | int    | Used to specify the tool coordinate system reference for obtaining values, range: \[0,50]. When not specified, the global tool coordinate system is used. |
 
-返回
+Return
 
 ErrorID,\{Fx,Fy,Fz,Mx,My,Mz},GetForce(tool);
 
-Fx、Fy、Fz为参考坐标系下各个方向的力值，Mx、My、Mz为扭矩值。
+Fx, Fy, Fz are the force values in each direction of the reference coordinate system, Mx, My, Mz are the torque values.
 
-示例
+Example
 
 GetForce(1)
 
-获取力传感器当前受力在工具坐标系1下的数值。
+Get the current force sensor values under tool coordinate system 1.
 
 ForceDriveMode
 
-原型
+Prototype
 
 ForceDriveMode(\{x,y,z,rx,ry,rz},user)
 
-描述
+Description
 
-指定可拖拽的方向并进入力控拖拽模式。
+Specify the draggable directions and enter force-controlled drag mode.
 
-必选参数
+Required Parameters
 
-| **参数名**           | **类型** | **说明**                                                                                                                                   |
+| **Parameter Name**  | **Type** | **Description**                                                                                                                                    |
 | ----------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| \{x,y,z,rx,ry,rz} | string | 用于指定可拖拽的方向。 0代表该方向不能拖拽，1代表该方向可以拖拽。 例： \{1,1,1,1,1,1}表示机械臂可在各轴方向上自由拖动 \{1,1,1,0,0,0}表示机械臂仅可在XYZ轴方向上拖动 \{0,0,0,1,1,1}表示机械臂仅可在RxRyRz轴方向上旋转。 |
+| \{x,y,z,rx,ry,rz} | string | Used to specify the draggable directions. 0 means that direction cannot be dragged, 1 means that direction can be dragged. Example: \{1,1,1,1,1,1} means the robot arm can be freely dragged in all axis directions. \{1,1,1,0,0,0} means the robot arm can only be dragged in XYZ axis directions. \{0,0,0,1,1,1} means the robot arm can only rotate in RxRyRz axis directions. |
 
-可选参数
+Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                  |
-| ------- | ------ | ------------------------------------------------------- |
-| user    | int    | 用于指定拖拽时参考的用户坐标系，取值范围：\[0,50]。 不指定时表示不参考用户坐标系，参考全局工具坐标系。 |
+| **Parameter Name** | **Type** | **Description**                                                 |
+| ------- | ------ | ---------------------------------------------------------- |
+| user    | int    | Used to specify the user coordinate system reference during dragging, range: \[0,50]. When not specified, it means not referencing the user coordinate system, referencing the global tool coordinate system. |
 
-返回
+Return
 
 ErrorID,\{},ForceDriveMode(\{x,y,z,rx,ry,rz},user);
 
-示例1
+Example 1
 
 ForceDriveMode(\{1,1,1,1,1,1},1)
 
-进入力控拖拽模式，可在用户坐标系1各轴方向上自由拖动。
+Enter force-controlled drag mode, can be freely dragged in all axis directions of user coordinate system 1.
 
-示例2
+Example 2
 
 ForceDriveMode(\{1,1,1,0,0,0})
 
-进入力控拖拽模式，可在全局工具坐标系XYZ轴方向上拖动。
+Enter force-controlled drag mode, can be dragged in XYZ axis directions of the global tool coordinate system.
 
 ForceDriveSpeed
 
-原型
+Prototype
 
 ForceDriveSpeed(speed)
 
-描述
+Description
 
-设置力控拖拽速度比例。
+Set the force-controlled drag speed ratio.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                  |
-| ------- | ------ | ----------------------- |
-| speed   | int    | 力控拖拽速度比例，取值范围：\[1,100]。 |
+| **Parameter Name** | **Type** | **Description**                 |
+| ------- | ------ | -------------------------- |
+| speed   | int    | Force-controlled drag speed ratio, range: \[1,100]. |
 
-返回
+Return
 
 ErrorID,\{},ForceDriveSpeed(speed);
 
-示例
+Example
 
 ForceDriveSpeed(10)
 
-设置力控拖拽的速度比例为10。
+Set the force-controlled drag speed ratio to 10.
 
 FCForceMode
 
-原型
+Prototype
 
 FCForceMode(\{x,y,z,rx,ry,rz},\{fx,fy,fz,frx,fry,frz},reference,user,tool)
 
-描述
+Description
 
-以用户指定的配置参数开启力控。
+Enable force control with user-specified configuration parameters.
 
-必选参数
+Required Parameters
 
-| **参数名**                 | **类型** | **说明**                                                                                                                                                                                   |
+| **Parameter Name**        | **Type** | **Description**                                                                                                                                                                                   |
 | ----------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| \{x,y,z,rx,ry,rz}       | string | 开启/关闭笛卡尔空间某个方向的力控调节。 0表示关闭该方向的力控。 1表示开启该方向的力控。                                                                                                                                           |
-| \{fx,fy,fz,frx,fry,frz} | string | 目标力：是工具末端与作用对象之间接触力的目标值，是一种模拟力，可以由用户自行设定；目标力方向分别对应笛卡尔空间的\{x,y,z,rx,ry,rz}方向。 位移方向的目标力范围\[-200,200]，单位N；姿态方向的目标力范围\[-12,12]，单位N/m。 目标力为0时处于柔顺模式，柔顺模式与力控拖动类似。 如果某个方向未开启力控调节，则该方向的目标力也不会生效。 |
+| \{x,y,z,rx,ry,rz}       | string | Enable/disable force control adjustment in a specific Cartesian space direction. 0 means force control is disabled for that direction. 1 means force control is enabled for that direction.                                                                           |
+| \{fx,fy,fz,frx,fry,frz} | string | Target force: The target value of the contact force between the tool end-effector and the workpiece, which is an analog force that can be set by the user. The target force directions correspond to the \{x,y,z,rx,ry,rz} directions in Cartesian space. Displacement direction target force range \[-200,200], unit N; attitude direction target force range \[-12,12], unit N/m. When target force is 0, it is in compliant mode, which is similar to force-controlled dragging. If force control adjustment is not enabled for a certain direction, the target force for that direction will also not take effect. |
 
-可选参数
+Optional Parameters
 
-| **参数名**   | **类型** | **说明**                                                                                                               |
+| **Parameter Name** | **Type** | **Description**                                                                                                               |
 | --------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
-| reference | string | 格式为“reference=value”。value表示参考坐标系，默认参考工具坐标系。 reference=0表示参考工具坐标系，即沿工具坐标系进行力控调节。 reference=1表示参考用户坐标系，即沿用户坐标系进行力控调节。 |
-| user      | string | 格式为"user=index"，index为已标定的用户坐标系索引。取值范围：\[0,50]。                                                                      |
-| tool      | string | 格式为"tool=index"，index为已标定的工具坐标系索引。取值范围：\[0,50]。                                                                      |
+| reference | string | Format is "reference=value". Value indicates the reference coordinate system, default is tool coordinate system. reference=0 means referencing the tool coordinate system, i.e., force control adjustment along the tool coordinate system. reference=1 means referencing the user coordinate system, i.e., force control adjustment along the user coordinate system. |
+| user      | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].                                                                      |
+| tool      | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].                                                                      |
 
-返回
+Return
 
 ErrorID,\{ResultID},FCForceMode(\{x,y,z,rx,ry,rz},\{fx,fy,fz,frx,fry,frz},reference,user,tool);
 
-示例
+Example
 
 FCForceMode(\{1,1,1,1,1,1},\{100,100,100,10,10,10},reference=1,user=1)
 
-参考已标定的用户坐标系1进行所有方向的力控调节，位移方向的目标力为100N，姿态方向的目标力为10N/m。
+Perform force control adjustment in all directions referencing calibrated user coordinate system 1, with displacement direction target force of 100N and attitude direction target force of 10N/m.
 
 FCSetDeviation
 
-原型
+Prototype
 
 FCSetDeviation(\{x,y,z,rx,ry,rz}，controltype)
 
-描述
+Description
 
-设置力控模式下的位移和姿态偏差，若力控过程中恒力偏移了较大的距离，机器人进会行相应处理。
+Set the displacement and attitude deviation in force control mode. If the constant force deviates a large distance during force control, the robot will perform corresponding processing.
 
-必选参数
+Required Parameters
 
-| **参数名**           | **类型** | **说明**                                                                                         |
+| **Parameter Name**  | **Type** | **Description**                                                                                         |
 | ----------------- | ------ | ---------------------------------------------------------------------------------------------- |
-| \{x,y,z,rx,ry,rz} | string | x、y、z代表力控模式下的位移偏差，单位为mm。取值范围：(0,1000]，默认值100mm。 rx、ry、rz代表力控模式下的姿态偏差，单位为度。取值范围：(0,360]，默认值36度。 |
+| \{x,y,z,rx,ry,rz} | string | x, y, z represent the displacement deviation in force control mode, unit: mm. Range: (0,1000], default 100mm. rx, ry, rz represent the attitude deviation in force control mode, unit: degrees. Range: (0,360], default 36 degrees. |
 
-可选参数
+Optional Parameters
 
-| **参数名**     | **类型** | **说明**                                                                   |
+| **Parameter Name** | **Type** | **Description**                                                                   |
 | ----------- | ------ | ------------------------------------------------------------------------ |
-| controltype | int    | 表示力控过程中超过规定阈值时，机械臂的处理方式。 0：超过阈值时，机械臂报警（默认值）。 1：超过阈值时，机械臂停止搜寻而在原有轨迹上继续运动。 |
+| controltype | int    | Indicates how the robot arm handles the situation when the threshold is exceeded during force control. 0: When threshold is exceeded, the robot arm alarms (default). 1: When threshold is exceeded, the robot arm stops searching and continues motion on the original trajectory. |
 
-返回
+Return
 
 ErrorID,\{},FCSetDeviation(\{x,y,z,rx,ry,rz}，controltype);
 
-示例
+Example
 
 FCSetDeviation(\{200,200,200,36,36,36})
 
-设置力控模式下x、y、z方向的位移偏差为200mm，rx、ry、rz方向的姿态偏差为36°。
+Set the displacement deviation in x, y, z directions to 200mm and the attitude deviation in rx, ry, rz directions to 36° in force control mode.
 
-TCP模式退出后，参数恢复默认值。
+After exiting TCP mode, the parameters are restored to default values.
 
 FCSetForceLimit
 
-原型
+Prototype
 
 FCSetForceLimit(x,y,z,rx,ry,rz)
 
-描述
+Description
 
-设置各方向的最大力限制（该设置对所有方向均生效，包含未启用力控的方向）。
+Set the maximum force limit for each direction (this setting takes effect for all directions, including directions where force control is not enabled).
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                       |
+| **Parameter Name** | **Type** | **Description**                      |
 | ------- | ------ | ---------------------------- |
-| x       | double | x方向的力限制，取值范围：(0,500]，默认值500。 |
-| y       | double | y方向的力限制，取值范围：(0,500]，默认值500。 |
-| z       | double | z方向的力限制，取值范围：(0,500]，默认值500。 |
-| rx      | double | rx方向的力限制，取值范围：(0,50]，默认值50。  |
-| ry      | double | ry方向的力限制，取值范围：(0,50]，默认值50。  |
-| rz      | double | rz方向的力限制，取值范围：(0,50]，默认值50。  |
+| x       | double | Force limit in x direction, range: (0,500], default 500. |
+| y       | double | Force limit in y direction, range: (0,500], default 500. |
+| z       | double | Force limit in z direction, range: (0,500], default 500. |
+| rx      | double | Force limit in rx direction, range: (0,50], default 50.  |
+| ry      | double | Force limit in ry direction, range: (0,50], default 50.  |
+| rz      | double | Force limit in rz direction, range: (0,50], default 50.  |
 
-返回
+Return
 
 ErrorID,\{},FCSetForceLimit(x,y,z,rx,ry,rz);
 
-示例
+Example
 
 FCSetForceLimit(500,500,500,50,50,50)
 
-FCSetForceLimit未调用时，x、y、z方向的最大力限制默认为500；rx、ry、rz方向的最大力限制默认为50。
+When FCSetForceLimit is not called, the maximum force limit in x, y, z directions defaults to 500; the maximum force limit in rx, ry, rz directions defaults to 50.
 
-TCP模式退出后，参数恢复默认值。
+After exiting TCP mode, the parameters are restored to default values.
 
 FCSetMass
 
-原型
+Prototype
 
 FCSetMass(x,y,z,rx,ry,rz)
 
-描述
+Description
 
-设置力控模式下各方向的惯性系数。
+Set the inertia coefficients in each direction in force control mode.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                          |
+| **Parameter Name** | **Type** | **Description**                         |
 | ------- | ------ | ------------------------------- |
-| x       | double | x方向的惯性系数，取值范围：(0,10000]，默认值20。  |
-| y       | double | y方向的惯性系数，取值范围：(0,10000]，默认值20。  |
-| z       | double | z方向的惯性系数，取值范围：(0,10000]，默认值20。  |
-| rx      | double | rx方向的惯性系数，取值范围：(0,10000]，默认值20。 |
-| ry      | double | ry方向的惯性系数，取值范围：(0,10000]，默认值20。 |
-| rz      | double | rz方向的惯性系数，取值范围：(0,10000]，默认值20。 |
+| x       | double | Inertia coefficient in x direction, range: (0,10000], default 20.  |
+| y       | double | Inertia coefficient in y direction, range: (0,10000], default 20.  |
+| z       | double | Inertia coefficient in z direction, range: (0,10000], default 20.  |
+| rx      | double | Inertia coefficient in rx direction, range: (0,10000], default 20. |
+| ry      | double | Inertia coefficient in ry direction, range: (0,10000], default 20. |
+| rz      | double | Inertia coefficient in rz direction, range: (0,10000], default 20. |
 
-返回
+Return
 
 ErrorID,\{},FCSetMass(x,y,z,rx,ry,rz);
 
-示例
+Example
 
 FCSetMass(20,20,20,20,20,20)
 
-FCSetMass 未调用时，各方向的惯性系数默认为20。
+When FCSetMass is not called, the inertia coefficient in each direction defaults to 20.
 
-TCP模式退出后，参数恢复默认值。
+After exiting TCP mode, the parameters are restored to default values.
 
 FCSetStiffness
 
-原型
+Prototype
 
 FCSetStiffness(x,y,z,rx,ry,rz)
 
-描述
+Description
 
-设置力控模式下各方向的弹性系数。
+Set the elasticity coefficients in each direction in force control mode.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                           |
+| **Parameter Name** | **Type** | **Description**                          |
 | ------- | ------ | -------------------------------- |
-| x       | double | x方向的弹性系数，取值范围：\[0,10000]，默认值30。  |
-| y       | double | y方向的弹性系数，取值范围：\[0,10000]，默认值30。  |
-| z       | double | z方向的弹性系数，取值范围：\[0,10000]，默认值30。  |
-| rx      | double | rx方向的弹性系数，取值范围：\[0,10000]，默认值30。 |
-| ry      | double | ry方向的弹性系数，取值范围：\[0,10000]，默认值30。 |
-| rz      | double | rz方向的弹性系数，取值范围：\[0,10000]，默认值30。 |
+| x       | double | Elasticity coefficient in x direction, range: \[0,10000], default 30.  |
+| y       | double | Elasticity coefficient in y direction, range: \[0,10000], default 30.  |
+| z       | double | Elasticity coefficient in z direction, range: \[0,10000], default 30.  |
+| rx      | double | Elasticity coefficient in rx direction, range: \[0,10000], default 30. |
+| ry      | double | Elasticity coefficient in ry direction, range: \[0,10000], default 30. |
+| rz      | double | Elasticity coefficient in rz direction, range: \[0,10000], default 30. |
 
-返回
+Return
 
 ErrorID,\{},FCSetStiffness(x,y,z,rx,ry,rz);
 
-示例
+Example
 
 FCSetStiffness(30,30,30,30,30,30)
 
-FCSetStiffness 未调用时，各方向的默认弹性系数为30。
+When FCSetStiffness is not called, the default elasticity coefficient in each direction is 30.
 
-TCP模式退出后，参数恢复默认值。
+After exiting TCP mode, the parameters are restored to default values.
 
 FCSetDamping
 
-原型
+Prototype
 
 FCSetDamping(x,y,z,rx,ry,rz)
 
-描述
+Description
 
-设置力控模式下各方向的阻尼系数。
+Set the damping coefficients in each direction in force control mode.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                          |
+| **Parameter Name** | **Type** | **Description**                         |
 | ------- | ------ | ------------------------------- |
-| x       | double | x方向的阻尼系数，取值范围：\[0,1000]，默认值50。  |
-| y       | double | y方向的阻尼系数，取值范围：\[0,1000]，默认值50。  |
-| z       | double | z方向的阻尼系数，取值范围：\[0,1000]，默认值50。  |
-| rx      | double | rx方向的阻尼系数，取值范围：\[0,1000]，默认值50。 |
-| ry      | double | ry方向的阻尼系数，取值范围：\[0,1000]，默认值50。 |
-| rz      | double | rz方向的阻尼系数，取值范围：\[0,1000]，默认值50。 |
+| x       | double | Damping coefficient in x direction, range: \[0,1000], default 50.  |
+| y       | double | Damping coefficient in y direction, range: \[0,1000], default 50.  |
+| z       | double | Damping coefficient in z direction, range: \[0,1000], default 50.  |
+| rx      | double | Damping coefficient in rx direction, range: \[0,1000], default 50. |
+| ry      | double | Damping coefficient in ry direction, range: \[0,1000], default 50. |
+| rz      | double | Damping coefficient in rz direction, range: \[0,1000], default 50. |
 
-返回
+Return
 
 ErrorID,\{},FCSetDamping(x,y,z,rx,ry,rz);
 
-示例
+Example
 
 FCSetDamping(50,50,50,50,50,50)
 
-FCSetDamping未调用时，各方向的默认阻尼系数为50。
+When FCSetDamping is not called, the default damping coefficient in each direction is 50.
 
-TCP模式退出后，参数恢复默认值。
+After exiting TCP mode, the parameters are restored to default values.
 
 FCOff
 
-原型
+Prototype
 
 FCOff()
 
-描述
+Description
 
-退出力控模式，与FCForceMode配合使用，两者之间的运动指令都会进行力的柔顺控制。
+Exit force control mode, used in conjunction with FCForceMode. The motion commands between them will perform force compliance control.
 
-返回
+Return
 
 ErrorID,\{ResultID},FCOff();
 
-示例
+Example
 
 FCOff()
 
-关闭力控。
+Turn off force control.
 
 FCSetForceSpeedLimit
 
-原型
+Prototype
 
 FCSetForceSpeedLimit(x,y,z,rx,ry,rz)
 
-描述
+Description
 
-设置各方向的力控调节速度。力控速度上限较小时，力控调节速度较慢，适合低速平缓的接触面。
+Set the force control adjustment speed for each direction. When the force control speed limit is small, the force control adjustment speed is slower, suitable for low-speed gentle contact surfaces.
 
-力控速度上限较大时，力控调节速度快，适合高速力控应用。需要根据具体的应用场景进行调整。
+When the force control speed limit is large, the force control adjustment speed is fast, suitable for high-speed force control applications. Adjustment is needed according to the specific application scenario.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                               |
+| **Parameter Name** | **Type** | **Description**                                                                               |
 | ------- | ------ | ------------------------------------------------------------------------------------ |
-| x       | double | x方向的力控调节速度，默认值20mm/s。 CRA机型取值范围：(0,安全限制TCP速度值] 。其他机型取值范围：(0,300]。                    |
-| y       | double | y方向的力控调节速度，默认值20mm/s。 CRA机型取值范围：(0,安全限制TCP速度值] 。其他机型取值范围：(0,300]。                    |
-| z       | double | z方向的力控调节速度，默认值20mm/s。 CRA机型取值范围：(0,安全限制TCP速度值] 。其他机型取值范围：(0,300]。                    |
-| rx      | double | rx方向的力控调节速度，默认值20°/s。 CRA机型取值范围：(0,（4安全限制TCP速度值 x0.001/ 3.14 x180）]。其他机型取值范围：(0,90]。 |
-| ry      | double | ry方向的力控调节速度，默认值20°/s。 CRA机型取值范围：(0,（4安全限制TCP速度值 x0.001/ 3.14 x180）]。其他机型取值范围：(0,90]。 |
-| rz      | double | rz方向的力控调节速度，默认值20°/s。 CRA机型取值范围：(0,（4安全限制TCP速度值 x0.001/ 3.14 x180）]。其他机型取值范围：(0,90]。 |
+| x       | double | Force control adjustment speed in x direction, default 20mm/s. CRA model range: (0, safety limit TCP speed value]. Other models range: (0,300].                    |
+| y       | double | Force control adjustment speed in y direction, default 20mm/s. CRA model range: (0, safety limit TCP speed value]. Other models range: (0,300].                    |
+| z       | double | Force control adjustment speed in z direction, default 20mm/s. CRA model range: (0, safety limit TCP speed value]. Other models range: (0,300].                    |
+| rx      | double | Force control adjustment speed in rx direction, default 20°/s. CRA model range: (0, (4×safety limit TCP speed value ×0.001/ 3.14 ×180)]. Other models range: (0,90]. |
+| ry      | double | Force control adjustment speed in ry direction, default 20°/s. CRA model range: (0, (4×safety limit TCP speed value ×0.001/ 3.14 ×180)]. Other models range: (0,90]. |
+| rz      | double | Force control adjustment speed in rz direction, default 20°/s. CRA model range: (0, (4×safety limit TCP speed value ×0.001/ 3.14 ×180)]. Other models range: (0,90]. |
 
-返回
+Return
 
 ErrorID,\{},FCSetForceSpeedLimit(x,y,z,rx,ry,rz);
 
-示例
+Example
 
 FCSetForceSpeedLimit(20,20,20,20,20,20)
 
-FCSetForceSpeedLimit未调用时，各方向的力控调节速度默认为20mm/s。
+When FCSetForceSpeedLimit is not called, the force control adjustment speed in each direction defaults to 20mm/s.
 
-TCP模式退出后，参数恢复默认值。
+After exiting TCP mode, the parameters are restored to default values.
 
 FCSetForce
 
-原型
+Prototype
 
 FCSetForce(x,y,z,rx,ry,rz)
 
-描述
+Description
 
-实时调整各方向的恒力设置。
+Real-time adjustment of constant force settings for each direction.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                         |
+| **Parameter Name** | **Type** | **Description**                        |
 | ------- | ------ | ------------------------------ |
-| x       | double | x方向的恒力值。取值范围：\[-200,200]，单位N。  |
-| y       | double | y方向的恒力值。取值范围：\[-200,200]，单位N。  |
-| z       | double | z方向的恒力值。取值范围：\[-200,200]，单位N。  |
-| rx      | double | rx方向的恒力值。取值范围：\[-12,12]，单位N/m。 |
-| ry      | double | ry方向的恒力值。取值范围：\[-12,12]，单位N/m。 |
-| rz      | double | rz方向的恒力值。取值范围：\[-12,12]，单位N/m。 |
+| x       | double | Constant force value in x direction. Range: \[-200,200], unit N.  |
+| y       | double | Constant force value in y direction. Range: \[-200,200], unit N.  |
+| z       | double | Constant force value in z direction. Range: \[-200,200], unit N.  |
+| rx      | double | Constant force value in rx direction. Range: \[-12,12], unit N/m. |
+| ry      | double | Constant force value in ry direction. Range: \[-12,12], unit N/m. |
+| rz      | double | Constant force value in rz direction. Range: \[-12,12], unit N/m. |
 
-返回
+Return
 
 ErrorID,\{},FCSetForce(x,y,z,rx,ry,rz);
 
-示例
+Example
 
 FCSetForce(50,50,50,10,10,10)
 
-x、y、z方向的恒力设置为50N。rx、ry、rz方向的恒力设置为10N/m。
+Constant force setting in x, y, z directions is 50N. Constant force setting in rx, ry, rz directions is 10N/m.
 
 SetFCCollision
 
-原型
+Prototype
 
 SetFCCollision(force,torque)
 
-描述
+Description
 
-设置力传感器碰撞检测的阈值参数，当机器人末端的碰撞力或碰撞力矩超过设定的阈值后；机器人根据设置暂停或停止运动。该指令仅适用于CRAF机型。其他机型调用该指令会报错。
+Set the force sensor collision detection threshold parameters. When the collision force or collision torque at the robot end exceeds the set threshold, the robot will pause or stop motion based on the settings. This command is only applicable to CRAF models. Other models will report an error when calling this command.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                               |
+| **Parameter Name** | **Type** | **Description**                                                                                                               |
 | ------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
-| force   | double | 触发碰撞检测的力阈值，正常模式和缩减模式共用相同的参数。单位 N，不同机型取值范围不同，具体如下： CR5AF取值范围：\[5, 150] CR10AF取值范围：\[5, 300] CR20AF取值范围：\[5, 500]      |
-| torque  | double | 触发碰撞检测的力矩阈值，正常模式和缩减模式共用相同的参数。单位N/m，不同机型取值范围不同，具体如下： CR5AF取值范围：\[0.5, 15] CR10AF取值范围：\[0.5, 30] CR20AF取值范围：\[0.5, 50] |
+| force   | double | Force threshold for triggering collision detection, shared by normal mode and reduced mode. Unit N, different models have different ranges as follows: CR5AF range: \[5, 150] CR10AF range: \[5, 300] CR20AF range: \[5, 500]      |
+| torque  | double | Torque threshold for triggering collision detection, shared by normal mode and reduced mode. Unit N/m, different models have different ranges as follows: CR5AF range: \[0.5, 15] CR10AF range: \[0.5, 30] CR20AF range: \[0.5, 50] |
 
-返回
+Return
 
 ErrorID,\{},SetFCCollision(force,torque);
 
-示例
+Example
 
 SetFCCollision(50, 10)
 
-当机器人末端的碰撞力超过50N或碰撞力矩超过10N/m，机器人根据设置暂停或停止运动。
+When the collision force at the robot end exceeds 50N or the collision torque exceeds 10N/m, the robot will pause or stop motion based on the settings.
 
 FCCollisionSwitch
 
-原型
+Prototype
 
 FCCollisionSwitch(switch)
 
-描述
+Description
 
-开启/关闭力传感器碰撞检测开关。该指令仅适用于CRAF机型。其他机型调用该指令会报错。
+Enable/disable the force sensor collision detection switch. This command is only applicable to CRAF models. Other models will report an error when calling this command.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                                                 |
+| **Parameter Name** | **Type** | **Description**                                                |
 | ------- | ------ | ------------------------------------------------------ |
-| switch  | int    | 力传感器碰撞检测开关。取值范围：0或1。 0表示关闭力传感器碰撞检测功能； 1表示开启力传感器碰撞检测功能。 |
+| switch  | int    | Force sensor collision detection switch. Range: 0 or 1. 0 means disable force sensor collision detection function; 1 means enable force sensor collision detection function. |
 
-返回
+Return
 
 ErrorID,\{},FCCollisionSwitch(switch);
 
-示例
+Example
 
 FCCollisionSwitch(1)
 
-开启力传感器碰撞检测功能。
+Enable the force sensor collision detection function.
 
-## 2.11 传送带指令
+## 2.11 Conveyor Belt Commands
 
-功能概述
+Functional Overview
 
-DOBOT 传送带跟踪解决方案通过光电传感器/工业相机精准捕获传送带上工件的初始位置，并采用高精度编码器实时追踪工件的位移变化。配合传送带跟踪插件，机器人控制系统可以动态计算出工件的运动轨迹，控制机器人对传送带上的工件完成稳定抓取、精密装配或连续点胶等操作。
+The DOBOT conveyor belt tracking solution precisely captures the initial position of workpieces on the conveyor belt through photoelectric sensors/industrial cameras, and uses high-precision encoders to track the displacement changes of workpieces in real time. Combined with the conveyor belt tracking plugin, the robot control system can dynamically calculate the trajectory of the workpiece and control the robot to perform stable grasping, precision assembly, or continuous dispensing operations on workpieces on the conveyor belt.
 
-指令列表
+Command List
 
-| **指令**                 | **功能**               | **指令类型** |
-| ---------------------- | -------------------- | -------- |
-| CnvInit                | 开启传送带                | 立即指令     |
-| GetCnvObject           | 等待指定工件进入传送带的抓取区域     | 立即指令     |
-| StartSyncCnv           | 开启传送带跟踪功能            | 立即指令     |
-| CnvMovL                | 执行传动带跟随，采取直线轨迹插补     | 队列指令     |
-| CnvMovC                | 执行传动带跟随，采取圆弧轨迹插补     | 队列指令     |
-| StopSyncCnv            | 停止传送带跟踪功能            | 立即指令     |
-| SetCnvPointOffset      | 设置传送带用户坐标系下X、Y方向的偏移量 | 立即指令     |
-| SetCnvTimeCompensation | 设置补偿时间               | 立即指令     |
+| **Command**            | **Function**                   | **Command Type** |
+| ---------------------- | -------------------------- | ------------ |
+| CnvInit                | Enable conveyor belt                | Immediate Command |
+| GetCnvObject           | Wait for specified workpiece to enter the conveyor belt pickup area     | Immediate Command |
+| StartSyncCnv           | Enable conveyor belt tracking function            | Immediate Command |
+| CnvMovL                | Execute conveyor belt tracking with linear trajectory interpolation     | Queue Command     |
+| CnvMovC                | Execute conveyor belt tracking with circular trajectory interpolation     | Queue Command     |
+| StopSyncCnv            | Stop conveyor belt tracking function            | Immediate Command |
+| SetCnvPointOffset      | Set X, Y direction offsets in conveyor belt user coordinate system | Immediate Command |
+| SetCnvTimeCompensation | Set compensation time               | Immediate Command |
 
 CnvInit
 
-原型
+Prototype
 
 CnvInit(index)
 
-描述
+Description
 
-开启传送带并下发传送带配置信息。删除所有队列信息，开始检测并存储新的队列信息。
+Enable the conveyor belt and send conveyor belt configuration information. Delete all queue information, start detecting and storing new queue information.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                               |
+| **Parameter Name** | **Type** | **Description**                              |
 | ------- | ------ | ------------------------------------ |
-| index   | int    | 传送带编号1/2/3，机器人最多支持三条传送带。 设置为其他数值会报错。 |
+| index   | int    | Conveyor belt number 1/2/3, the robot supports up to three conveyor belts. Setting to other values will report an error. |
 
-返回
+Return
 
 ErrorID,\{},CnvInit(index);
 
-示例
+Example
 
 CnvInit(1)
 
-开启1号传送带并下发传送带配置信息。
+Enable conveyor belt 1 and send conveyor belt configuration information.
 
 GetCnvObject
 
-原型
+Prototype
 
 GetCnvObject(objId)
 
-描述
+Description
 
-等待指定工件进入传送带的抓取区域（即拾取上边界与拾取下边界组成的区域）。
+Wait for the specified workpiece to enter the conveyor belt pickup area (the area formed by the upper pickup boundary and lower pickup boundary).
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                  |
+| **Parameter Name** | **Type** | **Description**                                                                                  |
 | ------- | ------ | --------------------------------------------------------------------------------------- |
-| objId   | int    | 工件类型，取值范围 \[0, 15]。 0：不指定工件类型，获取最先进入队列的工件信息。 对于传感器触发，objId 默认为0。 1\~15：获取最先进入队列的指定工件信息。 |
+| objId   | int    | Workpiece type, range \[0, 15]. 0: Do not specify workpiece type, get the workpiece information that first entered the queue. For sensor triggering, objId defaults to 0. 1~15: Get the specified workpiece information that first entered the queue. |
 
-返回
+Return
 
 ErrorID,\{flag, objId, objframe},GetCnvObject(objId);
 
-flag：数值含义说明如下
+flag: The meaning of the value is as follows
 
-0：没有工件
+0: No workpiece
 
-1：有工件
+1: Workpiece present
 
--1：执行错误，重新执行
+-1: Execution error, re-execute
 
--2：有错误未处理
+-2: Unhandled error
 
--3：非跟踪初始化状态，需执行 CnvInit 或 StopSyncCnv 指令
+-3: Not in tracking initialization state, need to execute CnvInit or StopSyncCnv command
 
-objId：工件类型号，仅当必选参数 objId 为 0 时，该返回值有意义。
+objId: Workpiece type number, only meaningful when the required parameter objId is 0.
 
-objframe：结果返回当前时刻的工件坐标系（参考机器人基坐标系）。即使工件未处于拾取边界范围内，同样返回工件坐标系（主要用于实时监控）。
+objframe: The result returns the current workpiece coordinate system (referenced to the robot base coordinate system). Even if the workpiece is not within the pickup boundary range, the workpiece coordinate system is still returned (mainly for real-time monitoring).
 
-示例
+Example
 
 GetCnvObject(0)
 
 StartSyncCnv
 
-原型
+Prototype
 
 StartSyncCnv()
 
-描述
+Description
 
-开启传送带跟踪功能。
+Enable the conveyor belt tracking function.
 
-返回
+Return
 
 ErrorID,\{},StartSyncCnv();
 
 CnvMovL
 
-原型
+Prototype
 
 CnvMovL(P,user, tool, a, v, cp|r)
 
-描述
+Description
 
-基于工件坐标系，机器人直线运动到目标点位执行传送带跟踪。
+Based on the workpiece coordinate system, the robot moves linearly to the target position to perform conveyor belt tracking.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                  |
+| **Parameter Name** | **Type** | **Description**                                                                                  |
 | ------- | ------ | --------------------------------------------------------------------------------------- |
-| P       | string | 目标点，支持关节变量或位姿变量。格式为"joint = \{j1, j2, j3, j4, j5, j6}"或"pose = \{x, y, z, rx, ry, rz}"。 |
+| P       | string | Target position, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". |
 
-可选参数
+Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                |
+| **Parameter Name** | **Type** | **Description**                                                |
 | ------- | ------ | ----------------------------------------------------- |
-| user    | string | 格式为"user=index"，index为已标定的用户坐标系索引。取值范围：\[0,50]。       |
-| tool    | string | 格式为"tool=index"，index为已标定的工具坐标系索引。取值范围：\[0,50]。       |
-| a       | string | 格式为“a=value”。value表示执行该条指令时的机器人运动加速度比例。取值范围：\[1,100]。 |
-| v       | string | 格式为“v=value”。value表示执行该条指令时的机器人运动速度比例，取值范围：\[1,100]。  |
-| cp      | string | 格式为“cp=value”。value表示平滑过渡比例，与r互斥。取值范围：\[0,100]。       |
-| r       | string | 格式为“r=value”。value表示平滑过渡半径，与cp互斥，若同时存在以r为准。单位：mm。     |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].       |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].       |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100]. |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command, range: \[1,100].  |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio, mutually exclusive with r. Range: \[0,100].       |
+| r       | string | Format is "r=value". Value represents the smoothing transition radius, mutually exclusive with cp, if both exist, r takes precedence. Unit: mm.     |
 
-返回
+Return
 
 ErrorID,\{flag},CnvMovL(P,user, tool, a, v, cp|r);
 
-flag：跟随结果，取值说明如下
+flag: Tracking result, the values are explained as follows
 
-0：执行成功
+0: Execution successful
 
-1：跟随失败，未检测到工件类型
+1: Tracking failed, workpiece type not detected
 
-2：跟随失败，已检测到工件类型，但未进入拾取边界范围
+2: Tracking failed, workpiece type detected but not within pickup boundary range
 
-3：跟随失败，工件超出离开边界
+3: Tracking failed, workpiece exceeded exit boundary
 
-示例
+Example
 
 CnvMovL(pose= \{x,y,z,rx,ry,rz},user = 1, tool = 0, a = 20, v = 50, cp = 100)
 
 CnvMovC
 
-原型
+Prototype
 
 CnvMovC(P1,P2,user, tool, a, v, cp|r, mode)
 
-描述
+Description
 
-基于工件坐标系，机器人从当前位置通过圆弧运动方式经由中间点位P1 运动至目标点位 P2 后，执行传送带跟踪。
+Based on the workpiece coordinate system, the robot moves from the current position through the intermediate point P1 to the target point P2 via circular motion, then performs conveyor belt tracking.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                     |
+| **Parameter Name** | **Type** | **Description**                                                                                     |
 | ------- | ------ | ------------------------------------------------------------------------------------------ |
-| P1      | string | 圆弧中间点，支持关节变量或位姿变量。格式为"joint = \{j1, j2, j3, j4, j5, j6}"或"pose = \{x, y, z, rx, ry, rz}"。  |
-| P2      | string | 运动目标点，支持关节变量或位姿变量。 格式为"joint = \{j1, j2, j3, j4, j5, j6}"或"pose = \{x, y, z, rx, ry, rz}"。 |
+| P1      | string | Arc intermediate point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}".  |
+| P2      | string | Motion target point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". |
 
-可选参数
+Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                                                                                                                                                                                                                   |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                                                                                                                                                                                   |
 | ------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| user    | string | 格式为"user=index"，index为已标定的用户坐标系索引。取值范围：\[0,50]。                                                                                                                                                                                                                                                          |
-| tool    | string | 格式为"tool=index"，index为已标定的工具坐标系索引。取值范围：\[0,50]。                                                                                                                                                                                                                                                          |
-| a       | string | 格式为“a=value”。value表示执行该条指令时的机械臂运动加速度比例。取值范围：\[1,100]。                                                                                                                                                                                                                                                    |
-| v       | string | 格式为“v=value”。value表示执行该条指令时的机械臂运动速度比例。取值范围：\[1,100]。                                                                                                                                                                                                                                                     |
-| cp      | string | 格式为“cp=value”。value表示平滑过渡比例，与r互斥。取值范围：\[0,100]。                                                                                                                                                                                                                                                          |
-| r       | string | 格式为“r=value”。value表示平滑过渡半径，与cp互斥，若同时存在以r为准。单位：mm。平滑过渡会改变机械臂运动轨迹，对DO输出的时机造成影响，请谨慎使用。                                                                                                                                                                                                                      |
-| mode    | int    | 格式为“mode=value”。通过设置姿态控制参数，对插补过程中机器人相对圆弧的姿态进行自适应控制，满足不同场景的使用需求。取值范围：\[0, 2]。 mode=0：线性模式。从当前姿态插值到P2目标位姿，忽略P1姿态。该模式下，只能实现小于180°的姿态变化。适用于对机器人姿态无要求的场合。 mode=1：过中间点模式。从当前姿态开始，经过中间点位姿，插值到P2目标位姿。主要用于焊接应用中。 mode=2：固定模式。从当前姿态开始，TCP保持相对于圆弧切线的方向不变，忽略P1和P2姿态。该模式下，姿态旋转角度与圆弧角度一致，可实现超过180°的姿态变化。主要用于涂胶、打磨等应用中。 |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].                                                                                                                                                                                                                                                          |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].                                                                                                                                                                                                                                                          |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100].                                                                                                                                                                                                                                                    |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command. Range: \[1,100].                                                                                                                                                                                                                                                     |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio, mutually exclusive with r. Range: \[0,100].                                                                                                                                                                                                                                                          |
+| r       | string | Format is "r=value". Value represents the smoothing transition radius, mutually exclusive with cp, if both exist, r takes precedence. Unit: mm. Smoothing transition will change the robot motion trajectory and affect the timing of DO output, use with caution.                                                                                                                                                                                                                      |
+| mode    | int    | Format is "mode=value". By setting attitude control parameters, the robot's attitude relative to the arc during interpolation is adaptively controlled to meet the usage requirements of different scenarios. Range: \[0, 2]. mode=0: Linear mode. Interpolate from current attitude to P2 target pose, ignoring P1 attitude. In this mode, only attitude changes less than 180° can be achieved. Suitable for occasions with no requirements on robot attitude. mode=1: Pass through intermediate point mode. Starting from current attitude, pass through intermediate point pose, interpolate to P2 target pose. Mainly used in welding applications. mode=2: Fixed mode. Starting from current attitude, TCP maintains a constant direction relative to the arc tangent, ignoring P1 and P2 attitudes. In this mode, the attitude rotation angle is consistent with the arc angle, and attitude changes greater than 180° can be achieved. Mainly used in applications such as dispensing and polishing. |
 
-说明：
+Note:
 
-当设置为mode=1（过中间点模式）时，为了保证圆弧运动速度的均匀性，示教圆弧轨迹时，尽可能保证中间点的位置处于实际圆弧的一半。
+When set to mode=1 (pass through intermediate point mode), to ensure the uniformity of arc motion speed, when teaching the arc trajectory, try to ensure the intermediate point position is at the middle of the actual arc.
 
-当设置为mode=1（过中间点模式）时，需要适当调整各点姿态，保证起始点到中间点的姿态变化与中间点到目标点的姿态变化角度接近。否则所构造的姿态曲线可能超出机器人的可达范围，运行时会报错。
+When set to mode=1 (pass through intermediate point mode), it is necessary to appropriately adjust the attitude of each point to ensure the attitude change from the starting point to the intermediate point is close to the attitude change from the intermediate point to the target point. Otherwise, the constructed attitude curve may exceed the robot's reachable range, and an error will be reported during operation.
 
-返回
+Return
 
 ErrorID,\{flag},CnvMovC(P1,P2,user, tool, a, v, cp|r, mode);
 
-flag：跟随结果，取值说明如下
+flag: Tracking result, the values are explained as follows
 
-0：执行成功
+0: Execution successful
 
-1：跟随失败，未检测到工件类型
+1: Tracking failed, workpiece type not detected
 
-2：跟随失败，已检测到工件类型，但未进入拾取边界范围
+2: Tracking failed, workpiece type detected but not within pickup boundary range
 
-3：跟随失败，工件超出离开边界
+3: Tracking failed, workpiece exceeded exit boundary
 
-示例
+Example
 
 CnvMovC(joint = \{1, 2, 3, 4, 5, 6},joint = \{7, 8, 9, 10, 11, 12},user = 1, tool = 0, a = 20, v = 50, cp = 100)
 
 StopSyncCnv
 
-原型
+Prototype
 
 StopSyncCnv()
 
-描述
+Description
 
-停止传送带跟踪功能。运行完该指令后才会继续执行该指令后面的其他指令。
+Stop the conveyor belt tracking function. Other commands after this command will only continue executing after this command has finished running.
 
-需要配合 StartSyncCnv() 指令一起使用， StartSyncCnv() 和 StopSyncCnv() 之间的程序不得调用除 CnvMovL 和 CnvMovC 以外的其他运动指令，否则会报错。
+Must be used in conjunction with the StartSyncCnv() command. Other motion commands except CnvMovL and CnvMovC must not be called between StartSyncCnv() and StopSyncCnv(), otherwise an error will be reported.
 
-返回
+Return
 
 ErrorID,\{},StopSyncCnv();
 
 SetCnvPointOffset
 
-原型
+Prototype
 
 SetCnvPointOffset(xOffset, yOffset)
 
-描述
+Description
 
-设置传送带用户坐标系下X、Y方向的偏移量。
+Set the X, Y direction offsets in the conveyor belt user coordinate system.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**        |
+| **Parameter Name** | **Type** | **Description**       |
 | ------- | ------ | ------------- |
-| xOffset | double | X轴方向偏移量，单位mm。 |
-| yOffset | double | Y轴方向偏移量，单位mm  |
+| xOffset | double | X-axis direction offset, unit mm. |
+| yOffset | double | Y-axis direction offset, unit mm  |
 
-返回
+Return
 
 ErrorID,\{},SetCnvPointOffset(xOffset, yOffset);
 
-示例
+Example
 
 SetCnvPointOffset(10, 10)
 
 SetCnvTimeCompensation
 
-原型
+Prototype
 
 SetCnvTimeCompensation(time)
 
-描述
+Description
 
-设置补偿时间，补偿因视觉触发带来的时间延时导致工件抓取位置偏移。
+Set compensation time to compensate for workpiece grasping position offset caused by time delay from visual triggering.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**     |
+| **Parameter Name** | **Type** | **Description**    |
 | ------- | ------ | ---------- |
-| time    | int    | 补偿时间，单位ms。 |
+| time    | int    | Compensation time, unit ms. |
 
-返回
+Return
 
 ErrorID,\{},SetCnvTimeCompensation(time);
 
-示例
+Example
 
 SetCnvTimeCompensation(100)
 
-## 2.12 点位可达性检查指令
+## 2.12 Point Reachability Check Commands
 
-功能概述
+Functional Overview
 
-该组指令用于检查指定的运动轨迹中的各个点位是否都可达。
+This group of commands is used to check whether each point in the specified motion trajectory is reachable.
 
-指令列表
+Command List
 
-| **指令**       | **功能**       | **指令类型** |
-| ------------ | ------------ | -------- |
-| CheckOddMovL | 检查直线运动的点位可达性 | 立即指令     |
-| CheckOddMovJ | 检查关节运动的点位可达性 | 立即指令     |
-| CheckOddMovC | 检查圆弧运动的点位可达性 | 立即指令     |
+| **Command**     | **Function**            | **Command Type** |
+| ------------ | --------------- | ------------ |
+| CheckOddMovL | Check linear motion point reachability | Immediate Command |
+| CheckOddMovJ | Check joint motion point reachability | Immediate Command |
+| CheckOddMovC | Check arc motion point reachability | Immediate Command |
 
 CheckOddMovL
 
-原型
+Prototype
 
 CheckOddMovL(P1,P2,user,tool,a,v,cp|r)
 
-描述
+Description
 
-检查直线运动的点位可达性。点位参数仅支持关节变量（joint = \{j1, j2, j3, j4, j5, j6}）。
+Check the point reachability of linear motion. Point parameters only support joint variables (joint = \{j1, j2, j3, j4, j5, j6}).
 
-该指令仅支持在机械臂静止时调用。
+This command can only be called when the robot arm is stationary.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**  |
+| **Parameter Name** | **Type** | **Description** |
 | ------- | ------ | ------- |
-| P1      | string | 直线运动起点。 |
-| P2      | string | 直线运动终点。 |
+| P1      | string | Linear motion start point. |
+| P2      | string | Linear motion end point. |
 
-可选参数
+Optional Parameters
 
-| **参数名** | **类型** | **说明**                          |
+| **Parameter Name** | **Type** | **Description**                         |
 | ------- | ------ | ------------------------------- |
-| user    | int    | 用户坐标系，对指令中的所有点位生效。              |
-| tool    | int    | 工具坐标系，对指令中的所有点位生效               |
-| a       | int    | 执行该条指令时的机械臂运动加速度比例。取值范围：(0,100] |
-| v       | int    | 执行该条指令时的机械臂运动速度比例。取值范围：(0,100]  |
-| cp      | int    | 平滑过渡比例。取值范围：\[0,100]            |
-| r       | int    | 平滑过渡半径，与cp互斥，若同时存在以r为准。单位：mm    |
+| user    | int    | User coordinate system, effective for all points in the command.              |
+| tool    | int    | Tool coordinate system, effective for all points in the command               |
+| a       | int    | Robot motion acceleration ratio when executing this command. Range: (0,100] |
+| v       | int    | Robot motion speed ratio when executing this command. Range: (0,100]  |
+| cp      | int    | Smoothing transition ratio. Range: \[0,100]            |
+| r       | int    | Smoothing transition radius, mutually exclusive with cp, if both exist, r takes precedence. Unit: mm    |
 
-返回
+Return
 
 ErrorID,\{result},CheckOddMovL(P1,P2,user,tool,a,v,cp|r);
 
-result为检查结果。
+result is the check result.
 
-0：轨迹点位均可达。
+0: All trajectory points are reachable.
 
--1：无法进行检查。通常是因为调用该指令时机械臂正在运动。
+-1: Unable to perform check. Usually because the robot arm is in motion when this command is called.
 
-其他返回值详见点位可达性检测通用报错码。
+For other return values, see the point reachability detection general error codes.
 
-示例
+Example
 
 CheckOddMovL(joint = \{0, 0, 90, 0, 0, 0},joint = \{90, 30, 0, 0, 0, 0})
 
-检查从\{0, 0, 90, 0, 0, 0}到\{90, 30, 0, 0, 0, 0}直线运动的点位可达性。
+Check the point reachability of linear motion from \{0, 0, 90, 0, 0, 0} to \{90, 30, 0, 0, 0, 0}.
 
 CheckOddMovJ
 
-原型
+Prototype
 
 CheckOddMovJ(P1,P2,a,v,cp)
 
-描述
+Description
 
-检查关节运动的点位可达性。点位参数仅支持关节变量（joint = \{j1, j2, j3, j4, j5, j6}）。
+Check the point reachability of joint motion. Point parameters only support joint variables (joint = \{j1, j2, j3, j4, j5, j6}).
 
-该指令仅支持在机械臂静止时调用。
+This command can only be called when the robot arm is stationary.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**  |
+| **Parameter Name** | **Type** | **Description** |
 | ------- | ------ | ------- |
-| P1      | string | 关节运动起点。 |
-| P2      | string | 关节运动终点。 |
+| P1      | string | Joint motion start point. |
+| P2      | string | Joint motion end point. |
 
-可选参数
+Optional Parameters
 
-| **参数名** | **类型** | **说明**                          |
+| **Parameter Name** | **Type** | **Description**                         |
 | ------- | ------ | ------------------------------- |
-| a       | int    | 执行该条指令时的机械臂运动加速度比例。取值范围：(0,100] |
-| v       | int    | 执行该条指令时的机械臂运动速度比例。取值范围：(0,100]  |
-| cp      | int    | 平滑过渡比例。取值范围：\[0,100]            |
+| a       | int    | Robot motion acceleration ratio when executing this command. Range: (0,100] |
+| v       | int    | Robot motion speed ratio when executing this command. Range: (0,100]  |
+| cp      | int    | Smoothing transition ratio. Range: \[0,100]            |
 
-返回
+Return
 
 ErrorID,\{result},CheckOddMovJ(P1,P2,a,v,cp);
 
-result为检查结果。
+result is the check result.
 
-0：轨迹点位均可达。
+0: All trajectory points are reachable.
 
--1：无法进行检查。通常是因为调用该指令时机械臂正在运动。
+-1: Unable to perform check. Usually because the robot arm is in motion when this command is called.
 
-其他返回值详见点位可达性检测通用报错码。
+For other return values, see the point reachability detection general error codes.
 
-示例
+Example
 
 CheckOddMovJ(joint = \{0, 0, 90, 0, 0, 0},joint = \{90, 30, 0, 0, 0, 0})
 
-检查从\{0, 0, 90, 0, 0, 0}到\{90, 30, 0, 0, 0, 0}关节运动的点位可达性。
+Check the point reachability of joint motion from \{0, 0, 90, 0, 0, 0} to \{90, 30, 0, 0, 0, 0}.
 
 CheckOddMovC
 
-原型
+Prototype
 
 CheckOddMovC(P1,P2,P3,user,tool,a,v,cp|r)
 
-描述
+Description
 
-检查圆弧运动的点位可达性。点位参数仅支持关节变量（joint = \{j1, j2, j3, j4, j5, j6}）。
+Check the point reachability of arc motion. Point parameters only support joint variables (joint = \{j1, j2, j3, j4, j5, j6}).
 
-该指令仅支持在机械臂静止时调用。
+This command can only be called when the robot arm is stationary.
 
-必选参数
+Required Parameters
 
-| **参数名** | **类型** | **说明**   |
+| **Parameter Name** | **Type** | **Description**  |
 | ------- | ------ | -------- |
-| P1      | string | 圆弧运动起点。  |
-| P2      | string | 圆弧运动中间点。 |
-| P3      | string | 圆弧运动终点。  |
+| P1      | string | Arc motion start point.  |
+| P2      | string | Arc motion intermediate point. |
+| P3      | string | Arc motion end point.  |
 
-可选参数
+Optional Parameters
 
-| **参数名** | **类型** | **说明**                          |
+| **Parameter Name** | **Type** | **Description**                         |
 | ------- | ------ | ------------------------------- |
-| user    | int    | 用户坐标系，对指令中的所有点位生效。              |
-| tool    | int    | 工具坐标系，对指令中的所有点位生效               |
-| a       | int    | 执行该条指令时的机械臂运动加速度比例。取值范围：(0,100] |
-| v       | int    | 执行该条指令时的机械臂运动速度比例。取值范围：(0,100]  |
-| cp      | int    | 平滑过渡比例。取值范围：\[0,100]            |
-| r       | int    | 平滑过渡半径，与cp互斥，若同时存在以r为准。单位：mm    |
+| user    | int    | User coordinate system, effective for all points in the command.              |
+| tool    | int    | Tool coordinate system, effective for all points in the command               |
+| a       | int    | Robot motion acceleration ratio when executing this command. Range: (0,100] |
+| v       | int    | Robot motion speed ratio when executing this command. Range: (0,100]  |
+| cp      | int    | Smoothing transition ratio. Range: \[0,100]            |
+| r       | int    | Smoothing transition radius, mutually exclusive with cp, if both exist, r takes precedence. Unit: mm    |
 
-返回
+Return
 
 ErrorID,\{result},CheckOddMovC(P1,P2,P3,user,tool,a,v,cp|r);
 
-result为检查结果。
+result is the check result.
 
-0：轨迹点位均可达。
+0: All trajectory points are reachable.
 
--1：无法进行检查。通常是因为调用该指令时机械臂正在运动。
+-1: Unable to perform check. Usually because the robot arm is in motion when this command is called.
 
-其他返回值详见点位可达性检测通用报错码。
+For other return values, see the point reachability detection general error codes.
 
-示例
+Example
 
 CheckOddMovC(joint = \{0, 0, 90, 0, 0, 0},joint = \{60, 30, 0, 0, 0, 0},joint = \{90, 30, 0, 0, 0, 0})
 
-检查\{0, 0, 90, 0, 0, 0} => \{60, 30, 0, 0, 0, 0} => \{90, 30, 0, 0, 0, 0} 圆弧运动的点位可达性。
+Check the point reachability of arc motion from \{0, 0, 90, 0, 0, 0} => \{60, 30, 0, 0, 0, 0} => \{90, 30, 0, 0, 0, 0}.
 
-点位可达性检测通用报错码
+Point Reachability Detection General Error Codes
 
-16：轨迹中有点位接近肩部奇异点
+16: Trajectory contains points near shoulder singularity
 
-17：轨迹中有点位不可达
+17: Trajectory contains unreachable points
 
-18：轨迹中有点位会触发关节限位
+18: Trajectory contains points that will trigger joint limits
 
-19：圆弧运动存在重复点位。
+19: Arc motion has duplicate points.
 
-26：轨迹中有点位接近腕部奇异点
+26: Trajectory contains points near wrist singularity
 
-27：轨迹中有点位接近肘部奇异点
+27: Trajectory contains points near elbow singularity
 
-29：速度参数错误
+29: Velocity parameter error

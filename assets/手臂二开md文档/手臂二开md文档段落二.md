@@ -1,2131 +1,2113 @@
-# 手臂二开md文档段落二
+# Arm Secondary Development Documentation - Section 2
 
-## 2.1 控制相关指令
+## 2.1 Control-Related Commands
 
-# 指令列表
+# Command List
 
-| **指令**         | **功能**            | **指令类型** |
-| -------------- | ----------------- | -------- |
-| RequestControl | 请求将设备控制模式切换为TCP模式 | 立即指令     |
-| PowerOn        | 机器人上电             | 立即指令     |
-| EnableRobot    | 使能机器人             | 立即指令     |
-| DisableRobot   | 下使能机器人            | 立即指令     |
-| ClearError     | 清除机器人报警           | 立即指令     |
-| RunScript      | 运行指定工程            | 立即指令     |
-| Stop           | 停止运动 (或正在运行的工程)   | 立即指令     |
-| Pause          | 暂停运动 (或正在运行的工程)   | 立即指令     |
-| Continue       | 继续运动 (或已暂停的工程)    | 立即指令     |
-| EmergencyStop  | 紧急停止机器人           | 立即指令     |
-| BrakeControl   | 控制指定关节的抱闸         | 立即指令     |
-| StartDrag      | 机器人进入关节拖拽模式       | 立即指令     |
-| StopDrag       | 机器人退出拖拽模式         | 立即指令     |
+| **Command**       | **Function**                                    | **Command Type** |
+| ----------------- | ----------------------------------------------- | ---------------- |
+| RequestControl    | Request to switch device control mode to TCP mode | Immediate        |
+| PowerOn           | Robot power on                                  | Immediate        |
+| EnableRobot       | Enable robot                                    | Immediate        |
+| DisableRobot      | Disable robot                                   | Immediate        |
+| ClearError        | Clear robot alarm                               | Immediate        |
+| RunScript         | Run specified project                           | Immediate        |
+| Stop              | Stop motion (or running project)                | Immediate        |
+| Pause             | Pause motion (or running project)               | Immediate        |
+| Continue          | Continue motion (or paused project)             | Immediate        |
+| EmergencyStop     | Emergency stop robot                            | Immediate        |
+| BrakeControl      | Control brake of specified joint                | Immediate        |
+| StartDrag         | Robot enters joint drag mode                    | Immediate        |
+| StopDrag          | Robot exits drag mode                           | Immediate        |
 
 # RequestControl
 
-**原型**
+**Prototype**
 
 RequestControl()
 
-# 描述
+# Description
 
-请求将设备控制模式切换为TCP模式。只有在TCP模式下才可执行其他TCP指令。
+Request to switch device control mode to TCP mode. Other TCP commands can only be executed in TCP mode.
 
-仅当机器人处于未上电或下使能（且非暂停或松抱闸状态）时才可切换TCP模式。
+TCP mode can only be switched when the robot is powered off or disabled (and not in paused or brake-released state).
 
-# 返回
+# Return
 
 ```
 ErrorID, {},RequestControl();
 ```
 
-# 示例
+# Example
 
 RequestControl()
 
-请求切换TCP模式。
+Request to switch to TCP mode.
 
-# 允许切换TCP模式的场景
+# Scenarios Where TCP Mode Switching Is Allowed
 
-| **控制器状态**          | **是否允许切换TCP模式** |
-| ------------------ | --------------- |
-| 未上电                | 允许              |
-| 下使能(非暂停状态、非抱闸松开状态) | 允许              |
-| 使能空闲               | 不允许             |
-| 拖拽模式               | 不允许             |
-| 单次运动中              | 不允许             |
-| 运行中                | 不允许             |
-| 暂停                 | 不允许             |
-| 错误(上使能情况下)         | 不允许             |
-| 松抱闸                | 不允许             |
-| 开启手自动模式            | 不允许             |
+| **Controller State**                         | **TCP Mode Switching Allowed** |
+| -------------------------------------------- | ------------------------------ |
+| Powered off                                  | Allowed                        |
+| Disabled (not paused, brake not released)    | Allowed                        |
+| Enabled and idle                             | Not allowed                    |
+| Drag mode                                    | Not allowed                    |
+| Single motion in progress                    | Not allowed                    |
+| Running                                      | Not allowed                    |
+| Paused                                       | Not allowed                    |
+| Error (while enabled)                        | Not allowed                    |
+| Brake released                               | Not allowed                    |
+| Manual/automatic mode enabled                | Not allowed                    |
 
 # PowerOn
 
-# 原型
+# Prototype
 
 PowerOn()
 
-# 描述
+# Description
 
-机器人上电。机器人上电到完成，需要大概10秒钟的时间，然后再进行使能操作。请勿在机器人开机初始化完成前下发控制信号，否则可能会造成机器人异常动作。
+Robot power on. It takes approximately 10 seconds for the robot to complete power-on, after which the enable operation can be performed. Do not send control signals before the robot's initialization is complete, otherwise it may cause abnormal robot behavior.
 
-# 返回
+# Return
 
 ```
 ErrorID, {},PowerOn();
 ```
 
-# 示例
+# Example
 
 ```
 PowerOn()
 ```
 
-控制机器人上电。
+Power on the robot.
 
 # EnableRobot
 
-# 原型
+# Prototype
 
 ```
 EnableRobot(load,centerX,centerY,centerZ,isCheck)
 ```
 
-# 描述
+# Description
 
-使能机器人。
+Enable the robot.
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                   |
-| ------- | ------ | ------------------------------------------------------------------------ |
-| load    | double | 设置负载重量, 取值范围不能超过各个型号机器人的负载范围。单位: kg。                                     |
-| centerX | double | X方向偏心距离, 单位: mm。                                                         |
-| centerY | double | Y方向偏心距离, 单位: mm。                                                         |
-| centerZ | double | Z方向偏心距离, 单位: mm。                                                         |
-| isCheck | int    | 是否检查负载。1表示检查, 0表示不检查。默认值为0。如果设置为1, 则机器人使能后会检查实际负载是否和设置负载一致, 如果不一致会自动下使能。 |
+| **Parameter** | **Type** | **Description**                                                                                                                                                                  |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| load          | double   | Load weight setting. The value must not exceed the load range of the corresponding robot model. Unit: kg.                                                                        |
+| centerX       | double   | Eccentricity distance in X direction. Unit: mm.                                                                                                                                  |
+| centerY       | double   | Eccentricity distance in Y direction. Unit: mm.                                                                                                                                  |
+| centerZ       | double   | Eccentricity distance in Z direction. Unit: mm.                                                                                                                                  |
+| isCheck       | int      | Whether to check the load. 1 = check, 0 = do not check. Default is 0. If set to 1, the robot will check if the actual load matches the set load after enabling, and will automatically disable if they do not match. |
 
-可携带的参数数量如下：
+The number of parameters that can be carried:
 
-· 0：不携带参数，表示使能时不设置负载重量和偏心参数。
+· 0: No parameters, indicating no load weight and eccentricity parameters are set when enabling.
 
-· 1: 携带一个参数，该参数表示负载重量。
+· 1: One parameter, representing load weight.
 
-· 4：携带四个参数，分别表示负载重量和偏心参数。
+· 4: Four parameters, representing load weight and eccentricity parameters.
 
-· 5: 携带五个参数，分别表示负载重量、偏心参数和是否检查负载。
+· 5: Five parameters, representing load weight, eccentricity parameters, and whether to check the load.
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, EnableRobot(load, centerX, centerY, centerZ, isCheck);
 ```
 
-# 示例1
+# Example 1
 
 ```
 EnableRobot()
 ```
 
-使能机器人，不设置负载重量和偏心参数。
+Enable the robot without setting load weight and eccentricity parameters.
 
-# 示例2
+# Example 2
 
 ```
 EnableRobot(1.5)
 ```
 
-使能机器人并设置负载重量1.5kg。
+Enable the robot with a load weight of 1.5kg.
 
-# 示例3
+# Example 3
 
 ```
 EnableRobot(1.5,0,0,30.5)
 ```
 
-使能机器人并设置负载重量1.5kg，Z方向偏心30.5mm，不检查负载。
+Enable the robot with a load weight of 1.5kg, Z-axis eccentricity of 30.5mm, without load checking.
 
-# 示例4
+# Example 4
 
 ```
 EnableRobot(1.5,0,0,30.5,1)
 ```
 
-使能机器人并设置负载重量1.5kg，Z方向偏心30.5mm，检查负载。
+Enable the robot with a load weight of 1.5kg, Z-axis eccentricity of 30.5mm, with load checking.
 
 # DisableRobot
 
-# 原型
+# Prototype
 
 ```
 DisableRobot()
 ```
 
-# 描述
+# Description
 
-下使能机器人。
+Disable the robot.
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, DisableRobot();
 ```
 
-# 示例
+# Example
 
 ```
 DisableRobot()
 ```
 
-下使能机器人。
+Disable the robot.
 
 # ClearError
 
-# 原型
+# Prototype
 
 ```
 ClearError()
 ```
 
-# 描述
+# Description
 
-清除机器人报警。清除报警后，用户可以根据RobotMode判断机器人是否还处于报警状态。部分报警需要解决报警原因或者重启控制柜后才能清除。
+Clear robot alarm. After clearing the alarm, the user can check whether the robot is still in an alarm state using RobotMode. Some alarms require resolving the alarm cause or restarting the control cabinet before they can be cleared.
 
-# 返回
+# Return
 
 ```
 ErrorID, {},ClearError();
 ```
 
-# 示例
+# Example
 
 ```
-uint64_t robotMode = parseRobotMode(RobotMode()); // parseRobotMode用于获取RobotMode指令返回的值，请自行实现
+uint64_t robotMode = parseRobotMode(RobotMode()); // parseRobotMode is used to get the return value of RobotMode command, implement it yourself
 if(robotMode=9){
     ClearError()
 }
 ```
 
-清除机器人报警。
+Clear robot alarm.
 
 # RunScript
 
-# 原型
+# Prototype
 
 ```
 RunScript(projectName)
 ```
 
-# 描述
+# Description
 
-运行指定工程。如果需要运行工程后立即暂停，则需要在下发RunScript指令后至少间隔1s再下发Pause指令。
+Run specified project. If you need to pause immediately after running the project, you must send the Pause command at least 1 second after sending the RunScript command.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**     | **类型** | **说明**                                                                |
-| ----------- | ------ | --------------------------------------------------------------------- |
-| projectName | string | 工程文件的名称。如果名称包含中文, 必须将发送端的编码方式设置为UTF-8, 否则会导致中文接收异常。如果名称为纯数字, 则需加上双引号。 |
+| **Parameter** | **Type** | **Description**                                                                                                                                    |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| projectName   | string   | Project file name. If the name contains Chinese characters, the sender's encoding must be set to UTF-8, otherwise Chinese characters will be received incorrectly. If the name is purely numeric, double quotes must be added. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, RunScript(projectName);
 ```
 
-# 示例1
+# Example 1
 
 ```
 RunScript(demo)
 ```
 
-运行名称为demo的脚本工程。
+Run the script project named "demo".
 
-# 示例2
+# Example 2
 
 RunScript("123")
 
-运行名称为123的脚本工程。
+Run the script project named "123".
 
-# 示例3
+# Example 3
 
 RunScript("blockly\_test")
 
-DobotStudio Pro在保存积木编程工程时会自动添加“blockly\_”前缀。例如在DobotStudio Pro 中保存了一个名为“test”的积木编程工程，则执行该指令时工程名称需要指定 为"blockly\_test"。
+DobotStudio Pro automatically adds the "blockly\_" prefix when saving block programming projects. For example, if you save a block programming project named "test" in DobotStudio Pro, you need to specify the project name as "blockly\_test" when executing this command.
 
 # Stop
 
-**原型**
+**Prototype**
 
 Stop()
 
-# 描述
+# Description
 
-停止已下发的运动指令队列或者RunScript指令运行的工程。
+Stop the motion command queue or the project running via RunScript.
 
-# 返回
+# Return
 
 ErrorID,\{},Stop();
 
-# 示例
+# Example
 
 Stop()
 
-停止点动、脚本运行、关节运动等一系列运动。
+Stop jogging, script running, joint motion, and other motions.
 
 # Pause
 
-# 原型
+# Prototype
 
 Pause()
 
-# 描述
+# Description
 
-暂停已下发的运动指令队列或者RunScript指令运行的工程。
+Pause the motion command queue or the project running via RunScript.
 
-# 返回
+# Return
 
 ```
 ErrorID, {},Pause();
 ```
 
-# 示例
+# Example
 
 ```
 Pause()
 ```
 
-暂停movj()等一系列运动，使机器人处于暂停状态，点动不可暂停。
+Pause motions such as movj(), putting the robot in a paused state. Jogging cannot be paused.
 
 # Continue
 
-# 原型
+# Prototype
 
 ```
 Continue()
 ```
 
-# 描述
+# Description
 
-继续已暂停的运动指令队列或者RunScript指令运行的工程。
+Continue the paused motion command queue or the project running via RunScript.
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, Continue();
 ```
 
-# 示例
+# Example
 
 ```
 Continue()
 ```
 
-继续运动，暂停状态下的算法队列指令可继续运动，机器人处于运行状态。
+Continue motion. Algorithm queue commands in paused state can continue moving, and the robot enters running state.
 
 # EmergencyStop
 
-# 原型
+# Prototype
 
 ```
 EmergencyStop(mode)
 ```
 
-# 描述
+# Description
 
-紧急停止机器人。急停后机器人会下使能并报警，需要松开急停、清除报警后才能重新使能。
+Emergency stop the robot. After emergency stop, the robot will be disabled and an alarm will be triggered. You need to release the emergency stop and clear the alarm before re-enabling.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                  |
-| ------- | ------ | ----------------------- |
-| mode    | int    | 急停操作模式。1表示按下急停,0表示松开急停。 |
+| **Parameter** | **Type** | **Description**                                   |
+| ------------- | -------- | ------------------------------------------------- |
+| mode          | int      | Emergency stop operation mode. 1 = press emergency stop, 0 = release emergency stop. |
 
-# 返回
+# Return
 
 ErrorID,\{},EmergencyStop(mode);
 
-# 示例
+# Example
 
 EmergencyStop(1)
 
-紧急停止机器人。
+Emergency stop the robot.
 
 # BrakeControl
 
-# 原型
+# Prototype
 
 BrakeControl(axisID,value)
 
-# 描述
+# Description
 
-控制指定关节的抱闸。机器人静止时关节会自动抱闸，如果用户需进行关节拖拽操作，可开启抱闸，即在机器人下使能状态，手动扶住关节后，下发开启抱闸的指令。
+Control the brake of a specified joint. When the robot is stationary, the joint will automatically brake. If the user needs to perform joint drag operations, the brake can be released when the robot is in disabled state by manually supporting the joint and then sending the brake release command.
 
-仅能在机器人下使能时控制关节抱闸，否则ErrorID会返回-1。
+Joint brake can only be controlled when the robot is disabled, otherwise ErrorID will return -1.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                    |
-| ------- | ------ | ----------------------------------------- |
-| axisID  | int    | 关节轴序号, 取值范围: \[1,6]。1表示J1轴, 2表示J2轴, 以此类推。 |
-| value   | int    | 设置抱闸状态。0表示抱闸锁死 (关节不可移动)。1表示松开抱闸 (关节可移动)。  |
+| **Parameter** | **Type** | **Description**                                                                                     |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------- |
+| axisID        | int      | Joint axis number. Range: [1,6]. 1 represents J1 axis, 2 represents J2 axis, and so on.            |
+| value         | int      | Brake status setting. 0 = brake locked (joint cannot move). 1 = brake released (joint can move). |
 
-# 返回
+# Return
 
 ErrorID,\{},BrakeControl(axisID,value);
 
-# 示例
+# Example
 
 # BrakeControl(1,1)
 
-松开关节1的抱闸。
+Release the brake of joint 1.
 
 # StartDrag
 
-# 原型
+# Prototype
 
 StartDrag()
 
-# 描述
+# Description
 
-机器人进入关节拖拽模式。机器人处于报警状态下时，无法通过该指令进入关节拖拽模式。
+Robot enters joint drag mode. When the robot is in an alarm state, it cannot enter joint drag mode through this command.
 
-# 返回
+# Return
 
 ```
 ErrorID, {},StartDrag();
 ```
 
-# 示例
+# Example
 
 ```
 StartDrag()
 ```
 
-机器人进入关节拖拽模式。
+Robot enters joint drag mode.
 
 # StopDrag
 
-# 原型
+# Prototype
 
 ```
 StopDrag()
 ```
 
-# 描述
+# Description
 
-机器人退出拖拽模式。关节拖拽和力控拖拽均使用此指令退出。
+Robot exits drag mode. Both joint drag and force control drag use this command to exit.
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, StopDrag();
 ```
 
-# 示例
+# Example
 
 ```
 StopDrag()
 ```
 
-机器人退出拖拽模式。
+Robot exits drag mode.
 
-## 2.2 设置相关指令
+## 2.2 Settings-Related Commands
 
-# 指令列表
+# Command List
 
-| **指令**               | **功能**            | **指令类型** |
-| -------------------- | ----------------- | -------- |
-| SpeedFactor          | 设置全局速度比例          | 立即指令     |
-| User                 | 设置全局用户坐标系         | 队列指令     |
-| SetUser              | 修改指定的用户坐标系        | 立即指令     |
-| CalcUser             | 计算用户坐标系           | 立即指令     |
-| Tool                 | 设置全局工具坐标系         | 队列指令     |
-| SetTool              | 修改指定的工具坐标系        | 立即指令     |
-| CalcTool             | 计算工具坐标系           | 立即指令     |
-| SetPayload           | 设置机械臂末端负载         | 队列指令     |
-| AccJ                 | 设置关节运动方式的加速度比例    | 立即指令     |
-| AccL                 | 设置直线和弧线运动方式的加速度比例 | 立即指令     |
-| VelJ                 | 设置关节运动方式的速度比例     | 立即指令     |
-| VelL                 | 设置直线和弧线运动方式的速度比例  | 立即指令     |
-| CP                   | 设置平滑过渡比例          | 立即指令     |
-| SetCollisionLevel    | 设置碰撞检测等级          | 队列指令     |
-| SetBackDistance      | 设置碰撞回退距离          | 队列指令     |
-| SetPostCollisionMode | 设置碰撞后处理方式         | 队列指令     |
-| DragSensitivity      | 设置拖拽灵敏度           | 立即指令     |
-| EnableSafeSkin       | 开启或关闭安全皮肤功能       | 队列指令     |
-| SetSafeSkin          | 设置安全皮肤各个部位的灵敏度    | 队列指令     |
-| SetSafeWallEnable    | 开启或关闭指定的安全墙       | 队列指令     |
-| SetWorkZoneEnable    | 开启或关闭指定的安全区域      | 队列指令     |
+| **Command**            | **Function**                            | **Command Type** |
+| ---------------------- | --------------------------------------- | ---------------- |
+| SpeedFactor            | Set global speed ratio                  | Immediate        |
+| User                   | Set global user coordinate system       | Queued           |
+| SetUser                | Modify specified user coordinate system | Immediate        |
+| CalcUser               | Calculate user coordinate system        | Immediate        |
+| Tool                   | Set global tool coordinate system       | Queued           |
+| SetTool                | Modify specified tool coordinate system | Immediate        |
+| CalcTool               | Calculate tool coordinate system        | Immediate        |
+| SetPayload             | Set robot end-effector load             | Queued           |
+| AccJ                   | Set joint motion acceleration ratio     | Immediate        |
+| AccL                   | Set linear/arc motion acceleration ratio| Immediate        |
+| VelJ                   | Set joint motion speed ratio            | Immediate        |
+| VelL                   | Set linear/arc motion speed ratio       | Immediate        |
+| CP                     | Set smooth transition ratio             | Immediate        |
+| SetCollisionLevel      | Set collision detection level           | Queued           |
+| SetBackDistance         | Set collision back-off distance         | Queued           |
+| SetPostCollisionMode   | Set post-collision handling mode        | Queued           |
+| DragSensitivity        | Set drag sensitivity                    | Immediate        |
+| EnableSafeSkin         | Enable/disable safe skin function       | Queued           |
+| SetSafeSkin            | Set sensitivity for safe skin parts     | Queued           |
+| SetSafeWallEnable      | Enable/disable specified safe wall      | Queued           |
+| SetWorkZoneEnable      | Enable/disable specified work zone      | Queued           |
 
-# i说明:
+# Note:
 
-如无特殊说明，TCP指令设置的参数均只在本次TCP/IP控制模式中生效。
+Unless otherwise specified, parameters set by TCP commands only take effect during the current TCP/IP control mode.
 
 # SpeedFactor
 
-# 原型
+# Prototype
 
 SpeedFactor(ratio)
 
-# 描述
+# Description
 
-设置全局速度比例。
+Set global speed ratio.
 
-● 机器人点动时实际运动加速度/速度比例 = 控制软件点动设置中的值 x 全局速度比例。
+● Actual motion acceleration/speed ratio during robot jogging = value set in control software jogging settings × global speed ratio.
 
-例：控制软件设置的关节速度为12°/s，全局速率为50%，则实际点动速度为12°/s x 50% = 6°/s
+Example: If the joint speed set in the control software is 12°/s and the global rate is 50%, then the actual jogging speed is 12°/s × 50% = 6°/s
 
-● 机器人再现时实际运动加速度/速度比例 = 运动指令可选参数设置的比例 x 控制软件再现设置中的值 x 全局速度比例。
+● Actual motion acceleration/speed ratio during robot playback = ratio set in motion command optional parameters × value set in control software playback settings × global speed ratio.
 
-例：控制软件设置的坐标系速度为2000mm/s，全局速率为50%，运动指令设置的速率为80%，则实际运动速度为2000mm/s x 50% x 80% = 800mm/s
+Example: If the coordinate speed set in the control software is 2000mm/s, the global rate is 50%, and the motion command rate is 80%, then the actual motion speed is 2000mm/s × 50% × 80% = 800mm/s
 
-未设置时沿用进入TCP/IP控制模式前控制软件设置的值。
+If not set, the value from before entering TCP/IP control mode is used.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                     |
-| ------- | ------ | -------------------------- |
-| ratio   | int    | 全局运动速度比例, 取值范围: \[1, 100]。 |
+| **Parameter** | **Type** | **Description**                          |
+| ------------- | -------- | ---------------------------------------- |
+| ratio         | int      | Global motion speed ratio. Range: [1, 100]. |
 
-# 返回
+# Return
 
 ErrorID,\{},SpeedFactor(ratio);
 
-# 示例
+# Example
 
 SpeedFactor(80)
 
-设置全局运动速度比例为80%。
+Set global motion speed ratio to 80%.
 
 # User
 
-# 原型
+# Prototype
 
 User(index)
 
-# 描述
+# Description
 
-设置全局用户坐标系。用户下发运动指令时可选择用户坐标系，如未指定，则会使用全局用户坐标系。
+Set global user coordinate system. Users can select a user coordinate system when sending motion commands. If not specified, the global user coordinate system is used.
 
-未设置时默认的全局用户坐标系为用户坐标系0。
+If not set, the default global user coordinate system is user coordinate system 0.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                 |
-| ------- | ------ | ------------------------------------------------------ |
-| index   | int    | 选择已标定的用户坐标系索引。需要通过控制软件等方式标定后才可在此处通过索引选择。取值范围: \[0,50]。 |
+| **Parameter** | **Type** | **Description**                                                                                      |
+| ------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| index         | int      | Index of the calibrated user coordinate system. Must be calibrated through control software before selection here. Range: [0,50]. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {ResultID}, User(index);
 ```
 
-若ErrorID返回-1，表示设置失败。ResultID为算法队列ID，可用于判断指令执行顺序。
+If ErrorID returns -1, the setting failed. ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例
+# Example
 
 ```
 User(1)
 ```
 
-设置用户坐标系1为全局用户坐标系。
+Set user coordinate system 1 as the global user coordinate system.
 
 # SetUser
 
-# 原型：
+# Prototype:
 
 ```
 SetUser(index, value, type)
 ```
 
-# 描述:
+# Description:
 
-修改指定的用户坐标系。
+Modify a specified user coordinate system.
 
-# 必选参数：
+# Required Parameters:
 
-| **参数名** | **类型** | **说明**                                                 |
-| ------- | ------ | ------------------------------------------------------ |
-| index   | int    | 选择已标定的用户坐标系索引。需要通过控制软件等方式标定后才可在此处通过索引选择。取值范围: \[1,50]。 |
-| value   | string | 修改后的用户坐标系, 格式为\{x, y, z, rx, ry, rz}。建议使用CalcUser指令获取。 |
+| **Parameter** | **Type** | **Description**                                                                                      |
+| ------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| index         | int      | Index of the calibrated user coordinate system. Must be calibrated through control software before selection here. Range: [1,50]. |
+| value         | string   | Modified user coordinate system, format: {x, y, z, rx, ry, rz}. It is recommended to use the CalcUser command to obtain this. |
 
-# 可选参数：
+# Optional Parameters:
 
-| **参数名** | **类型** | **说明**                                                                                         |
-| ------- | ------ | ---------------------------------------------------------------------------------------------- |
-| type    | int    | 是否使坐标系改动全局生效。0: 该命令修改的坐标系仅在当前工程运行中生效, 退出TCP模式后恢复为原来的值。1: 该命令修改的坐标系将会被控制器保存, 退出TCP模式后依然保持修改后的值。 |
+| **Parameter** | **Type** | **Description**                                                                                                                      |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| type          | int      | Whether the coordinate system change takes effect globally. 0: The coordinate system modified by this command only takes effect during the current project run and reverts to the original value after exiting TCP mode. 1: The coordinate system modified by this command will be saved by the controller and remains modified after exiting TCP mode. |
 
-# 返回：
+# Return:
 
 ```
 ErrorID, {}, SetUser(index, table, type);
 ```
 
-# 示例：
+# Example:
 
 ```
 SetUser(1,{10,10,10,0,0,0})
 ```
 
-修改用户坐标系1为$x=10, y=10, z=10, rx=0, ry=0, rz=0$。
+Modify user coordinate system 1 to $x=10, y=10, z=10, rx=0, ry=0, rz=0$.
 
 # CalcUser
 
-# 原型：
+# Prototype:
 
 ```
 CalcUser(index,matrix,offset)
 ```
 
-# 描述:
+# Description:
 
-计算用户坐标系。
+Calculate user coordinate system.
 
-# 必选参数：
+# Required Parameters:
 
-| **参数名** | **类型** | **说明**                                                                         |
-| ------- | ------ | ------------------------------------------------------------------------------ |
-| index   | int    | 选择已标定的用户坐标系索引。需要通过控制软件等方式标定后才可在此处通过索引选择。取值范围: \[0,50]。                         |
-| matrix  | int    | 计算的方向。1表示左乘, 即index指定的坐标系沿基坐标系偏转offset指定的值。0表示右乘, 即index指定的坐标系沿自己偏转offset指定的值。 |
-| offset  | string | 格式为\{x, y, z, rx, ry, rz}, 表示用户坐标系的偏移值。                                        |
+| **Parameter** | **Type** | **Description**                                                                                                                                                           |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| index         | int      | Index of the calibrated user coordinate system. Must be calibrated through control software before selection here. Range: [0,50].                                        |
+| matrix        | int      | Calculation direction. 1 = left multiply, meaning the coordinate system specified by index rotates by the offset relative to the base coordinate system. 0 = right multiply, meaning the coordinate system specified by index rotates by the offset relative to itself. |
+| offset        | string   | Format: {x, y, z, rx, ry, rz}, representing the offset value of the user coordinate system.                                                                              |
 
-# 返回：
+# Return:
 
 ```
 ErrorID, {x,y,z,rx,ry,rz},CalcUser(index,matrix,offset);
 ```
 
-其中\{x, y, z, rx, ry, rz}为计算得出的用户坐标系。
+{x, y, z, rx, ry, rz} is the calculated user coordinate system.
 
-示例1：
+Example 1:
 
 ```
 newUser = CalcUser(1,1,{10,10,10,10,10,10})
 ```
 
-计算用户坐标系1左乘\{10,10,10,0,0,0}后的值。计算过程可等价为：一个初始位姿与用户坐标系1相同的坐标系，沿基坐标系平移\{x=10, y=10, z=10}并旋转\{rx=10, ry=10, rz=10}后，得到的新坐标系为newUser。
+Calculate the value after left-multiplying user coordinate system 1 by {10,10,10,0,0,0}. The calculation process is equivalent to: a coordinate system with the same initial pose as user coordinate system 1, translated by {x=10, y=10, z=10} and rotated by {rx=10, ry=10, rz=10} relative to the base coordinate system, resulting in a new coordinate system newUser.
 
-# 示例2：
+# Example 2:
 
 ```
 newUser = CalcUser(1,0,{10,10,10,10,10,10})
 ```
 
-计算用户坐标系1右乘\{10,10,10,0,0,0}后的值。计算过程可等价为：一个初始位姿与用户坐标系1相同的坐标系，沿用户坐标系1平移\{x=10, y=10, z=10}并旋转\{rx=10, ry=10, rz=10}后，得到的新坐标系为newUser。
+Calculate the value after right-multiplying user coordinate system 1 by {10,10,10,0,0,0}. The calculation process is equivalent to: a coordinate system with the same initial pose as user coordinate system 1, translated by {x=10, y=10, z=10} and rotated by {rx=10, ry=10, rz=10} relative to user coordinate system 1, resulting in a new coordinate system newUser.
 
 # Tool
 
-# 原型
+# Prototype
 
 ```
 Tool(index)
 ```
 
-# 描述
+# Description
 
-设置全局工具坐标系。用户下发运动指令时可选择工具坐标系，如未指定，则会使用全局工具坐标系。
+Set global tool coordinate system. Users can select a tool coordinate system when sending motion commands. If not specified, the global tool coordinate system is used.
 
-未设置时默认的全局工具坐标系为工具坐标系0。
+If not set, the default global tool coordinate system is tool coordinate system 0.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                 |
-| ------- | ------ | ------------------------------------------------------ |
-| index   | int    | 选择已标定的工具坐标系索引。需要通过控制软件等方式标定后才可在此处通过索引选择。取值范围: \[0,50]。 |
+| **Parameter** | **Type** | **Description**                                                                                      |
+| ------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| index         | int      | Index of the calibrated tool coordinate system. Must be calibrated through control software before selection here. Range: [0,50]. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},Tool(index);
 ```
 
-若ErrorID返回-1，表示设置的工具坐标索引索引不存在；ResultID为算法队列ID，可用于判断指令执行顺序。
+If ErrorID returns -1, the specified tool coordinate index does not exist; ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例
+# Example
 
 Tool(1)
 
-设置工具坐标系1为全局工具坐标系。
+Set tool coordinate system 1 as the global tool coordinate system.
 
 # SetTool
 
-# 原型：
+# Prototype:
 
 SetTool(index,value,type)
 
-# 描述:
+# Description:
 
-修改指定的工具坐标系。
+Modify a specified tool coordinate system.
 
-# 必选参数:
+# Required Parameters:
 
-| **参数名** | **类型** | **说明**                                                    |
-| ------- | ------ | --------------------------------------------------------- |
-| index   | int    | 选择已标定的工具坐标系索引。需要通过控制软件等方式标定后才可在此处通过索引选择。取值范围: \[1,50]。    |
-| value   | string | 修改后的工具坐标系, 格式为\{x, y, z, rx, ry, rz}。表示该坐标系相对默认工具坐标系的偏移量。 |
+| **Parameter** | **Type** | **Description**                                                                                          |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| index         | int      | Index of the calibrated tool coordinate system. Must be calibrated through control software before selection here. Range: [1,50]. |
+| value         | string   | Modified tool coordinate system, format: {x, y, z, rx, ry, rz}. Represents the offset of this coordinate system relative to the default tool coordinate system. |
 
-# 可选参数:
+# Optional Parameters:
 
-| **参数名** | **类型** | **说明**                                                                                         |
-| ------- | ------ | ---------------------------------------------------------------------------------------------- |
-| type    | int    | 是否使坐标系改动全局生效。0: 该命令修改的坐标系仅在当前工程运行中生效, 退出TCP模式后恢复为原来的值。1: 该命令修改的坐标系将会被控制器保存, 退出TCP模式后依然保持修改后的值。 |
+| **Parameter** | **Type** | **Description**                                                                                                                      |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| type          | int      | Whether the coordinate system change takes effect globally. 0: The coordinate system modified by this command only takes effect during the current project run and reverts to the original value after exiting TCP mode. 1: The coordinate system modified by this command will be saved by the controller and remains modified after exiting TCP mode. |
 
-# 返回：
+# Return:
 
 ErrorID,\{},SetTool(index,table,type);
 
-# 示例：
+# Example:
 
 SetTool(1,\{10,10,10,0,0,0})
 
-修改工具坐标系1为$x=10, y=10, z=10, rx=0, ry=0, rz=0$。
+Modify tool coordinate system 1 to $x=10, y=10, z=10, rx=0, ry=0, rz=0$.
 
 # CalcTool
 
-原型：
+Prototype:
 
 CalcTool(index,matrix,offset)
 
-# 描述:
+# Description:
 
-计算工具坐标系。
+Calculate tool coordinate system.
 
-# 必选参数:
+# Required Parameters:
 
-| **参数名** | **类型** | **说明**                                                                              |
-| ------- | ------ | ----------------------------------------------------------------------------------- |
-| index   | int    | 选择已标定的工具坐标系索引。需要通过控制软件等方式标定后才可在此处通过索引选择。取值范围: \[0,50]。                              |
-| matrix  | int    | 计算的方向。1表示左乘, 即index指定的工具坐标系沿法兰坐标系偏转offset指定的值。0表示右乘, 即index指定的工具坐标系沿自己偏转offset指定的值。 |
-| offset  | string | 格式为\{x, y, z, rx, ry, rz}, 表示工具坐标系的偏移值。                                             |
+| **Parameter** | **Type** | **Description**                                                                                                                                                           |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| index         | int      | Index of the calibrated tool coordinate system. Must be calibrated through control software before selection here. Range: [0,50].                                        |
+| matrix        | int      | Calculation direction. 1 = left multiply, meaning the tool coordinate system specified by index rotates by the offset relative to the flange coordinate system. 0 = right multiply, meaning the tool coordinate system specified by index rotates by the offset relative to itself. |
+| offset        | string   | Format: {x, y, z, rx, ry, rz}, representing the offset value of the tool coordinate system.                                                                              |
 
-返回：
+Return:
 
 ErrorID,\{x,y,z,rx,ry,rz},CalcTool(index,matrix,offset);
 
-其中\{x, y, z, rx, ry, rz}为计算得出的工具坐标系。
+{x, y, z, rx, ry, rz} is the calculated tool coordinate system.
 
-# 示例1：
+# Example 1:
 
 ​$\text{CalcTool}(1,1,\{ 10,10,10,0,0,0\})$​
 
-计算工具坐标系1左乘\{10,10,10,0,0,0}后的值。计算过程可等价为:一个初始位姿与工具坐标系1相同的坐标系,沿法兰坐标系平移\{x=10, y=10, z=10}并旋转\{rx=10, ry=10, rz=10}后,得到的新坐标系为newTool。
+Calculate the value after left-multiplying tool coordinate system 1 by {10,10,10,0,0,0}. The calculation process is equivalent to: a coordinate system with the same initial pose as tool coordinate system 1, translated by {x=10, y=10, z=10} and rotated by {rx=10, ry=10, rz=10} relative to the flange coordinate system, resulting in a new coordinate system newTool.
 
-# 示例2:
+# Example 2:
 
-​$\text{CalcTool}(1,\theta,\{ 1\theta,1\theta,1\theta,\theta,\theta,\theta\})$​
+​$\text{CalcTool}(1,0,\{ 10,10,10,0,0,0\})$​
 
-计算工具坐标系1右乘\{10,10,10,0,0}后的值。计算过程可等价为:一个初始位姿与工具坐标系1相同的坐标系,沿工具坐标系1平移\{x=10, y=10, z=10}并旋转\{rx=10, ry=10, rz=10}后,得到的新坐标系为newTool。
+Calculate the value after right-multiplying tool coordinate system 1 by {10,10,10,0,0}. The calculation process is equivalent to: a coordinate system with the same initial pose as tool coordinate system 1, translated by {x=10, y=10, z=10} and rotated by {rx=10, ry=10, rz=10} relative to tool coordinate system 1, resulting in a new coordinate system newTool.
 
 # SetPayload
 
-# 原型
+# Prototype
 
 SetPayload(load,x,y,z)
 
 SetPayload(name)
 
-# 描述
+# Description
 
-设置机器人末端负载，支持两种设置方式。
+Set robot end-effector load, supporting two configuration methods.
 
-# 方式一：直接设置负载参数
+# Method 1: Direct load parameter setting
 
-# 必选参数1
+# Required Parameter 1
 
-| **参数名** | **类型** | **说明**                               |
-| ------- | ------ | ------------------------------------ |
-| load    | double | 设置负载重量, 单位: kg。取值范围不能超过各个型号机器人的负载范围。 |
+| **Parameter** | **Type** | **Description**                                                       |
+| ------------- | -------- | --------------------------------------------------------------------- |
+| load          | double   | Load weight setting. Unit: kg. The value must not exceed the load range of the corresponding robot model. |
 
-# 可选参数1
+# Optional Parameter 1
 
-| **参数名** | **类型** | **说明**              |
-| ------- | ------ | ------------------- |
-| x       | double | 末端负载X轴偏心坐标, 单位: mm。 |
-| y       | double | 末端负载Y轴偏心坐标, 单位: mm。 |
-| z       | double | 末端负载Z轴偏心坐标, 单位: mm。 |
+| **Parameter** | **Type** | **Description**                |
+| ------------- | -------- | ------------------------------ |
+| x             | double   | End-effector load X-axis eccentric coordinate. Unit: mm. |
+| y             | double   | End-effector load Y-axis eccentric coordinate. Unit: mm. |
+| z             | double   | End-effector load Z-axis eccentric coordinate. Unit: mm. |
 
-需同时设置或不设置这三个参数。偏心坐标为负载(含治具)的质心在默认工具坐标系下的坐标，参考下图。
+These three parameters must be set simultaneously or not at all. The eccentric coordinates are the center of mass coordinates of the load (including fixture) in the default tool coordinate system, as shown in the figure below.
 
-Z\<→\n
+# Method 2: Load by preset load parameter group from control software
 
-# 方式二：通过控制软件保存的预设负载参数组设置
+# Required Parameter 2
 
-# 必选参数2
-
-| **参数名** | **类型** | **说明**             |
-| ------- | ------ | ------------------ |
-| name    | string | 控制软件保存的预设负载参数组的名称。 |
-
-20CRSAF设置日末Dobot应用帮助与反馆FTScnsor点动监控速度(92%系统浪置一般设置用户管理坐标系管理负载参数负载参数示意图运动参数姿态设置负载删除修改十新增回轨迹文件通讯设置index别名Y方向中心偏移距离(mm)X方向中心编移距离(mmZ方向中心偏移距离(mm)负载重量(kg)安装设置00000load1拖搜设置15kg辨识40.71-43.3381.89远程控制后台通程\n
+| **Parameter** | **Type** | **Description**                           |
+| ------------- | -------- | ----------------------------------------- |
+| name          | string   | Name of the preset load parameter group saved in the control software. |
 
 ![](attachment/1_1.png)
 
-​
-
-# 返回
+# Return
 
 ErrorID,\{\ResultID},SetPayload(load,x,y,z);
 
 ErrorID,\{\ResultID},SetPayload(name);
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例1
+# Example 1
 
 SetPayload(3,10,10,10)
 
-设置末端负载重量为3kg，偏心坐标为\{10,10,10}。
+Set end-effector load weight to 3kg, eccentric coordinates {10,10,10}.
 
-# 示例2
+# Example 2
 
 SetPayload("Load1")
 
-加载名称为“Load1”的预设负载参数组。
+Load the preset load parameter group named "Load1".
 
 # AccJ
 
-# 原型
+# Prototype
 
 AccJ(R)
 
-# 描述
+# Description
 
-设置关节运动方式的加速度比例。
+Set joint motion acceleration ratio.
 
-未设置时默认值为100。
+Default value if not set is 100.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                 |
-| ------- | ------ | ---------------------- |
-| R       | int    | 关节加速度比例。取值范围: \[1,100] |
+| **Parameter** | **Type** | **Description**                  |
+| ------------- | -------- | -------------------------------- |
+| R             | int      | Joint acceleration ratio. Range: [1,100] |
 
-# 返回
+# Return
 
 ```
 ErrorID, {},AccJ(R);
 ```
 
-# 示例
+# Example
 
 ```
 AccJ(50)
 ```
 
-设置关节运动方式的加速度比例为50%。
+Set joint motion acceleration ratio to 50%.
 
 # AccL
 
-# 原型
+# Prototype
 
-AcCL(R)
+AccL(R)
 
-# 描述
+# Description
 
-设置直线和弧线运动方式的加速度比例。
+Set linear and arc motion acceleration ratio.
 
-未设置时默认值为100。
+Default value if not set is 100.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**               |
-| ------- | ------ | -------------------- |
-| R       | int    | 加速度比例。取值范围: \[1,100] |
+| **Parameter** | **Type** | **Description**                |
+| ------------- | -------- | ------------------------------ |
+| R             | int      | Acceleration ratio. Range: [1,100] |
 
-# 返回
+# Return
 
 ```
 ErrorID, {},AccL(R);
 ```
 
-# 示例
+# Example
 
 AccL (50)
 
-设置直线和弧线运动方式的加速度比例为50%。
+Set linear and arc motion acceleration ratio to 50%.
 
 # VelJ
 
-# 原型
+# Prototype
 
 VelJ(R)
 
-# 描述
+# Description
 
-设置关节运动方式的速度比例。
+Set joint motion speed ratio.
 
-未设置时默认值为100。
+Default value if not set is 100.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**              |
-| ------- | ------ | ------------------- |
-| R       | int    | 速度比例。取值范围: \[1,100] |
+| **Parameter** | **Type** | **Description**               |
+| ------------- | -------- | ----------------------------- |
+| R             | int      | Speed ratio. Range: [1,100] |
 
-# 返回
+# Return
 
 ```
 ErrorID, {},VelJ(R);
 ```
 
-# 示例
+# Example
 
 ```
 VelJ(50)
 ```
 
-设置关节运动方式的速度比例为50%。
+Set joint motion speed ratio to 50%.
 
 # VelL
 
-# 原型
+# Prototype
 
 VelL(R)
 
-# 描述
+# Description
 
-设置直线和弧线运动方式的速度比例。
+Set linear and arc motion speed ratio.
 
-未设置时默认值为100。
+Default value if not set is 100.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**              |
-| ------- | ------ | ------------------- |
-| R       | int    | 速度比例。取值范围: \[1,100] |
+| **Parameter** | **Type** | **Description**               |
+| ------------- | -------- | ----------------------------- |
+| R             | int      | Speed ratio. Range: [1,100] |
 
-# 返回
+# Return
 
 ErrorID,\{},VelL(R);
 
-# 示例
+# Example
 
-VeLL(50)
+VelL(50)
 
-设置直线和弧线运动方式的速度比例为50%。
+Set linear and arc motion speed ratio to 50%.
 
 # CP
 
-# 原型
+# Prototype
 
 CP(R)
 
-# 描述
+# Description
 
-设置平滑过渡比例，即机器人连续运动经过多个点时，经过中间点是以直角方式过渡还是以曲线方式过渡。
+Set smooth transition ratio, which determines whether the robot passes through intermediate points at right angles or in curves when continuously moving through multiple points.
 
-未设置时默认值为0。
+Default value if not set is 0.
 
-CP=0P2CP=50%CP=100%P1P3\n
+# Required Parameters
 
-# 必选参数
+| **Parameter** | **Type** | **Description**                  |
+| ------------- | -------- | -------------------------------- |
+| R             | int      | Smooth transition ratio. Range: [0, 100] |
 
-| **参数名** | **类型** | **说明**                 |
-| ------- | ------ | ---------------------- |
-| R       | int    | 平滑过渡比例。取值范围: \[0, 100] |
-
-# 返回
+# Return
 
 ErrorID, \{},CP(R);
 
-# 示例
+# Example
 
 CP(50)
 
-设置平滑过渡比例为50%。
+Set smooth transition ratio to 50%.
 
 # SetCollisionLevel
 
-# 原型
+# Prototype
 
 SetCollisionLevel(level)
 
-# 描述
+# Description
 
-设置碰撞检测等级。
+Set collision detection level.
 
-未设置时沿用进入TCP/IP控制模式前控制软件设置的值。
+If not set, the value from before entering TCP/IP control mode is used.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                           |
-| ------- | ------ | ------------------------------------------------ |
-| level   | int    | 碰撞检测等级，取值范围：$[0,5]$。0表示关闭碰撞检测，$1\sim5$数字越大灵敏度越高。 |
+| **Parameter** | **Type** | **Description**                                                                                                          |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| level         | int      | Collision detection level. Range: $[0,5]$. 0 = collision detection off, $1\sim5$ higher numbers = higher sensitivity. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},SetCollisionLevel(level);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例
+# Example
 
 ```
 SetCollisionLevel(1)
 ```
 
-设置碰撞检测等级为1。
+Set collision detection level to 1.
 
 # SetBackDistance
 
-# 原型：
+# Prototype:
 
 ```
 SetBackDistance(distance)
 ```
 
-# 描述:
+# Description:
 
-设置机器人检测到碰撞后原路回退的距离。
+Set the distance the robot backs off after detecting a collision.
 
-未设置时沿用进入TCP/IP控制模式前控制软件设置的值。
+If not set, the value from before entering TCP/IP control mode is used.
 
-# 必选参数：
+# Required Parameters:
 
-| **参数名**  | **类型** | **说明**                          |
-| -------- | ------ | ------------------------------- |
-| distance | double | 碰撞回退的距离, 取值范围: \[0,50], 单位: mm。 |
+| **Parameter** | **Type** | **Description**                           |
+| ------------- | -------- | ----------------------------------------- |
+| distance      | double   | Collision back-off distance. Range: [0,50], Unit: mm. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {ResultID}, SetBackDistance(distance)
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例：
+# Example:
 
 ```
 SetBackDistance(20)
 ```
 
-设置碰撞回退距离为20mm。
+Set collision back-off distance to 20mm.
 
 # SetPostCollisionMode
 
-# 原型：
+# Prototype:
 
 ```
 SetPostCollisionMode(mode)
 ```
 
-# 描述:
+# Description:
 
-设置机器人检测到碰撞后进入的状态。
+Set the state the robot enters after detecting a collision.
 
-未设置时沿用进入TCP/IP控制模式前控制软件设置的值。
+If not set, the value from before entering TCP/IP control mode is used.
 
-# 必选参数：
+# Required Parameters:
 
-| **参数名** | **类型** | **说明**                                    |
-| ------- | ------ | ----------------------------------------- |
-| mode    | int    | 碰撞后处理方式。0表示检测到碰撞后进入停止状态, 1表示检测到碰撞后进入暂停状态。 |
+| **Parameter** | **Type** | **Description**                                                                 |
+| ------------- | -------- | ------------------------------------------------------------------------------- |
+| mode          | int      | Post-collision handling mode. 0 = enter stopped state after collision, 1 = enter paused state after collision. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},SetPostCollisionMode(mode)
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例：
+# Example:
 
 ```
 SetPostCollisionMode(0)
 ```
 
-设置机器人检测到碰撞后进入停止状态。
+Set robot to enter stopped state after collision detection.
 
 # DragSensitivity
 
-# 原型
+# Prototype
 
 DragSensitivity(index,value)
 
-# 描述
+# Description
 
-设置拖拽灵敏度。
+Set drag sensitivity.
 
-未设置时沿用进入TCP/IP控制模式前控制软件设置的值。
+If not set, the value from before entering TCP/IP control mode is used.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                   |
-| ------- | ------ | -------------------------------------------------------- |
-| index   | int    | 轴序号, 取值范围: \[0,6]。0表示所有轴设置为相同的灵敏度。1\~6分别表示设置J1\~J6轴的灵敏度。 |
-| value   | int    | 拖拽灵敏度, 值越小, 拖拽时的阻力越大。取值范围: \[1, 90]。                     |
+| **Parameter** | **Type** | **Description**                                                                                                                        |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| index         | int      | Axis number. Range: [0,6]. 0 = set all axes to the same sensitivity. 1~6 set the sensitivity for J1~J6 axes respectively.             |
+| value         | int      | Drag sensitivity. Lower values = greater resistance when dragging. Range: [1, 90].                                                     |
 
-# 返回
+# Return
 
 ErrorID, \{},DragSensitivity(index,value);
 
-# 示例
+# Example
 
 DragSensitivity(0,50)
 
-设置所有轴的拖拽灵敏度为50。
+Set drag sensitivity for all axes to 50.
 
 # EnableSafeSkin
 
-# 原型
+# Prototype
 
 EnableSafeSkin(status)
 
-# 描述
+# Description
 
-开启或关闭安全皮肤功能。仅对安装了安全皮肤的机器人有效。
+Enable or disable the safe skin function. Only effective for robots equipped with safe skin.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                  |
-| ------- | ------ | ----------------------- |
-| status  | int    | 电子皮肤功能开关, 0表示关闭, 1表示开启。 |
+| **Parameter** | **Type** | **Description**                                    |
+| ------------- | -------- | -------------------------------------------------- |
+| status        | int      | Electronic skin function switch. 0 = disable, 1 = enable. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {ResultID}, EnableSafeSkin(status);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。若返回ErrorID为-1，可能是当前无电子皮肤。
+ResultID is the algorithm queue ID, which can be used to determine command execution order. If ErrorID returns -1, it may be that no electronic skin is currently installed.
 
-# 示例
+# Example
 
 ```
 EnableSafeSkin(1)
 ```
 
-开启电子皮肤功能。
+Enable electronic skin function.
 
 # SetSafeSkin
 
-# 原型
+# Prototype
 
 ```
 SetSafeSkin(part,status)
 ```
 
-# 描述
+# Description
 
-设置安全皮肤各个部位的灵敏度。仅对安装了安全皮肤的机器人有效。
+Set sensitivity for different parts of the safe skin. Only effective for robots equipped with safe skin.
 
-未设置时沿用进入TCP/IP控制模式前控制软件设置的值。
+If not set, the value from before entering TCP/IP control mode is used.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                     |
-| ------- | ------ | ------------------------------------------ |
-| part    | int    | 要设置的部位, 3表示arm (小臂安全皮肤), 4\~6分别表示J4\~J6关节。 |
-| status  | int    | 灵敏度, 0表示关闭, 1表示low, 2表示middle, 3表示high。    |
+| **Parameter** | **Type** | **Description**                                                                                          |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| part          | int      | Part to set. 3 = arm (forearm safe skin), 4~6 represent J4~J6 joints respectively.                       |
+| status        | int      | Sensitivity. 0 = off, 1 = low, 2 = middle, 3 = high.                                                     |
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},SetSafeSkin(part,status);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例
+# Example
 
 SetSafeSkin(3,1)
 
-设置小臂的电子皮肤为低灵敏度。
+Set forearm electronic skin to low sensitivity.
 
 # SetSafeWallEnable
 
-# 原型：
+# Prototype:
 
 ```
 SetSafeWallEnable(index, value)
 ```
 
-# 描述:
+# Description:
 
-开启或关闭指定的安全墙。
+Enable or disable a specified safe wall.
 
-# 必选参数：
+# Required Parameters:
 
-| **参数名** | **类型** | **说明**                                     |
-| ------- | ------ | ------------------------------------------ |
-| index   | int    | 要设置的安全墙索引, 需要先在控制软件中添加对应的安全墙。取值范围: \[1,8]。 |
-| value   | int    | 安全墙开关, 0表示关闭, 1表示开启。                       |
+| **Parameter** | **Type** | **Description**                                                                                          |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| index         | int      | Safe wall index to set. Must first be added in control software. Range: [1,8].                           |
+| value         | int      | Safe wall switch. 0 = disable, 1 = enable.                                                               |
 
-# 返回
+# Return
 
 ```
 ErrorID, {ResultID}, SetSafeWallEnable(index, value);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例：
+# Example:
 
 ```
 SetSafeWallEnable(1,1)
 ```
 
-开启索引为1的安全墙。
+Enable the safe wall with index 1.
 
 # SetWorkZoneEnable
 
-# 原型：
+# Prototype:
 
 ```
 SetWorkZoneEnable(index, value)
 ```
 
-# 描述:
+# Description:
 
-开启或关闭指定的安全区域。
+Enable or disable a specified work zone.
 
-# 必选参数：
+# Required Parameters:
 
-| **参数名** | **类型** | **说明**                                       |
-| ------- | ------ | -------------------------------------------- |
-| index   | int    | 要设置的安全区域索引, 需要先在控制软件中添加对应的安全区域。取值范围: \[1,6]。 |
-| value   | int    | 安全区域开关, 0表示关闭, 1表示开启。                        |
+| **Parameter** | **Type** | **Description**                                                                                              |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| index         | int      | Work zone index to set. Must first be added in control software. Range: [1,6].                               |
+| value         | int      | Work zone switch. 0 = disable, 1 = enable.                                                                   |
 
-# 返回
+# Return
 
 ```
 ErrorID, {ResultID}, SetWorkZoneEnable(index, value);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例：
+# Example:
 
 ```
 SetWorkZoneEnable(1,1)
 ```
 
-开启索引为1的安全区域。
+Enable the work zone with index 1.
 
-## 2.3 计算和获取相关指令
+## 2.3 Calculation and Query Commands
 
-# 指令列表
+# Command List
 
-| **指令**       | **功能**                  | **指令类型** |
-| ------------ | ----------------------- | -------- |
-| RobotMode    | 获取机器人当前状态               | 立即指令     |
-| PositiveKin  | 进行正解运算                  | 立即指令     |
-| InverseKin   | 进行逆解运算                  | 立即指令     |
-| GetAngle     | 获取机器人当前位姿的关节坐标          | 立即指令     |
-| GetPose      | 获取机器人当前位姿在指定的坐标系下的笛卡尔坐标 | 立即指令     |
-| GetErrorID   | 获取机器人当前报错的错误码           | 立即指令     |
-| CreateTray   | 创建托盘                    | 立即指令     |
-| GetTrayPoint | 获取托盘点                   | 立即指令     |
-| GetScrName   | 获取当前机器人正在运行的脚本名称        | 立即指令     |
+| **Command**    | **Function**                                                       | **Command Type** |
+| -------------- | ------------------------------------------------------------------ | ---------------- |
+| RobotMode      | Get current robot state                                            | Immediate        |
+| PositiveKin    | Perform forward kinematics calculation                             | Immediate        |
+| InverseKin     | Perform inverse kinematics calculation                             | Immediate        |
+| GetAngle       | Get joint coordinates of robot's current pose                      | Immediate        |
+| GetPose        | Get Cartesian coordinates of robot's current pose in specified coordinate system | Immediate        |
+| GetErrorID     | Get current robot error code                                       | Immediate        |
+| CreateTray     | Create tray                                                        | Immediate        |
+| GetTrayPoint   | Get tray point                                                     | Immediate        |
+| GetScrName     | Get name of script currently running on robot                      | Immediate        |
 
 # RobotMode
 
-# 原型
+# Prototype
 
 RobotMode()
 
-# 描述
+# Description
 
-获取机器人当前状态。
+Get current robot state.
 
-# 返回
+# Return
 
 ```
 ErrorID,{Value},RobotMode();
 ```
 
-Value取值范围如下：
+Value range is as follows:
 
-| **取值** | **定义**                   | **说明**     |
-| ------ | ------------------------ | ---------- |
-| 1      | ROBOT\_MODE\_INIT        | 初始化状态      |
-| 2      | ROBOT\_MODE\_BRAKE\_OPEN | 有任意关节的抱闸松开 |
-| 3      | ROBOT\_MODE\_POWEROFF    | 机械臂下电状态    |
+| **Value** | **Definition**             | **Description**                          |
+| --------- | -------------------------- | ---------------------------------------- |
+| 1         | ROBOT\_MODE\_INIT          | Initialization state                     |
+| 2         | ROBOT\_MODE\_BRAKE\_OPEN   | Any joint brake is released              |
+| 3         | ROBOT\_MODE\_POWEROFF      | Robot power off state                    |
 
-| **取值** | **定义**                    | **说明**                                 |
-| ------ | ------------------------- | -------------------------------------- |
-| 4      | ROBOT\_MODE\_DISABLED     | 未使能 (无抱闸松开)                            |
-| 5      | ROBOT\_MODE\_ENABLE       | 使能且空闲                                  |
-| 6      | ROBOT\_MODE\_BACKDRIVE    | 拖拽模式 (关节拖拽或力控拖拽)                       |
-| 7      | ROBOT\_MODE\_RUNNING      | 运行状态(工程, TCP队列运动等)                     |
-| 8      | ROBOT\_MODE\_SINGLE\_MOVE | 单次运动状态 (点动、RunTo等)                     |
-| 9      | ROBOT\_MODE\_ERROR        | 有未清除的报警。此状态优先级最高。无论机械臂处于什么状态, 有报警时都返回9 |
-| 10     | ROBOT\_MODE\_PAUSE        | 暂停状态                                   |
-| 11     | ROBOT\_MODE\_COLLISION    | 碰撞检测触发状态                               |
+| **Value** | **Definition**              | **Description**                                                      |
+| --------- | --------------------------- | -------------------------------------------------------------------- |
+| 4         | ROBOT\_MODE\_DISABLED       | Disabled (no brake released)                                         |
+| 5         | ROBOT\_MODE\_ENABLE         | Enabled and idle                                                     |
+| 6         | ROBOT\_MODE\_BACKDRIVE      | Drag mode (joint drag or force control drag)                         |
+| 7         | ROBOT\_MODE\_RUNNING        | Running state (project, TCP queue motion, etc.)                      |
+| 8         | ROBOT\_MODE\_SINGLE\_MOVE   | Single motion state (jogging, RunTo, etc.)                           |
+| 9         | ROBOT\_MODE\_ERROR          | Uncleared alarm. This state has the highest priority. Returns 9 whenever there is an alarm, regardless of the robot state |
+| 10        | ROBOT\_MODE\_PAUSE          | Paused state                                                         |
+| 11        | ROBOT\_MODE\_COLLISION      | Collision detection triggered state                                  |
 
-# 示例
+# Example
 
 RobotMode()
 
-获取机器人当前状态。
+Get current robot state.
 
 # PositiveKin
 
-# 原型
+# Prototype
 
 PositiveKin(J1,J2,J3,J4,J5,J6,user,tool)
 
-# 描述
+# Description
 
-进行正解运算：给定机器人各关节角度，计算机器人末端在给定的笛卡尔坐标系中的坐标值。
+Perform forward kinematics: Given the joint angles of the robot, calculate the Cartesian coordinates of the robot end-effector in the specified coordinate system.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**        |
-| ------- | ------ | ------------- |
-| J1      | double | J1轴位置, 单位: 度。 |
-| J2      | double | J2轴位置, 单位: 度。 |
-| J3      | double | J3轴位置, 单位: 度。 |
-| J4      | double | J4轴位置, 单位: 度。 |
-| J5      | double | J5轴位置, 单位: 度。 |
-| J6      | double | J6轴位置, 单位: 度。 |
+| **Parameter** | **Type** | **Description**          |
+| ------------- | -------- | ------------------------ |
+| J1            | double   | J1 axis position. Unit: degrees. |
+| J2            | double   | J2 axis position. Unit: degrees. |
+| J3            | double   | J3 axis position. Unit: degrees. |
+| J4            | double   | J4 axis position. Unit: degrees. |
+| J5            | double   | J5 axis position. Unit: degrees. |
+| J6            | double   | J6 axis position. Unit: degrees. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                          |
-| ------- | ------ | --------------------------------------------------------------- |
-| user    | string | 格式为"user=index", index为已标定的用户坐标系索引。不指定时使用全局用户坐标系。取值范围: \[0,50]。 |
-| tool    | string | 格式为"tool=index", index为已标定的工具坐标系索引。不指定时使用全局工具坐标系。取值范围: \[0,50]。 |
+| **Parameter** | **Type** | **Description**                                                                                                                                     |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| user          | string   | Format: "user=index", where index is the calibrated user coordinate system index. If not specified, the global user coordinate system is used. Range: [0,50]. |
+| tool          | string   | Format: "tool=index", where index is the calibrated tool coordinate system index. If not specified, the global tool coordinate system is used. Range: [0,50]. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {x,y,z,a,b,c}, PositiveKin(J1,J2,J3,J4,J5,J6,user,tool);
 ```
 
-\{x,y,z,a,b,c}为点位的笛卡尔坐标值。
+{x,y,z,a,b,c} are the Cartesian coordinates of the point.
 
-# 示例
+# Example
 
 ```
 PositiveKin(0,0,-90,0,90,0,user=1,tool=1)
 ```
 
-关节坐标为\{0,0,-90,0,90,0}, 计算机器人末端在用户坐标系1和工具坐标系1下的笛卡尔坐标。
+Joint coordinates are {0,0,-90,0,90,0}, calculate the Cartesian coordinates of the robot end-effector in user coordinate system 1 and tool coordinate system 1.
 
 # InverseKin
 
-# 原型
+# Prototype
 
 ```
 InverseKin(X,Y,Z,Rx,Ry,Rz,useJointNear,jointNear,user,tool)
 ```
 
-# 描述
+# Description
 
-进行逆解运算：给定机器人末端在给定的笛卡尔坐标系中的坐标值，计算机器人各关节角度。
+Perform inverse kinematics: Given the Cartesian coordinates of the robot end-effector in the specified coordinate system, calculate the joint angles of the robot.
 
-由于笛卡尔坐标仅定义了TCP的空间坐标与倾斜角，所以机器人可以通过多种不同的姿态到达同一个位姿，意味着一个位姿变量可以对应多个关节变量。为得出唯一的解，系统需要一个指定的关节坐标，选择最接近该关节坐标的解作为逆解结果。
+Since Cartesian coordinates only define the TCP's spatial coordinates and orientation angles, the robot can reach the same pose through multiple different postures, meaning one pose variable can correspond to multiple joint variables. To obtain a unique solution, the system requires a specified joint coordinate and selects the solution closest to that joint coordinate as the inverse kinematics result.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**        |
-| ------- | ------ | ------------- |
-| X       | double | X轴位置, 单位: mm。 |
-| Y       | double | Y轴位置, 单位: mm。 |
-| Z       | double | Z轴位置, 单位: mm。 |
-| Rx      | double | Rx轴位置, 单位: 度。 |
-| Ry      | double | Ry轴位置, 单位: 度。 |
+| **Parameter** | **Type** | **Description**          |
+| ------------- | -------- | ------------------------ |
+| X             | double   | X-axis position. Unit: mm. |
+| Y             | double   | Y-axis position. Unit: mm. |
+| Z             | double   | Z-axis position. Unit: mm. |
+| Rx            | double   | Rx-axis position. Unit: degrees. |
+| Ry            | double   | Ry-axis position. Unit: degrees. |
+| Rz            | double   | Rz-axis position. Unit: degrees. |
 
-| **Rz** | **double** | **Rz轴位置, 单位: 度。** |
-| ------ | ---------- | ----------------- |
+# Optional Parameters
 
-# 可选参数
+| **Parameter**   | **Type** | **Description**                                                                                                                                                                                                           |
+| --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| useJointNear    | string   | Format: "useJointNear=value", used to set whether the JointNear parameter is valid. "useJointNear=0" or omitted means the JointNear parameter is invalid and the system selects the nearest solution based on the robot's current joint angles. "useJointNear=1" means selection is based on JointNear. If only this parameter is carried without JointNear, it is invalid. |
+| jointNear       | string   | Format: "jointNear=\{j1,j2,j3,j4,j5,j6}", joint coordinates for nearest solution selection.                                                                                                                                  |
+| user            | string   | Format: "user=index", where index is the calibrated user coordinate system index. If not specified, the global user coordinate system is used. Range: [0,50].                                                                  |
+| tool            | string   | Format: "tool=index", where index is the calibrated tool coordinate system index. If not specified, the global tool coordinate system is used. Range: [0,50].                                                                  |
 
-| **参数名**      | **类型** | **说明**                                                                                                                                                              |
-| ------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| useJointNear | string | 格式为 "useJointNear=value", 用于设置JointNear参数是否有效。"useJointNear=0"或不携带表示JointNear参数无效, 系统根据机械臂当前关节角度就近选解。"useJointNear=1"表示根据JointNear就近选解。仅携带该参数而不携带JointNear时, 该参数无效。 |
-| jointNear    | string | 格式为 "jointNear=\{j1,j2,j3,j4,j5,j6}", 用于就近选解的关节坐标。                                                                                                                  |
-| user         | string | 格式为 "user=index", index为已标定的用户坐标系索引。不指定时使用全局用户坐标系。取值范围: \[0,50]。                                                                                                    |
-| tool         | string | 格式为 "tool=index", index为已标定的工具坐标系索引。不指定时使用全局工具坐标系。取值范围: \[0,50]。                                                                                                    |
-
-# 返回
+# Return
 
 ```
 ErrorID, {J1, J2, J3, J4, J5, J6}, InverseKin(X, Y, Z, Rx, Ry, Rz, useJointNear, jointNear, user, tool);
 ```
 
-\{J1,J2,J3,J4,J5,J6}为点位的关节坐标值。
+{J1,J2,J3,J4,J5,J6} are the joint coordinates of the point.
 
-# 示例
+# Example
 
 ```
 InverseKin(473.000000, -141.000000, 469.000000, -180.000000, 0.000, -90.000)
 ```
 
-机器人末端在全局用户坐标系和全局关节坐标系下的笛卡尔坐标为\{473,-141,469,-180,0,-90}，计算关节坐标，选择机器人当前关节角度的最近解。
+The Cartesian coordinates of the robot end-effector in the global user coordinate system and global tool coordinate system are {473,-141,469,-180,0,-90}, calculate the joint coordinates, selecting the nearest solution to the robot's current joint angles.
 
 # GetAngle
 
-# 原型
+# Prototype
 
 ```
 GetAngle()
 ```
 
-# 描述
+# Description
 
-获取机器人当前位姿的关节坐标。
+Get the joint coordinates of the robot's current pose.
 
-# 返回
+# Return
 
 ```
 ErrorID, {J1, J2, J3, J4, J5, J6}, GetAngle();
 ```
 
-\{J1, J2, J3, J4, J5, J6}表示机器人当前位姿的关节坐标。
+{J1, J2, J3, J4, J5, J6} represent the joint coordinates of the robot's current pose.
 
-# 示例
+# Example
 
 GetAngle()
 
-获取机器人当前位姿的关节坐标。
+Get the joint coordinates of the robot's current pose.
 
 # GetPose
 
-# 原型
+# Prototype
 
 ```
 GetPose(user, tool)
 ```
 
-# 描述
+# Description
 
-获取机器人当前位姿在指定的坐标系下的笛卡尔坐标。
+Get the Cartesian coordinates of the robot's current pose in the specified coordinate system.
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                            |
-| ------- | ------ | ------------------------------------------------- |
-| user    | string | 格式为"user=index", index为已标定的用户坐标系索引。取值范围: \[0,50]。 |
-| tool    | string | 格式为"tool=index", index为已标定的工具坐标系索引。取值范围: \[0,50]。 |
+| **Parameter** | **Type** | **Description**                                                                                      |
+| ------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| user          | string   | Format: "user=index", where index is the calibrated user coordinate system index. Range: [0,50].     |
+| tool          | string   | Format: "tool=index", where index is the calibrated tool coordinate system index. Range: [0,50].     |
 
-必须同时传或同时不传，不传时默认为全局用户和工具坐标系。
+Both must be passed or both omitted. If omitted, the global user and tool coordinate systems are used.
 
-# 返回
+# Return
 
 ```
 ErrorID, {X, Y, Z, Rx, Ry, Rz}, GetPose(user, tool);
 ```
 
-\{X,Y,Z,Rx,Ry,Rz}表示机器人当前位姿的笛卡尔坐标。
+{X,Y,Z,Rx,Ry,Rz} represent the Cartesian coordinates of the robot's current pose.
 
-# 示例
+# Example
 
 ```
 GetPose(user=1,tool=1)
 ```
 
-获取机器人当前位姿在用户坐标系1和工具坐标系1下的笛卡尔坐标。
+Get the Cartesian coordinates of the robot's current pose in user coordinate system 1 and tool coordinate system 1.
 
 # GetErrorID
 
-# 原型
+# Prototype
 
 GetErrorID()
 
-# 描述
+# Description
 
-获取机器人当前报错的错误码。
+Get the current robot error code.
 
-# 返回
+# Return
 
 ​$\text{ErrorID},\{[id,\dots,id]\},\text{GetErrorID();}$​
 
-● ErrorID 为0时表示命令接收成功，返回非0则代表命令有错误，详见通用错误码；
+● ErrorID of 0 indicates successful command reception; non-zero indicates command error (see general error codes);
 
-● \[id,...,id]为控制器以及算法报警信息，无报警时返回\[],有多个报警时以英文逗号”，”相隔。
+● [id,...,id] are controller and algorithm alarm information. Returns [] when there are no alarms, and multiple alarms are separated by commas.
 
-# 示例
+# Example
 
 GetErrorID()
 
-获取机器人当前报错的错误码。
+Get the current robot error code.
 
 # CreateTray
 
-# 原型：
+# Prototype:
 
 ```
-CreateTray(Trayname, {Count}, {P1},{P2}) -- 一维托盘
-CreateTray(Trayname, {row,col}, {P1},{P2},{P3},{P4}) -- 二维托盘
-CreateTray(Trayname, {row,col,layer}, {P1},{P2},{P3},{P4},{P5},{P6},{P7},{P8}) -- 三维托盘
+CreateTray(Trayname, {Count}, {P1},{P2}) -- 1D tray
+CreateTray(Trayname, {row,col}, {P1},{P2},{P3},{P4}) -- 2D tray
+CreateTray(Trayname, {row,col,layer}, {P1},{P2},{P3},{P4},{P5},{P6},{P7},{P8}) -- 3D tray
 ```
 
-# 描述:
+# Description:
 
-创建托盘，支持创建一维、二维和三维的托盘。最多可创建20个托盘，创建同名的托盘时会覆盖已有的托盘，不会增加托盘数量。
+Create a tray, supporting 1D, 2D, and 3D trays. Up to 20 trays can be created. Creating a tray with the same name will overwrite the existing tray without increasing the tray count.
 
-# 必选参数:
+# Required Parameters:
 
-| **参数名**  | **类型** | **说明**                          |
-| -------- | ------ | ------------------------------- |
-| Trayname | string | 托盘名称, 最长32字节的字符串, 不允许为纯数字或者纯空格。 |
+| **Parameter** | **Type** | **Description**                               |
+| ------------- | -------- | --------------------------------------------- |
+| Trayname      | string   | Tray name, up to 32 bytes. Cannot be purely numeric or purely spaces. |
 
-维度参数为table变量，各点位为独立的table参数，每个点位格式为 {pose = {x,y,z,rx,ry,rz}}。下文分别进行介绍。
+Dimension parameters are table variables, and each point is an independent table parameter with format {pose = {x,y,z,rx,ry,rz}}. Described below.
 
-● 创建一维托盘：一维托盘是在一条直线上等距分布的一组点。
+● Create 1D tray: A 1D tray is a set of points equally spaced along a line.
 
-| **参数名**   | **类型** | **说明**                                              |
-| --------- | ------ | --------------------------------------------------- |
-| \{Count}  | table  | Count表示点位数量,取值范围:\[2,50],输入非整数会自动向下取整。              |
-| \{P1}     | table  | P1为一维托盘的第1个端点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。      |
-| \{P2}     | table  | P2为一维托盘的第2个端点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。      |
+| **Parameter** | **Type** | **Description**                                                |
+| ------------- | -------- | -------------------------------------------------------------- |
+| \{Count}      | table    | Count represents the number of points. Range: [2,50]. Non-integer values are automatically rounded down. |
+| \{P1}         | table    | P1 is the first endpoint of the 1D tray, format: {pose = \{x,y,z,rx,ry,rz}}. |
+| \{P2}         | table    | P2 is the second endpoint of the 1D tray, format: {pose = \{x,y,z,rx,ry,rz}}. |
 
-P1P2Count\n
+● Create 2D tray: A 2D tray is a set of points arranged in a planar array.
 
-● 创建二维托盘：二维托盘是在一个平面上阵列分布的一组点。
+| **Parameter** | **Type** | **Description**                                                                                                           |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+| \{row,col}    | table    | row represents the number of points in the row direction (P1 to P2), col represents the number of points in the column direction (P1 to P4). Range is the same as 1D tray Count. |
+| \{P1}         | table    | P1 is a vertex of the 2D tray, format: {pose = \{x,y,z,rx,ry,rz}}.                                                         |
+| \{P2}         | table    | P2 is a vertex of the 2D tray, format: {pose = \{x,y,z,rx,ry,rz}}.                                                         |
+| \{P3}         | table    | P3 is a vertex of the 2D tray, format: {pose = \{x,y,z,rx,ry,rz}}.                                                         |
+| \{P4}         | table    | P4 is a vertex of the 2D tray, format: {pose = \{x,y,z,rx,ry,rz}}.                                                         |
 
-| **参数名**    | **类型** | **说明**                                                                     |
-| ----------- | ------ | -------------------------------------------------------------------------- |
-| \{row,col}  | table  | row表示行方向 (P1到P2方向) 上点位的数量, col表示列方向 (P1到P4方向) 上点位的数量, 取值范围都与一维托盘的Count 相同。 |
-| \{P1}       | table  | P1为二维托盘的顶点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。                               |
-| \{P2}       | table  | P2为二维托盘的顶点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。                               |
-| \{P3}       | table  | P3为二维托盘的顶点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。                               |
-| \{P4}       | table  | P4为二维托盘的顶点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。                               |
+● Create 3D tray: A 3D tray is a set of points distributed in 3D space, which can be viewed as multiple 2D trays arranged vertically.
 
-P2P1CoP4P3row\n
+| **Parameter**     | **Type** | **Description**                                                                                                             |
+| ----------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| \{row,col,layer}  | table    | row represents the number of points in the row direction (P1 to P2), col represents the number of points in the column direction (P1 to P4), layer represents the number of layers (P1 to P5 direction). |
+| \{P1}             | table    | P1 is a vertex of the 3D tray, format: {pose = \{x,y,z,rx,ry,rz}}.                                                           |
+| \{P2}             | table    | P2 is a vertex of the 3D tray, format: {pose = \{x,y,z,rx,ry,rz}}.                                                           |
+| \{P3}             | table    | P3 is a vertex of the 3D tray, format: {pose = \{x,y,z,rx,ry,rz}}.                                                           |
+| \{P4}             | table    | P4 is a vertex of the 3D tray, format: {pose = \{x,y,z,rx,ry,rz}}.                                                           |
+| \{P5}             | table    | P5 is a vertex of the 3D tray, format: {pose = \{x,y,z,rx,ry,rz}}.                                                           |
+| \{P6}             | table    | P6 is a vertex of the 3D tray, format: {pose = \{x,y,z,rx,ry,rz}}.                                                           |
+| \{P7}             | table    | P7 is a vertex of the 3D tray, format: {pose = \{x,y,z,rx,ry,rz}}.                                                           |
+| \{P8}             | table    | P8 is a vertex of the 3D tray, format: {pose = \{x,y,z,rx,ry,rz}}.                                                           |
 
-● 创建三维托盘：三维托盘是在空间上立体分布的一组点，可视为竖向排布的多个二维托盘。
-
-| **参数名**          | **类型** | **说明**                                                                       |
-| ---------------- | ------ | ---------------------------------------------------------------------------- |
-| \{row,col,layer} | table  | row表示行方向 (P1到P2方向) 上点位的数量, col 表示列方向 (P1到P4方向) 上点位的数量, layer表 示层数 (P1到P5方向)。 |
-| \{P1}             | table  | P1为三维托盘的顶点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。                                 |
-| \{P2}             | table  | P2为三维托盘的顶点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。                                 |
-| \{P3}             | table  | P3为三维托盘的顶点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。                                 |
-| \{P4}             | table  | P4为三维托盘的顶点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。                                 |
-| \{P5}             | table  | P5为三维托盘的顶点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。                                 |
-| \{P6}             | table  | P6为三维托盘的顶点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。                                 |
-| \{P7}             | table  | P7为三维托盘的顶点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。                                 |
-| \{P8}             | table  | P8为三维托盘的顶点, 格式为 {pose = \{x,y,z,rx,ry,rz}}。                                 |
-
-P5P6P8P7layerP2coP4P3row\n
-
-# 返回
+# Return
 
 ErrorID,\{},CreateTray(\ldots);
 
-# 示例：
+# Example:
 
-* 创建名称为t1的5个点的一维托盘。
-  &#x20;CreateTray(t1, \{5}, \{pose = \{x1,y1,z1,rx1,ry1,rz1}},{pose = \{x2,y2,z2,rx2,ry2,rz2}})
-* 创建名称为t2的4x5的二维托盘,下方示例中P1到P4均为 {pose = \{x,y,z,rx,ry,rz}} 格式的点位。
-  &#x20;CreateTray(t2, \{4,5}, \{P1},{P2},{P3},{P4})
-* 创建名称为t3的4x5x6的三维托盘,下方示例中P1到P8均为 {pose = \{x,y,z,rx,ry,rz}} 格式的点位。
-  &#x20;CreateTray(t3, \{4,5,6}, \{P1},{P2},{P3},{P4},{P5},{P6},{P7},{P8})
+* Create a 1D tray named t1 with 5 points.
+  CreateTray(t1, \{5}, \{pose = \{x1,y1,z1,rx1,ry1,rz1}},{pose = \{x2,y2,z2,rx2,ry2,rz2}})
+* Create a 2D tray named t2 with 4x5. The following example uses points P1 to P4 in {pose = \{x,y,z,rx,ry,rz}} format.
+  CreateTray(t2, \{4,5}, \{P1},{P2},{P3},{P4})
+* Create a 3D tray named t3 with 4x5x6. The following example uses points P1 to P8 in {pose = \{x,y,z,rx,ry,rz}} format.
+  CreateTray(t3, \{4,5,6}, \{P1},{P2},{P3},{P4},{P5},{P6},{P7},{P8})
 
 # GetTrayPoint
 
-# 原型：
+# Prototype:
 
 GetTrayPoint(Trayname, index)
 
-# 描述:
+# Description:
 
-获取指定托盘指定序号的点位。点位序号和创建托盘时传入的点位顺序有关。
+Get the point at a specified index of a specified tray. The point index is related to the point order passed when creating the tray.
 
-● 一维托盘：P1点序号为1，P2点序号与点位数量相同，以此类推。
+● 1D tray: P1 point index is 1, P2 point index equals the point count, and so on.
 
-●二维托盘:下图以3x3的托盘为例说明示教点与点位序号的关系。
+● 2D tray: The following diagram uses a 3x3 tray as an example to illustrate the relationship between teaching points and point indices.
 
-897P4P3546213P2P1\n
+● 3D tray: Reference the 2D tray. The first point of the second layer has an index one greater than the last point of the first layer, and so on.
 
-● 三维托盘：参考二维托盘，第二层的第一个点的序号为第一层最后一个点的序号加一，以此类推。
+# Required Parameters:
 
-# 必选参数：
+| **Parameter** | **Type** | **Description**                 |
+| ------------- | -------- | ------------------------------- |
+| Trayname      | string   | Created tray name, up to 32 bytes. |
+| index         | int      | Index of the point to retrieve. |
 
-| **参数名**  | **类型** | **说明**                |
-| -------- | ------ | --------------------- |
-| Trayname | string | 已创建的托盘名称, 最长32字节的字符串。 |
-| index    | int    | 要获取的点位的序号。            |
-
-# 返回：
+# Return:
 
 ```
 ErrorID, {isErr,x,y,z,rx,ry,rz}, GetTrayPoint(Trayname, index);
 ```
 
-isErr表示获取点位的结果，0表示获取成功，-1表示获取失败。
+isErr indicates the result of retrieving the point. 0 = success, -1 = failure.
 
-x,y,z,rx,ry,rz为获取到的点位坐标。
+x,y,z,rx,ry,rz are the retrieved point coordinates.
 
-# 示例：
+# Example:
 
 ```
--- 获取名称为t1的托盘的序号为3的点位。
+-- Get the point at index 3 of tray named t1.
 GetTrayPoint(t1,3)
 ```
 
 # GetScrName
 
-# 原型
+# Prototype
 
 ```
 GetScrName()
 ```
 
-# 描述
+# Description
 
-获取当前机器人正在运行的脚本名称。
+Get the name of the script currently running on the robot.
 
-# 返回
+# Return
 
 ErrorID,\{"test"};
 
-● ErrorID 返回0，表示命令接收成功。
+● ErrorID returns 0, indicating successful command reception.
 
-● ErrorID 返回-1，表示当前处于未正常运行状态，无当前运行脚本名称。
+● ErrorID returns -1, indicating the robot is not in a normally running state, no current running script name.
 
-● ErrorID 返回其他数值，表示运行失败或其他异常情况，详见通用错误码。
+● ErrorID returns other values, indicating runtime failure or other abnormal conditions (see general error codes).
 
-● test 表示脚本工程的文件名称。
+● test is the file name of the script project.
 
-## 2.4 IO相关指令
+## 2.4 IO-Related Commands
 
-# 指令列表
+# Command List
 
-| **指令**        | **功能**                   | **指令类型** |
-| ------------- | ------------------------ | -------- |
-| DO            | 设置数字输出端口状态               | 队列指令     |
-| DOInstant     | 设置数字输出端口状态               | 立即指令     |
-| GetDO         | 获取数字输出端口状态               | 立即指令     |
-| DOGroup       | 设置多个数字输出端口状态             | 队列指令     |
-| DOGroupDEC    | 通过赋值十进制设置多个数字输出端口状态      | 队列指令     |
-| GetDOGroup    | 获取多个数字输出端口状态             | 立即指令     |
-| GetDOGroupDEC | 获取多个数字输出端口当前状态, 返回值为十进制数 | 立即指令     |
-| ToolDO        | 设置末端数字输出端口状态             | 队列指令     |
-| ToolDOInstant | 设置末端数字输出端口状态             | 立即指令     |
-| GetToolDO     | 获取末端数字输出端口状态             | 立即指令     |
-| AO            | 设置模拟输出端口的值               | 队列指令     |
-| AOInstant     | 设置模拟输出端口的值               | 立即指令     |
-| GetAO         | 获取模拟输出端口的值               | 立即指令     |
-| DI            | 获取DI端口的状态                | 立即指令     |
-| DIGroup       | 获取多个DI端口的状态              | 立即指令     |
-| DIGroupDEC    | 获取多个DI端口的状态, 返回值为十进制数    | 队列指令     |
-| ToolDI        | 获取末端DI端口的状态              | 立即指令     |
-| AI            | 获取AI端口的值                 | 立即指令     |
-| ToolAI        | 获取末端AI端口的值               | 立即指令     |
-| SetTool485    | 设置末端485通信格式              | 立即指令     |
-| SetToolPower  | 设置末端工具供电状态               | 立即指令     |
-| SetToolMode   | 设置末端复用端子的模式              | 立即指令     |
+| **Command**      | **Function**                                       | **Command Type** |
+| ---------------- | -------------------------------------------------- | ---------------- |
+| DO               | Set digital output port status                     | Queued           |
+| DOInstant        | Set digital output port status                     | Immediate        |
+| GetDO            | Get digital output port status                     | Immediate        |
+| DOGroup          | Set multiple digital output port statuses          | Queued           |
+| DOGroupDEC       | Set multiple digital output port statuses via decimal value | Queued           |
+| GetDOGroup       | Get multiple digital output port statuses          | Immediate        |
+| GetDOGroupDEC    | Get multiple digital output port statuses, returns decimal value | Immediate        |
+| ToolDO           | Set end-effector digital output port status        | Queued           |
+| ToolDOInstant    | Set end-effector digital output port status        | Immediate        |
+| GetToolDO        | Get end-effector digital output port status        | Immediate        |
+| AO               | Set analog output port value                       | Queued           |
+| AOInstant        | Set analog output port value                       | Immediate        |
+| GetAO            | Get analog output port value                       | Immediate        |
+| DI               | Get digital input port status                      | Immediate        |
+| DIGroup          | Get multiple digital input port statuses           | Immediate        |
+| DIGroupDEC       | Get multiple digital input port statuses, returns decimal value | Queued           |
+| ToolDI           | Get end-effector digital input port status         | Immediate        |
+| AI               | Get analog input port value                        | Immediate        |
+| ToolAI           | Get end-effector analog input port value           | Immediate        |
+| SetTool485       | Set end-effector 485 communication format          | Immediate        |
+| SetToolPower     | Set end-effector tool power status                 | Immediate        |
+| SetToolMode      | Set end-effector multiplexing terminal mode        | Immediate        |
 
 # DO
 
-# 原型
+# Prototype
 
 DO(index,status,time)
 
-# 描述
+# Description
 
-设置数字输出端口状态。
+Set digital output port status.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                  |
-| ------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| index   | int    | DO端子的编号。取值范围: \[1,MAX]或\[100,1000]。MAX代表当前控制柜的DO范围, 不同控制柜的DO资源数量不一样。当取值范围为\[100,1000]时, 需要有拓展IO模块的硬件支持。 |
-| status  | int    | DO端子的状态, 1: 打开; 0: 关闭。                                                                                  |
+| **Parameter** | **Type** | **Description**                                                                                                                                                                         |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| index         | int      | DO terminal number. Range: [1,MAX] or [100,1000]. MAX represents the current control cabinet's DO range, which varies across different cabinets. When the range is [100,1000], expansion IO module hardware support is required. |
+| status        | int      | DO terminal status. 1: ON; 0: OFF.                                                                                                                                                      |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                                              |
-| ------- | ------ | --------------------------------------------------------------------------------------------------- |
-| time    | int    | 持续输出时间。取值范围: \[25, 60000], 单位: ms如果设置了该参数, 系统会在指定时间后对DO自动取反。取反为异步动作, 不会阻塞指令队列, 系统执行了DO输出后就会执行下一条指令。 |
+| **Parameter** | **Type** | **Description**                                                                                                                                         |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| time          | int      | Continuous output time. Range: [25, 60000], Unit: ms. If this parameter is set, the system will automatically invert the DO after the specified time. Inversion is an asynchronous action that does not block the command queue. The system will execute the next command after the DO output. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},DO(index,status,time);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例
+# Example
 
 ```
 DO(1,1,2000)
 ```
 
-设置DO\_1为打开状态，2秒后自动取反（关闭）。
+Set DO\_1 to ON state, auto-invert (OFF) after 2 seconds.
 
 # DOInstant
 
-# 原型
+# Prototype
 
 ```
 DOInstant(index,status)
 ```
 
-# 描述
+# Description
 
-设置数字输出端口状态。
+Set digital output port status.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                  |
-| ------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| index   | int    | DO端子的编号。取值范围: \[1,MAX]或\[100,1000]。MAX代表当前控制柜的DO范围, 不同控制柜的DO资源数量不一样。当取值范围为\[100,1000]时, 需要有拓展IO模块的硬件支持。 |
-| status  | int    | DO端子的状态, 1: 打开; 0: 关闭。                                                                                  |
+| **Parameter** | **Type** | **Description**                                                                                                                                                                         |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| index         | int      | DO terminal number. Range: [1,MAX] or [100,1000]. MAX represents the current control cabinet's DO range, which varies across different cabinets. When the range is [100,1000], expansion IO module hardware support is required. |
+| status        | int      | DO terminal status. 1: ON; 0: OFF.                                                                                                                                                      |
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, DOInstant(index, status);
 ```
 
-# 示例
+# Example
 
 ```
 DOInstant(1,1)
 ```
 
-无视指令队列，立即设置DO\_1为打开状态。
+Ignore command queue, immediately set DO\_1 to ON state.
 
 # GetDO
 
-# 原型
+# Prototype
 
 ```
 GetDO(index)
 ```
 
-# 描述
+# Description
 
-获取数字输出端口状态。
+Get digital output port status.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                  |
-| ------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| index   | int    | DO端子的编号。取值范围: \[1,MAX]或\[100,1000]。MAX代表当前控制柜的DO范围, 不同控制柜的DO资源数量不一样。当取值范围为\[100,1000]时, 需要有拓展IO模块的硬件支持。 |
+| **Parameter** | **Type** | **Description**                                                                                                                                                                         |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| index         | int      | DO terminal number. Range: [1,MAX] or [100,1000]. MAX represents the current control cabinet's DO range, which varies across different cabinets. When the range is [100,1000], expansion IO module hardware support is required. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{value},GetDO(index);
 ```
 
-value表示DO端子的状态，0为关闭，1为打开。
+value represents the DO terminal status, 0 = OFF, 1 = ON.
 
-# 示例
+# Example
 
 GetDO(1)
 
-获取DO\_1的开关状态。
+Get the ON/OFF status of DO\_1.
 
 # DOGroup
 
-# 原型
+# Prototype
 
 DOGroup(index1,value1,index2,value2, ..., indexN,valueN)
 
-# 描述
+# Description
 
-设置多个数字输出端口状态，最大支持64个。
+Set multiple digital output port statuses, maximum support for 64 ports.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                     |
-| ------- | ------ | ---------------------------------------------------------------------------------------------------------- |
-| index1  | int    | 第一个DO端子的编号。取值范围: \[1,MAX]或\[100,1000]。MAX代表当前控制柜的DO范围, 不同控制柜的DO资源数量不一样。当取值范围为\[100,1000]时, 需要有拓展IO模块的硬件支持。 |
-| value1  | int    | 第一个DO端子的状态, 1: 打开; 0: 关闭。                                                                                  |
-| ...     | ...    | ...                                                                                                        |
-| indexN  | int    | 第N个DO端子的编号。取值范围: \[1,MAX]或\[100,1000]。MAX代表当前控制柜的DO范围, 不同控制柜的DO资源数量不一样。当取值范围为\[100,1000]时, 需要有拓展IO模块的硬件支持。 |
-| valueN  | int    | 第N个DO端子的状态, 1: 打开; 0: 关闭。                                                                                  |
+| **Parameter** | **Type** | **Description**                                                                                                                                                                            |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| index1        | int      | First DO terminal number. Range: [1,MAX] or [100,1000]. MAX represents the current control cabinet's DO range, which varies across different cabinets. When the range is [100,1000], expansion IO module hardware support is required. |
+| value1        | int      | First DO terminal status. 1: ON; 0: OFF.                                                                                                                                                   |
+| ...           | ...      | ...                                                                                                                                                                                        |
+| indexN        | int      | Nth DO terminal number. Range: [1,MAX] or [100,1000]. MAX represents the current control cabinet's DO range, which varies across different cabinets. When the range is [100,1000], expansion IO module hardware support is required.   |
+| valueN        | int      | Nth DO terminal status. 1: ON; 0: OFF.                                                                                                                                                     |
 
-# 返回
+# Return
 
 ErrorID,\{ResultID},DOGroup(index1,value1,index2,value2, ..., indexN,valueN);
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例
+# Example
 
 DOGroup(4,1,6,0,2,1,7,0)
 
-设置DO\_4为打开，DO\_6为关闭，DO\_2为打开，DO\_7为关闭。
+Set DO\_4 to ON, DO\_6 to OFF, DO\_2 to ON, DO\_7 to OFF.
 
 # DOGroupDEC
 
-原型：
+Prototype:
 
 DOGroupDEC(\{index1,index2,\ldots,indeN},value)
 
-# 描述:
+# Description:
 
-将给定的十进制值转换为二进制值，然后按bit对应（低位优先）设置DO端口状态。
+Convert the given decimal value to binary, then set DO port statuses according to bit correspondence (low-bit first).
 
-# 必选参数:
+# Required Parameters:
 
-| **参数名** | **类型** | **说明**                    |
-| ------- | ------ | ------------------------- |
-| indexN  | int    | 第N个DO端子的编号。取值范围: \[1,24]。 |
-| value   | int    | 十进制值。                     |
+| **Parameter** | **Type** | **Description**                     |
+| ------------- | -------- | ----------------------------------- |
+| indexN        | int      | Nth DO terminal number. Range: [1,24]. |
+| value         | int      | Decimal value.                       |
 
-# 返回
+# Return
 
 ErrorID,\{ResultID},DOGroupDEC(\{index1,index2,\ldots,indeN},value);
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例1：
+# Example 1:
 
 DOGroupDEC(\{1,2,3,4,5},18)
 
-1.先将十进制数18转化为二进制10010 2.按bit低位优先进行赋值,如下所示:
+1. First convert decimal 18 to binary 10010. 2. Assign by bit low-bit first, as follows:
 
 index: 1 2 3 4 5
 
 value: 0 1 0 0 1
 
-3.如上指令执行完成后将D02和D05切换
+3. After executing the above command, D02 and D05 are toggled
 
-# 示例2:
+# Example 2:
 
 DOGroupDEC(\{5,4,3,2,1},18)
 
-1.先将十进制数18转化为二进制10010 2.按低位优先进行赋值,如下所示:
+1. First convert decimal 18 to binary 10010. 2. Assign low-bit first, as follows:
 
 index: 5 4 3 2 1
 
 value: 0 1 0 0 1
 
-3.如上指令执行完成后将D04和D01切换
+3. After executing the above command, D04 and D01 are toggled
 
 # GetDOGroup
 
-# 原型
+# Prototype
 
 ```
 GetDOGroup(index1,index2,...,indexN)
 ```
 
-# 描述
+# Description
 
-获取多个数字输出端口状态。
+Get multiple digital output port statuses.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                  |
-| ------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| index   | int    | DO端子的编号。取值范围: \[1,MAX]或\[100,1000]。MAX代表当前控制柜的DO范围, 不同控制柜的DO资源数量不一样。当取值范围为\[100,1000]时, 需要有拓展IO模块的硬件支持。 |
+| **Parameter** | **Type** | **Description**                                                                                                                                                                         |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| index         | int      | DO terminal number. Range: [1,MAX] or [100,1000]. MAX represents the current control cabinet's DO range, which varies across different cabinets. When the range is [100,1000], expansion IO module hardware support is required. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{value1,value2,...,valueN},GetDOGroup(index1,index2,...,indexN);
 ```
 
-\{value1,value2,...,valueN}分别表示DO\_1到DO\_N的状态, 0为关闭, 1为打开。
+{value1,value2,...,valueN} represent the statuses of DO\_1 to DO\_N respectively, 0 = OFF, 1 = ON.
 
-# 示例
+# Example
 
 ```
 GetDOGroup(1,2)
 ```
 
-获取DO\_1和DO\_2的状态。
+Get the statuses of DO\_1 and DO\_2.
 
 # GetDOGroupDEC
 
-# 原型：
+# Prototype:
 
 ```
 GetDOGroupDEC({index1,...,indexN})
 ```
 
-# 描述:
+# Description:
 
-获取多个数字输出端口状态，将DO电平按0/1组成一个二进制数，再转化为十进制数输出。
+Get multiple digital output port statuses. Compose DO levels into a binary number as 0/1, then convert to decimal output.
 
-# 必选参数：
+# Required Parameters:
 
-| **参数名** | **类型** | **说明**                    |
-| ------- | ------ | ------------------------- |
-| indexN  | int    | 第N个DO端子的编号。取值范围: \[1,24]。 |
+| **Parameter** | **Type** | **Description**                     |
+| ------------- | -------- | ----------------------------------- |
+| indexN        | int      | Nth DO terminal number. Range: [1,24]. |
 
-# 返回：
+# Return:
 
 ```
 ErrorID,{value},GetDOGroupDEC({index1,...,indexN});
 ```
 
-value: 十进制数，对应DO端子状态。
+value: Decimal number corresponding to DO terminal statuses.
 
-# 示例：
+# Example:
 
 ```
 GetDOGroupDEC({1,2,3})
 ```
 
-读取DO1、DO2和DO3的电平值，若DO1为高电平、DO2为低电平、DO3为低电平，则组成二进制数001，转化为十进制数为1。
+Read the levels of DO1, DO2, and DO3. If DO1 is high, DO2 is low, DO3 is low, then the binary number is 001, which converts to decimal 1.
 
-若DO1为低电平、DO2为低电平、DO3为高电平，则组成二进制数100，转化为十进制数为4。
+If DO1 is low, DO2 is low, DO3 is high, then the binary number is 100, which converts to decimal 4.
 
 # ToolDO
 
-# 原型
+# Prototype
 
 ```
 ToolDO(index,status)
 ```
 
-# 描述
+# Description
 
-设置末端数字输出端口状态。
+Set end-effector digital output port status.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                    |
-| ------- | ------ | --------------------------------------------------------- |
-| index   | int    | 末端DO端子的编号, 取值范围: \[1,MAX]。MAX代表当前末端的DO范围, 不同末端的DO资源数量不一样。 |
-| status  | int    | 末端DO端子的状态, 1: 打开; 0: 关闭。                                  |
+| **Parameter** | **Type** | **Description**                                                                                          |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| index         | int      | End-effector DO terminal number. Range: [1,MAX]. MAX represents the current end-effector's DO range, which varies across different end-effectors. |
+| status        | int      | End-effector DO terminal status. 1: ON; 0: OFF.                                                          |
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},ToolDO(index,status);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例
+# Example
 
 ```
 ToolDO(1,1)
 ```
 
-设置末端DO\_1为打开状态。
+Set end-effector DO\_1 to ON state.
 
 # ToolDOInstant
 
-# 原型
+# Prototype
 
 ```
 ToolDOInstant(index,status)
 ```
 
-# 描述
+# Description
 
-设置末端数字输出端口状态。
+Set end-effector digital output port status.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                    |
-| ------- | ------ | --------------------------------------------------------- |
-| index   | int    | 末端DO端子的编号, 取值范围: \[1,MAX]。MAX代表当前末端的DO范围, 不同末端的DO资源数量不一样。 |
-| status  | int    | 末端DO端子的状态, 1: 打开; 0: 关闭。                                  |
+| **Parameter** | **Type** | **Description**                                                                                          |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| index         | int      | End-effector DO terminal number. Range: [1,MAX]. MAX represents the current end-effector's DO range, which varies across different end-effectors. |
+| status        | int      | End-effector DO terminal status. 1: ON; 0: OFF.                                                          |
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, ToolDOInstant(index, status);
 ```
 
-# 示例
+# Example
 
 ```
 ToolDOInstant(1,1)
 ```
 
-无视指令队列，立即设置末端DO\_1为打开状态。
+Ignore command queue, immediately set end-effector DO\_1 to ON state.
 
 # GetToolDO
 
-# 原型
+# Prototype
 
 ```
 GetToolDO(index)
 ```
 
-# 描述
+# Description
 
-获取末端数字输出端口状态。
+Get end-effector digital output port status.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                    |
-| ------- | ------ | --------------------------------------------------------- |
-| index   | int    | 末端DO端子的编号, 取值范围: \[1,MAX]。MAX代表当前末端的DO范围, 不同末端的DO资源数量不一样。 |
+| **Parameter** | **Type** | **Description**                                                                                          |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| index         | int      | End-effector DO terminal number. Range: [1,MAX]. MAX represents the current end-effector's DO range, which varies across different end-effectors. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{value},GetToolDO(index);
 ```
 
-value表示末端DO端子的状态，0为关闭，1为打开。
+value represents the end-effector DO terminal status, 0 = OFF, 1 = ON.
 
-# 示例
+# Example
 
 ```
 GetToolDO(1)
 ```
 
-获取末端DO\_1的状态。
+Get the status of end-effector DO\_1.
 
 # AO
 
-# 原型
+# Prototype
 
 ```
 AO(index, value)
 ```
 
-# 描述
+# Description
 
-设置模拟输出端口的值。
+Set analog output port value.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                     |
-| ------- | ------ | ---------------------------------------------------------- |
-| index   | int    | AO端子的编号, 取值范围: 1/2。                                        |
-| value   | double | AO端子的输出值, 电压取值范围: \[0,10], 单位: V; 电流取值范围: \[4,20], 单位: mA。 |
+| **Parameter** | **Type** | **Description**                                                                                                                |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| index         | int      | AO terminal number. Range: 1/2.                                                                                               |
+| value         | double   | AO terminal output value. Voltage range: [0,10], Unit: V; Current range: [4,20], Unit: mA.                                     |
 
-# 返回
+# Return
 
 ```
 ErrorID, {ResultID}, AO(index, value);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine command execution order.
 
-# 示例
+# Example
 
 ```
-A0(1,2)
+AO(1,2)
 ```
 
-设置AO\_1的值为2。
+Set AO\_1 value to 2.
 
 # AOInstant
 
-# 原型
+# Prototype
 
 AOInstant(index,value)
 
-# 描述
+# Description
 
-设置模拟输出端口的值。
+Set analog output port value.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                     |
-| ------- | ------ | ---------------------------------------------------------- |
-| index   | int    | AO端子的编号, 取值范围: 1/2。                                        |
-| value   | double | AO端子的输出值, 电压取值范围: \[0,10], 单位: V; 电流取值范围: \[4,20], 单位: mA。 |
+| **Parameter** | **Type** | **Description**                                                                                                                |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| index         | int      | AO terminal number. Range: 1/2.                                                                                               |
+| value         | double   | AO terminal output value. Voltage range: [0,10], Unit: V; Current range: [4,20], Unit: mA.                                     |
 
-# 返回
+# Return
 
 ErrorID, \{},AOInstant(index,value);
 
-# 示例
+# Example
 
 AOInstant(1,2)
 
-无视指令队列，立即设置AO\_1的值为2。
+Ignore command queue, immediately set AO\_1 value to 2.
 
 # GetAO
 
-# 原型
+# Prototype
 
 GetAO(index)
 
-# 描述
+# Description
 
-获取模拟量输出端口的值。
+Get analog output port value.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**              |
-| ------- | ------ | ------------------- |
-| index   | int    | AO端子的编号, 取值范围: 1/2。 |
+| **Parameter** | **Type** | **Description**               |
+| ------------- | -------- | ----------------------------- |
+| index         | int      | AO terminal number. Range: 1/2. |
 
-# 返回
+# Return
 
 ErrorID, \{value}, GetAO(index);
 
-value表示AO端子的值。
+value represents the AO terminal value.
 
-# 示例
+# Example
 
 GetAO(1)
 
-获取AO\_1的值。
+Get the value of AO\_1.
 
 # DI
 
-# 原型
+# Prototype
 
 DI(index)
 
-# 描述
+# Description
 
-获取数字量输入端口的状态。
+Get digital input port status.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                  |
-| ------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| index   | int    | DI端子的编号。取值范围: \[1,MAX]或\[100,1000]。MAX代表当前控制柜的DI范围, 不同控制柜的DI资源数量不一样。当取值范围为\[100,1000]时, 需要有拓展IO模块的硬件支持。 |
+| **Parameter** | **Type** | **Description**                                                                                                                                                                         |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| index         | int      | DI terminal number. Range: [1,MAX] or [100,1000]. MAX represents the current control cabinet's DI range, which varies across different cabinets. When the range is [100,1000], expansion IO module hardware support is required. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{value},DI(index);
 ```
 
-value表示DI端子的状态，0为关闭，1为打开。
+value represents the DI terminal status, 0 = OFF, 1 = ON.
 
-# 示例
+# Example
 
 DI(1)
 
-获取DI\_1的状态。
+Get the status of DI\_1.
 
 # DIGroup
 
-# 原型
+# Prototype
 
 ```
 DIGroup(index1,index2,...,indexN)
 ```
 
-# 描述
+# Description
 
-获取多个DI端口的状态，最大支持64个。
+Get multiple digital input port statuses, maximum support for 64 ports.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                  |
-| ------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| index   | int    | DI端子的编号。取值范围: \[1,MAX]或\[100,1000]。MAX代表当前控制柜的DI范围, 不同控制柜的DI资源数量不一样。当取值范围为\[100,1000]时, 需要有拓展IO模块的硬件支持。 |
+| **Parameter** | **Type** | **Description**                                                                                                                                                                         |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| index         | int      | DI terminal number. Range: [1,MAX] or [100,1000]. MAX represents the current control cabinet's DI range, which varies across different cabinets. When the range is [100,1000], expansion IO module hardware support is required. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{value1,value2,...,valueN},DIGroup(index1,index2,...,indexN);
 ```
 
-\{value1,value2,...,valueN}表示返回当前index1到indexN端子的状态，0为关闭，1为打开。
+{value1,value2,...,valueN} represent the statuses of index1 to indexN terminals, 0 = OFF, 1 = ON.
 
-# 示例
+# Example
 
 ```
 DIGroup(4,6,2,7)
 ```
 
-获取DI\_4, DI\_6, DI\_2, DI\_7端子的状态。
+Get the statuses of DI\_4, DI\_6, DI\_2, DI\_7 terminals.
 
 ```
--- 当DI1和DI2都为ON时机械臂以直线运动方式运动至P1点。
+-- When both DI1 and DI2 are ON, move the robot to point P1 in linear motion mode.
 local digroup = DIGroup(1,2)
 if (digroup[1]&digroup[2]==ON)
 then
@@ -2135,712 +2117,707 @@ end
 
 # DIGroupDEC
 
-# 原型：
+# Prototype:
 
 ```
 DIGroupDEC({index1,index2,...,indexN})
 ```
 
-# 描述:
+# Description:
 
-读取多个数字输入端口状态，将DI电平按0/1组成一个二进制数，再转化为十进制数输出。
+Read multiple digital input port statuses. Compose DI levels into a binary number as 0/1, then convert to decimal output.
 
-# 必选参数：
+# Required Parameters:
 
-| **参数名** | **类型** | **说明**                    |
-| ------- | ------ | ------------------------- |
-| indexN  | int    | 第N个DI端子的编号。取值范围: \[1,24]。 |
+| **Parameter** | **Type** | **Description**                     |
+| ------------- | -------- | ----------------------------------- |
+| indexN        | int      | Nth DI terminal number. Range: [1,24]. |
 
-# 返回：
+# Return:
 
 ```
 ErrorID, {value}, DIGroupDEC({index1,index2, ..., indexN});
 ```
 
-value：十进制数，对应DI端子状态。
+value: Decimal number corresponding to DI terminal statuses.
 
-# i说明:
+# Note:
 
-● 返回值按照低位优先的方式进行计算，假设按照1，3，5的顺序定义了一个组DI，则转化成二进制数是按照DI5，DI3，DI1的电平状态顺序保存。
+● The return value is calculated using low-bit priority. For example, if a DI group is defined in the order 1, 3, 5, the converted binary number is saved in the order of DI5, DI3, DI1 signal statuses.
 
-● 输入的DI端子编号区分先后顺序，DIGGroupDEC(\{1,2,3})和DIGGroupDEC(\{1,3,2})的结果是不同的。假设DI1为高电平，DI2为高电平，DI3为低电平，那么DIGGroupDEC(\{1,2,3})组成二进制数为011，转化为十进制数为3。而DIGGroupDEC(\{1,3,2})组成二进制数为101，转化为十进制数为5。
+● The order of input DI terminal numbers matters. DIGGroupDEC(\{1,2,3}) and DIGGroupDEC(\{1,3,2}) produce different results. If DI1 is high, DI2 is high, DI3 is low, then DIGGroupDEC(\{1,2,3}) produces binary 011, which converts to decimal 3. While DIGGroupDEC(\{1,3,2}) produces binary 101, which converts to decimal 5.
 
-假设DI1\~DI6的信号状态如下表所示：
+Assuming DI1~DI6 signal statuses are as follows:
 
-| **index (DI编号)** | **1** | **2** | **3** | **4** | **5** | **6** |
-| ---------------- | ----- | ----- | ----- | ----- | ----- | ----- |
-| DI信号状态           | ON    | OFF   | ON    | OFF   | ON    | OFF   |
-| 对应二进制            | 1     | 0     | 1     | 0     | 1     | 0     |
+| **index (DI number)** | **1** | **2** | **3** | **4** | **5** | **6** |
+| --------------------- | ----- | ----- | ----- | ----- | ----- | ----- |
+| DI signal status       | ON    | OFF   | ON    | OFF   | ON    | OFF   |
+| Corresponding binary   | 1     | 0     | 1     | 0     | 1     | 0     |
 
-# 示例1：
+# Example 1:
 
-DIGGroupDEC(\{1,3,6}) \$\$
+DIGGroupDEC(\{1,3,6})
 
-1. 先读取\{1,3,6}的DI信号状态为ON、ON、OFF
-2. 返回十进制时，按照低位优先的顺序保存二进制数；也就是按照DI6、DI3、DI1的信号状态保存二进制数。即实际保存的二进制是011 (DI6=0,DI3=1,DI1=1)
+1. First read the DI signal statuses of \{1,3,6} as ON, ON, OFF
+2. When returning decimal, save binary in low-bit priority order; that is, save in DI6, DI3, DI1 signal status order. The actual saved binary is 011 (DI6=0, DI3=1, DI1=1)
 
-3.将二进制011转化为十进制，那么如上指令执行完成后返回值为3
+3. Convert binary 011 to decimal, so the return value after executing the above command is 3
 
-# 示例2:
+# Example 2:
 
-DIGGroupDEC(\{1,6,3}) \$\$
+DIGGroupDEC(\{1,6,3})
 
-1. 先读取\{1,6,3}的信号状态为ON、OFF、ON
-2. 返回十进制时，按照低位优先的顺序保存二进制数；也就是按照DI3、DI6、DI1的信号状态保存二进制数。即实际保存的二进制是101（DI3=1,DI6=0,DI1=1）
+1. First read the signal statuses of \{1,6,3} as ON, OFF, ON
+2. When returning decimal, save binary in low-bit priority order; that is, save in DI3, DI6, DI1 signal status order. The actual saved binary is 101 (DI3=1, DI6=0, DI1=1)
 
-3.将二进制101转化为十进制，那么如上指令执行完成后返回值为5
+3. Convert binary 101 to decimal, so the return value after executing the above command is 5
 
 # ToolDI
 
-# 原型
+# Prototype
 
 ToolDI(index)
 
-# 描述
+# Description
 
-获取末端数字量输入端口的状态。
+Get end-effector digital input port status.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                   |
-| ------- | ------ | -------------------------------------------------------- |
-| index   | int    | 末端DI端子的编号,取值范围:\[1,MAX]。MAX代表当前控制柜的DI范围,不同控制柜的DI资源数量不一样。 |
+| **Parameter** | **Type** | **Description**                                                                                       |
+| ------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| index         | int      | End-effector DI terminal number. Range: [1,MAX]. MAX represents the current control cabinet's DI range, which varies across different cabinets. |
 
-# 返回
+# Return
 
 ErrorID,\{value},ToolDI(index);
 
-value表示末端DI端子的状态，0为关闭，1为打开。
+value represents the end-effector DI terminal status, 0 = OFF, 1 = ON.
 
-# 示例
+# Example
 
 ToolDI(1)
 
-获取末端DI\_1的状态。
+Get the status of end-effector DI\_1.
 
 # AI
 
-# 原型
+# Prototype
 
 AI(index)
 
-# 描述
+# Description
 
-获取模拟量输入端口的值。
+Get analog input port value.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**              |
-| ------- | ------ | ------------------- |
-| index   | int    | AI端子的编号, 取值范围: 1/2。 |
+| **Parameter** | **Type** | **Description**               |
+| ------------- | -------- | ----------------------------- |
+| index         | int      | AI terminal number. Range: 1/2. |
 
-# 返回
+# Return
 
 ErrorID, \{value}, AI(index);
 
-value表示AI端子的输入值。
+value represents the AI terminal input value.
 
-# 示例
+# Example
 
 AI(1)
 
-获取AI\_1的输入值。
+Get the input value of AI\_1.
 
 # ToolAI
 
-# 原型
+# Prototype
 
 ToolAI(index)
 
-# 描述
+# Description
 
-获取末端模拟量输入端口的值。使用前需要通过SetToolMode将端子设置为模拟输入模式。
+Get end-effector analog input port value. Before use, the terminal must be set to analog input mode via SetToolMode.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                    |
-| ------- | ------ | --------------------------------------------------------- |
-| index   | int    | 末端AI端子的编号,取值范围: \[1,MAX]。MAX代表当前控制柜的AI范围,不同控制柜的AI资源数量不一样。 |
+| **Parameter** | **Type** | **Description**                                                                                       |
+| ------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| index         | int      | End-effector AI terminal number. Range: [1,MAX]. MAX represents the current control cabinet's AI range, which varies across different cabinets. |
 
-# 返回
+# Return
 
 ErrorID, \{value}, ToolAI(index);
 
-value表示末端AI端子的输入值。
+value represents the end-effector AI terminal input value.
 
-# 示例
+# Example
 
 ToolAI(1)
 
-获取末端AI\_1的输入值。
+Get the input value of end-effector AI\_1.
 
 # SetTool485
 
-# 原型：
+# Prototype:
 
 SetTool485(baud, parity, stopbit, identify)
 
-# 描述:
+# Description:
 
-设置末端工具的RS485接口对应的数据格式。
+Set the data format for the end-effector tool's RS485 interface.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**       |
-| ------- | ------ | ------------ |
-| baud    | int    | RS485接口的波特率。 |
+| **Parameter** | **Type** | **Description**        |
+| ------------- | -------- | ---------------------- |
+| baud          | int      | RS485 interface baud rate. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名**  | **类型** | **说明**                                            |
-| -------- | ------ | ------------------------------------------------- |
-| parity   | string | 是否有奇偶校验位。“O”表示奇校验, “E”表示偶校验, “N”表示无奇偶校验位。默认值为“N”。 |
-| stopbit  | int    | 停止位长度。取值范围: 1, 2。默认值为1。                           |
-| identify | int    | 当机器人为多航插机型时, 用于指定设置的航插。1: 航插1; 2: 航插2             |
+| **Parameter** | **Type** | **Description**                                                                                          |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| parity        | string   | Parity bit setting. "O" = odd parity, "E" = even parity, "N" = no parity. Default is "N".               |
+| stopbit       | int      | Stop bit length. Range: 1, 2. Default is 1.                                                             |
+| identify      | int      | For robots with multiple aviation connectors, specifies which connector to set. 1: Connector 1; 2: Connector 2. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, SetTool485(baud, parity, stopbit, identify);
 ```
 
-# 示例：
+# Example:
 
 ```
 SetTool485(115200,"N",1)
 ```
 
-将末端工具的RS485接口对应的波特率设置为115200Hz，无奇偶校验位，停止位长度为1。
+Set the RS485 interface baud rate of the end-effector tool to 115200Hz, no parity bit, stop bit length 1.
 
 # SetToolPower
 
-# 原型：
+# Prototype:
 
 ```
 SetToolPower(status)
 ```
 
-# 描述:
+# Description:
 
-设置末端工具供电状态，一般用于重启末端电源，例如对末端夹爪重新上电初始化。如需连续调用该接口，建议至少间隔4ms以上。
+Set end-effector tool power status, generally used for restarting end-effector power, such as re-powering and initializing an end-effector gripper. If you need to call this interface continuously, it is recommended to interval at least 4ms.
 
-# i 说明：
+# Note:
 
-Magician E6 机器人不支持该指令，调用无效果。
+Magician E6 robot does not support this command; calling it has no effect.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                      |
-| ------- | ------ | --------------------------- |
-| status  | int    | 末端工具供电状态, 0: 关闭电源; 1: 打开电源。 |
+| **Parameter** | **Type** | **Description**                     |
+| ------------- | -------- | ----------------------------------- |
+| status        | int      | End-effector tool power status. 0: Power off; 1: Power on. |
 
-# 返回
+# Return
 
-ErrorID,\{},\SetToolPower(status);
+ErrorID,\{},SetToolPower(status);
 
-# 示例：
+# Example:
 
-SetToolPower(θ)
+SetToolPower(0)
 
-关闭末端电源。
+Turn off end-effector power.
 
 # SetToolMode
 
-# 原型：
+# Prototype:
 
 SetToolMode(mode, type, identify)
 
-# 描述:
+# Description:
 
-机器人末端AI接口与485接口复用端子时，可通过此接口设置末端复用端子的模式。默认模式为485模式。
+When the robot's end-effector AI interface and 485 interface share a terminal, this interface can be used to set the mode of the end-effector multiplexing terminal. Default mode is 485 mode.
 
-# i说明：
+# Note:
 
-不支持末端模式切换的机器人调用此接口无效果。
+Robots that do not support end-effector mode switching will have no effect when calling this interface.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                        |
-| ------- | ------ | ----------------------------- |
-| mode    | int    | 复用端子的模式, 1: 485模式, 2: 模拟输入模式。 |
+| **Parameter** | **Type** | **Description**                             |
+| ------------- | -------- | ------------------------------------------- |
+| mode          | int      | Multiplexing terminal mode. 1: 485 mode, 2: Analog input mode. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                              |
-| ------- | ------ | ----------------------------------------------------------------------------------- |
-| type    | int    | 当mode为1时,该参数无效。当mode为2时,可设置模拟输入的模式(见type参数含义的说明)。个位表示AI1的模式,十位表示AI2的模式。十位为0时可仅输入个位。 |
+| **Parameter** | **Type** | **Description**                                                                                                                                     |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type          | int      | When mode is 1, this parameter is invalid. When mode is 2, the analog input mode can be set (see type parameter description). The ones digit represents AI1 mode, the tens digit represents AI2 mode. When the tens digit is 0, only the ones digit needs to be entered. |
 
-时,可设置模拟输入的模式(见type参数含义的说明)。个位表示AI1的模式,十位表示AI2的模式。十位为0时可仅输入个位。|
+· type parameter description:
 
-| **identify** | **int** | **当机器人为多航插机型时,用于指定设置的航插。1: 航插1;2: 航插2。不填默认为航插1。** |
-| ------------ | ------- | ------------------------------------------------- |
+○ 0: 0~10V voltage input mode
 
-· type参数含义：
+○ 1: Current collection mode
 
-○ 0: 0\~10V电压输入模式
+2: 0~5V voltage input mode
 
-○ 1：电流采集模式
+· Examples:
 
-2: 0\~5V电压输入模式
+○ 0: Both AI1 and AI2 are in 0~10V voltage input mode
 
-· 例子：
+○ 1: AI2 is in 0~10V voltage input mode, AI1 is in current collection mode
 
-○ 0：AI1与AI2均为0\~10V电压输入模式
+○ 11: Both AI2 and AI1 are in current collection mode
 
-○ 1：AI2是0\~10V电压输入模式，AI1是电流采集模式
+○ 12: AI2 is in current collection mode, AI1 is in 0~5V voltage input mode
 
-○ 11：AI2和AI1都是电流采集模式
+○ 20: AI2 is in 0~5V voltage input mode, AI1 is in 0~10V voltage input mode
 
-○ 12：AI2是电流采集模式，AI1是0\~5V电压输入模式
-
-○ 20：AI2是0\~5V电压输入模式，AI1是0\~10V电压输入模式
-
-# 返回
+# Return
 
 ```
 ErrorID, {}, SetToolMode(mode, type, identify);
 ```
 
-# 示例：
+# Example:
 
 ```
 SetToolMode(2,0)
 ```
 
-设置末端复用端子为模拟输入，两路都是0\~10V电压输入模式。
+Set end-effector multiplexing terminal to analog input, both channels in 0~10V voltage input mode.
 
-## 2.5 Modbus相关指令
+## 2.5 Modbus-Related Commands
 
-# 指令列表
+# Command List
 
-| **指令**           | **功能**               | **指令类型** |
-| ---------------- | -------------------- | -------- |
-| ModbusCreate     | 创建Modbus主站           | 立即指令     |
-| ModbusRTUCreate  | 创建基于RS485接口的Modbus主站 | 立即指令     |
-| ModbusClose      | 和Modbus从站断开连接        | 立即指令     |
-| GetInBits        | 读取触点寄存器              | 立即指令     |
-| GetInRegs        | 读取输入寄存器              | 立即指令     |
-| GetCoils         | 读取线圈寄存器              | 立即指令     |
-| SetCoils         | 写入线圈寄存器连续地址          | 立即指令     |
-| SetSingleCoil    | 写入线圈寄存器单地址           | 立即指令     |
-| GetHoldRegs      | 读取保持寄存器              | 立即指令     |
-| SetHoldRegs      | 写入保存寄存器连续地址          | 立即指令     |
-| SetSingleHoldReg | 写入保存寄存器单地址           | 立即指令     |
+| **Command**       | **Function**                         | **Command Type** |
+| ----------------- | ------------------------------------ | ---------------- |
+| ModbusCreate      | Create Modbus master                 | Immediate        |
+| ModbusRTUCreate   | Create Modbus master via RS485       | Immediate        |
+| ModbusClose       | Disconnect from Modbus slave         | Immediate        |
+| GetInBits         | Read contact registers              | Immediate        |
+| GetInRegs         | Read input registers                | Immediate        |
+| GetCoils          | Read coil registers                 | Immediate        |
+| SetCoils          | Write coil registers (continuous)    | Immediate        |
+| SetSingleCoil     | Write coil register (single)        | Immediate        |
+| GetHoldRegs       | Read holding registers              | Immediate        |
+| SetHoldRegs       | Write holding registers (continuous)| Immediate        |
+| SetSingleHoldReg  | Write holding register (single)     | Immediate        |
 
-Modbus函数用于建立Modbus主站与从站进行通讯，寄存器地址的取值范围与定义请参考对应从站的Modbus寄存器地址定义说明。
+Modbus functions are used to establish communication between Modbus master and slave. The register address range and definition should refer to the corresponding slave's Modbus register address definition.
 
-各类寄存器对应的Modbus功能码遵循标准Modbus协议:
+Modbus function codes for various register types follow the standard Modbus protocol:
 
-| **寄存器类型** | **读取寄存器** | **写单个寄存器** | **写多个寄存器** |
-| --------- | --------- | ---------- | ---------- |
-| 线圈寄存器     | 01        | 05         | 0F         |
-| 触点寄存器     | 02        | -          | -          |
-| 输入寄存器     | 04        | -          | -          |
-| 保持寄存器     | 03        | 06         | 10         |
+| **Register Type** | **Read Register** | **Write Single Register** | **Write Multiple Registers** |
+| ----------------- | ----------------- | ------------------------- | ---------------------------- |
+| Coil Register     | 01                | 05                        | 0F                           |
+| Contact Register  | 02                | -                         | -                            |
+| Input Register    | 04                | -                         | -                            |
+| Holding Register  | 03                | 06                        | 10                           |
 
 # ModbusCreate
 
-# 原型
+# Prototype
 
 ModbusCreate(ip,port,slave\_id,isRTU)
 
-# 描述
+# Description
 
-创建Modbus主站，并和从站建立连接。最多支持同时连接5个设备。
+Create Modbus master and establish connection with slave. Maximum support for 5 simultaneous connections.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**   | **类型** | **说明**  |
-| --------- | ------ | ------- |
-| ip        | string | 从站IP地址。 |
-| port      | int    | 从站端口。   |
-| slave\_id | int    | 从站ID。   |
+| **Parameter** | **Type** | **Description**  |
+| ------------- | -------- | ---------------- |
+| ip            | string   | Slave IP address. |
+| port          | int      | Slave port.       |
+| slave\_id     | int      | Slave ID.         |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                       |
-| ------- | ------ | -------------------------------------------- |
-| isRTU   | int    | 如果不携带或为0, 建立modbusTCP通信。如果为1, 建立modbusRTU通信。 |
+| **Parameter** | **Type** | **Description**                                        |
+| ------------- | -------- | ------------------------------------------------------ |
+| isRTU         | int      | If omitted or 0, establish ModbusTCP communication. If 1, establish ModbusRTU communication. |
 
-# $\blacktriangle$ 注意：
+# $\blacktriangle$ Note:
 
-此参数决定了连接建立后传输数据使用的协议格式，并不影响连接结果。因此，如果创建主站时该参数设置错误，依然可以创建成功，但后续通讯时会导致异常。
+This parameter determines the protocol format used for data transmission after the connection is established, but does not affect the connection result. Therefore, if this parameter is set incorrectly when creating the master, the creation will still succeed, but subsequent communication will cause errors.
 
-# 返回
+# Return
 
 ```
 ErrorID,{index},ModbusCreate(ip,port,slave_id,isRTU);
 ```
 
-● ErrorID为0表示创建成功，-1表示创建失败，其余错误码请参考通用错误码
+● ErrorID of 0 indicates successful creation, -1 indicates creation failure (see general error codes)
 
-● index为返回的主站索引，后续调用其他Modbus指令时使用
+● index is the returned master index, used when calling other Modbus commands later
 
-# 示例
+# Example
 
 ```
 ModbusCreate("127.0.0.1",60000,1,0)
 ```
 
-建立modbusTCP通信主站，连接本机的Modbus从站，端口为60000，从站ID为1。
+Establish ModbusTCP communication master, connecting to the local Modbus slave, port 60000, slave ID 1.
 
 # ModbusRTUCreate
 
-# 原型：
+# Prototype:
 
 ```
 ModbusRTUCreate(slave_id,baud,parity,data_bit,stop_bit)
 ```
 
-# 描述:
+# Description:
 
-创建基于RS485接口的Modbus主站，并和从站建立连接。最多支持同时连接5个设备。
+Create Modbus master via RS485 interface and establish connection with slave. Maximum support for 5 simultaneous connections.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**   | **类型** | **说明**       |
-| --------- | ------ | ------------ |
-| slave\_id | int    | 从站ID。        |
-| baud      | int    | RS485接口的波特率。 |
+| **Parameter** | **Type** | **Description**        |
+| ------------- | -------- | ---------------------- |
+| slave\_id     | int      | Slave ID.              |
+| baud          | int      | RS485 interface baud rate. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名**   | **类型** | **说明**                                          |
-| --------- | ------ | ----------------------------------------------- |
-| parity    | string | 是否有奇偶校验位。“O”表示奇校验，“E”表示偶校验，“N”表示无奇偶校验位。默认值为“E”。 |
-| data\_bit | int    | 数据位长度。默认值为8。                                    |
-| stop\_bit | int    | 停止位长度。默认值为1。                                    |
+| **Parameter** | **Type** | **Description**                                                                                          |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| parity        | string   | Parity bit setting. "O" = odd parity, "E" = even parity, "N" = no parity. Default is "E".               |
+| data\_bit     | int      | Data bit length. Default is 8.                                                                          |
+| stop\_bit     | int      | Stop bit length. Default is 1.                                                                          |
 
-# 返回：
+# Return:
 
 ErrorID, \{index},ModbusRTUCreate(slave\_id,baud,parity,data\_bit,stop\_bit);
 
-● ErrorID为0表示创建成功，-1表示创建失败，其余错误码请参考通用错误码
+● ErrorID of 0 indicates successful creation, -1 indicates creation failure (see general error codes)
 
-● index为返回的主站索引，后续调用其他Modbus指令时使用
+● index is the returned master index, used when calling other Modbus commands later
 
-# 示例：
+# Example:
 
 ModbusRTUCreate(1,115200)
 
-创建Modbus主站并与RS485接口连接的从站建立连接，从站ID为1，波特率为115200。
+Create Modbus master and establish connection with slave via RS485 interface, slave ID 1, baud rate 115200.
 
 # ModbusClose
 
-# 原型
+# Prototype
 
 ModbusClose(index)
 
-# 描述
+# Description
 
-和Modbus从站断开连接，释放主站。
+Disconnect from Modbus slave and release the master.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**        |
-| ------- | ------ | ------------- |
-| index   | int    | 创建主站时返回的主站索引。 |
+| **Parameter** | **Type** | **Description**            |
+| ------------- | -------- | -------------------------- |
+| index         | int      | Master index returned when creating the master. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {},ModbusClose(index);
 ```
 
-# 示例
+# Example
 
 ```
 ModbusClose(0)
 ```
 
-释放索引为0的Modbus主站。
+Release the Modbus master with index 0.
 
 # GetInBits
 
-# 原型
+# Prototype
 
 ```
 GetInBits(index,addr,count)
 ```
 
-# 描述
+# Description
 
-读取Modbus从站触点寄存器（离散输入）地址的值。
+Read Modbus slave contact register (discrete input) address values.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                         |
-| ------- | ------ | ------------------------------ |
-| index   | int    | 创建主站时返回的主站索引。                  |
-| addr    | int    | 触点寄存器起始地址。                     |
-| count   | int    | 连续读取触点寄存器的值的数量。取值范围: \[1, 16]。 |
+| **Parameter** | **Type** | **Description**                          |
+| ------------- | -------- | ---------------------------------------- |
+| index         | int      | Master index returned when creating the master. |
+| addr          | int      | Contact register start address.          |
+| count         | int      | Number of consecutive contact register values to read. Range: [1, 16]. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{value1,value2,...,valuen},GetInBits(index,addr,count);
 ```
 
-\{value1,value2,...,valuen}为读取的值，数量与count相同。
+{value1,value2,...,valuen} are the read values, count matches the count parameter.
 
-# 示例
+# Example
 
 ```
 GetInBits(0,3000,5)
 ```
 
-从地址为3000的触点寄存器开始读取5个值。
+Read 5 values starting from contact register address 3000.
 
 # GetInRegs
 
-# 原型
+# Prototype
 
 GetInRegs(index,addr,count,valType)
 
-# 描述
+# Description
 
-按照指定的数据类型，读取Modbus从站输入寄存器地址的值。
+Read Modbus slave input register address values according to the specified data type.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                        |
-| ------- | ------ | ----------------------------- |
-| index   | int    | 创建主站时返回的主站索引。                 |
-| addr    | int    | 输入寄存器起始地址。                    |
-| count   | int    | 连续读取输入寄存器的值的数量。取值范围: \[1, 4]。 |
+| **Parameter** | **Type** | **Description**                          |
+| ------------- | -------- | ---------------------------------------- |
+| index         | int      | Master index returned when creating the master. |
+| addr          | int      | Input register start address.           |
+| count         | int      | Number of consecutive input register values to read. Range: [1, 4]. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                                                     |
-| ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| valType | string | 读取的数据格式:U16: 16位无符号整数 (2个字节, 占用1个寄存器);U32: 32位无符号整数 (4个字节, 占用2个寄存器);F32: 32位单精度浮点数 (4个字节, 占用2个寄存器);F64: 64位双精度浮点数 (8个字节, 占用4个寄存器);默认值为U16。 |
+| **Parameter** | **Type** | **Description**                                                                                                                                     |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| valType       | string   | Data format: U16: 16-bit unsigned integer (2 bytes, occupies 1 register); U32: 32-bit unsigned integer (4 bytes, occupies 2 registers); F32: 32-bit single-precision float (4 bytes, occupies 2 registers); F64: 64-bit double-precision float (8 bytes, occupies 4 registers); Default is U16. |
 
-# 返回
+# Return
 
 ErrorID, \{value1, value2, ..., valuen}, GetInRegs(index, addr, count, valType);
 
-\{value1,value2,...,valuen}为读取的值，数量与count相同。
+{value1,value2,...,valuen} are the read values, count matches the count parameter.
 
-# 示例
+# Example
 
 GetInRegs(0,4000,3)
 
-从地址为4000的输入寄存器开始读取3个值，值类型为U16。
+Read 3 values starting from input register address 4000, value type U16.
 
 # GetCoils
 
-# 原型
+# Prototype
 
 ```
 GetCoils(index,addr,count)
 ```
 
-# 描述
+# Description
 
-读取Modbus从站线圈寄存器地址的值。
+Read Modbus slave coil register address values.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                         |
-| ------- | ------ | ------------------------------ |
-| index   | int    | 创建主站时返回的主站索引。                  |
-| addr    | int    | 线圈寄存器起始地址。                     |
-| count   | int    | 连续读取线圈寄存器的值的数量。取值范围: \[1, 16]。 |
+| **Parameter** | **Type** | **Description**                          |
+| ------------- | -------- | ---------------------------------------- |
+| index         | int      | Master index returned when creating the master. |
+| addr          | int      | Coil register start address.            |
+| count         | int      | Number of consecutive coil register values to read. Range: [1, 16]. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{value1,value2,...,valuen},GetCoils(index,addr,count);
 ```
 
-\{value1,value2,...,valuen}为读取的值，数量与count相同。
+{value1,value2,...,valuen} are the read values, count matches the count parameter.
 
-# 示例
+# Example
 
 ```
 GetCoils(0,1000,3)
 ```
 
-从地址为1000的线圈寄存器开始读取3个值。
+Read 3 values starting from coil register address 1000.
 
 # SetCoils
 
-# 原型
+# Prototype
 
 ```
 SetCoils(index,addr,count,valTab)
 ```
 
-# 描述
+# Description
 
-将指定的值写入线圈寄存器指定的地址。
+Write the specified values to coil register at the specified address.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                         |
-| ------- | ------ | ------------------------------ |
-| index   | int    | 创建主站时返回的主站索引。                  |
-| addr    | int    | 线圈寄存器起始地址。                     |
-| count   | int    | 连续写入线圈寄存器的值的数量。取值范围: \[1, 16]。 |
-| valTab  | string | 要写入的值, 数量与count相同。             |
+| **Parameter** | **Type** | **Description**                          |
+| ------------- | -------- | ---------------------------------------- |
+| index         | int      | Master index returned when creating the master. |
+| addr          | int      | Coil register start address.            |
+| count         | int      | Number of consecutive coil register values to write. Range: [1, 16]. |
+| valTab        | string   | Values to write, count matches the count parameter. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, SetCoils(index, addr, count, valTab);
 ```
 
-# 示例
+# Example
 
 ```
 SetCoils(0,1000,3,{1,0,1})
 ```
 
-从地址为1000的线圈寄存器开始连续写入3个值，分别为1, 0, 1。
+Write 3 consecutive values starting from coil register address 1000: 1, 0, 1.
 
 # SetSingleCoil
 
-# 原型
+# Prototype
 
 ```
 SetSingleCoil(index,addr,val)
 ```
 
-# 描述
+# Description
 
-将指定的值写入线圈寄存器指定的地址。
+Write the specified value to coil register at the specified address.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**               |
-| ------- | ------ | -------------------- |
-| index   | int    | 创建主站时返回的主站索引。        |
-| addr    | int    | 线圈寄存器的起始地址, 视从站配置而定。 |
-| val     | int    | 要写入的值, 取值范围0或1。      |
+| **Parameter** | **Type** | **Description**                |
+| ------------- | -------- | ------------------------------ |
+| index         | int      | Master index returned when creating the master. |
+| addr          | int      | Coil register start address, depends on slave configuration. |
+| val           | int      | Value to write. Range: 0 or 1. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, SetSingleCoil(index, addr, val);
 ```
 
-# 示例
+# Example
 
 ```
-SetSingleCoil(0,1000,1})
+SetSingleCoil(0,1000,1)
 ```
 
-向地址为1000的线圈寄存器写入1。
+Write 1 to coil register at address 1000.
 
 # GetHoldRegs
 
-# 原型
+# Prototype
 
 ```
 GetHoldRegs(index,addr,count,valType)
 ```
 
-# 描述
+# Description
 
-按照指定的数据类型，读取Modbus从站保持寄存器地址的值。
+Read Modbus slave holding register address values according to the specified data type.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                               |
-| ------- | ------ | ------------------------------------ |
-| index   | int    | 创建主站时返回的主站索引, 最多支持5个设备。取值范围: \[0,4]。 |
-| addr    | int    | 保持寄存器起始地址。                           |
-| count   | int    | 连续读取保持寄存器的值的数量。                      |
+| **Parameter** | **Type** | **Description**                                      |
+| ------------- | -------- | ---------------------------------------------------- |
+| index         | int      | Master index returned when creating the master, max 5 devices. Range: [0,4]. |
+| addr          | int      | Holding register start address.                      |
+| count         | int      | Number of consecutive holding register values to read. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                                                     |
-| ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| valType | string | 读取的数据类型:U16: 16位无符号整数 (2个字节, 占用1个寄存器);U32: 32位无符号整数 (4个字节, 占用2个寄存器);F32: 32位单精度浮点数 (4个字节, 占用2个寄存器);F64: 64位双精度浮点数 (8个字节, 占用4个寄存器);默认值为U16。 |
+| **Parameter** | **Type** | **Description**                                                                                                                                     |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| valType       | string   | Data type: U16: 16-bit unsigned integer (2 bytes, occupies 1 register); U32: 32-bit unsigned integer (4 bytes, occupies 2 registers); F32: 32-bit single-precision float (4 bytes, occupies 2 registers); F64: 64-bit double-precision float (8 bytes, occupies 4 registers); Default is U16. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{value1,value2,...,valuen},GetHoldRegs(index,addr,count,valType);
 ```
 
-\{value1,value2,...,valuen}为读取的值，数量与count相同。
+{value1,value2,...,valuen} are the read values, count matches the count parameter.
 
-# 示例
+# Example
 
 ```
 GetHoldRegs(0,3095,1)
 ```
 
-从地址为3095的保持寄存器开始读取1个值，值类型为U16。
+Read 1 value starting from holding register address 3095, value type U16.
 
 # SetHoldRegs
 
-# 原型
+# Prototype
 
 ```
 SetHoldRegs(index,addr,count,valTab,valType)
 ```
 
-# 描述
+# Description
 
-将指定的值以指定的数据类型写入Modbus从站保持寄存器指定的地址。
+Write the specified values to Modbus slave holding register at the specified address with the specified data type.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                               |
-| ------- | ------ | ------------------------------------ |
-| index   | int    | 创建主站时返回的主站索引, 最多支持5个设备。取值范围: \[0,4]。 |
-| addr    | int    | 保持寄存器起始地址。                           |
-| count   | int    | 连续写入保持寄存器的值的数量。取值范围: \[1, 4]         |
-| valTab  | string | 要写入的值, 数量与count相同。                   |
+| **Parameter** | **Type** | **Description**                                      |
+| ------------- | -------- | ---------------------------------------------------- |
+| index         | int      | Master index returned when creating the master, max 5 devices. Range: [0,4]. |
+| addr          | int      | Holding register start address.                      |
+| count         | int      | Number of consecutive holding register values to write. Range: [1, 4]. |
+| valTab        | string   | Values to write, count matches the count parameter.  |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                                                     |
-| ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| valType | string | 写入的数据类型:U16: 16位无符号整数 (2个字节, 占用1个寄存器);U32: 32位无符号整数 (4个字节, 占用2个寄存器);F32: 32位单精度浮点数 (4个字节, 占用2个寄存器);F64: 64位双精度浮点数 (8个字节, 占用4个寄存器);默认值为U16。 |
+| **Parameter** | **Type** | **Description**                                                                                                                                     |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| valType       | string   | Data type: U16: 16-bit unsigned integer (2 bytes, occupies 1 register); U32: 32-bit unsigned integer (4 bytes, occupies 2 registers); F32: 32-bit single-precision float (4 bytes, occupies 2 registers); F64: 64-bit double-precision float (8 bytes, occupies 4 registers); Default is U16. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, SetHoldRegs(index, addr, count, valTab, valType);
 ```
 
-# 示例
+# Example
 
 ```
 SetHoldRegs(0,3095,2,{6000,300}, U16)
 ```
 
-从地址为3095的保持寄存器开始写入两个U16类型的值，分别为6000和300。
+Write two U16-type values starting from holding register address 3095: 6000 and 300.
 
 # SetSingleHoldReg
 
-# 原型
+# Prototype
 
 ```
 SetSingleHoldReg(index,addr,val)
 ```
 
-# 描述
+# Description
 
-将指定的值写入Modbus从站保持寄存器指定的地址。
+Write the specified value to Modbus slave holding register at the specified address.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                |
-| ------- | ------ | ------------------------------------- |
-| index   | int    | 创建主站时返回的主站索引, 最多支持5个设备。取值范围: \[0, 4]。 |
-| addr    | int    | 保持寄存器的起始地址, 视从站配置而定。                  |
-| val     | int    | 要写入的值, 数据会自动转换为U16, 超出数据自动裁剪。         |
+| **Parameter** | **Type** | **Description**                                      |
+| ------------- | -------- | ---------------------------------------------------- |
+| index         | int      | Master index returned when creating the master, max 5 devices. Range: [0, 4]. |
+| addr          | int      | Holding register start address, depends on slave configuration. |
+| val           | int      | Value to write. Data is automatically converted to U16; excess data is automatically truncated. |
 
-# 返回
+# Return
 
-ErrorID,\{\{},SetSingleHoldReg(index,addr,val);
+ErrorID,\{},SetSingleHoldReg(index,addr,val);
 
-# 示例
+# Example
 
 SetSingleHoldReg(0,3095,6000)
 
-向地址为3095的保持寄存器写入整数值6000。
+Write integer value 6000 to holding register at address 3095.

@@ -1,69 +1,67 @@
-# 手臂二开md文档段落一
+# Arm Secondary Development Documentation - Section 1
 
-# 前言
+# Preface
 
-# 目的
+# Purpose
 
-本手册介绍了DOBOT工业机器人控制柜V4版本TCP/IP二次开发接口及其使用方式，帮助用户了解和开发基于TCP/IP的机器人控制软件。
+This manual introduces the DOBOT industrial robot controller V4 TCP/IP secondary development interface and its usage, helping users understand and develop TCP/IP-based robot control software.
 
 ![](attachment/1.png)
 
-​
+# Target Audience
 
-# 读者对象
+This manual is suitable for:
 
-本手册适用于：
+Customers
 
-客户
+● Sales engineers
 
-● 销售工程师
+Installation and commissioning engineers
 
-安装调测工程师
+· Technical support engineers
 
-· 技术支持工程师
+# Revision History
 
-# 修订记录
+| **Time** | **Version** | **Revision History** |
+|----------|-------------|---------------------|
+| 2026/04/10 | V4.6.6 | 1. Added SetSingleCoil and SetSingleHoldReg commands to Modbus-related instructions. 2. Updated port 30005 definition. 3. Added error code -9 description to general error codes. |
+| 2025/10/15 | V4.6.5 | 1. Added GetScrName command to calculation and query instructions. 2. Added DOGroupDEC, DIGroupDEC, GetDOGroupDEC commands to IO instructions. 3. Added MovS, ArcIO, StartRTOffset, EndRTOffset, OffsetPara commands to motion instructions. 4. Added conveyor belt commands. 5. Optimized RunTo, Arc, Circle, GetStartPose motion commands. |
+| 2025/05/08 | V4.6.2 | 1. Corresponds to 6-axis robot controller v4.6.2. 2. Added force control commands SetFCCollision, FCCollisionSwitch. |
+| 2025/03/20 | V4.6.0 | Updated GetErrorID command return value. |
 
-| **时间**     | **版本号** | **修订记录**                                                                                                                                                                                      |
-| ---------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026/04/10 | V4.6.6  | 1. Modbus相关指令新增SetSingleCoil、SetSingleHoldReg 指令。2. 更新30005端口定义。3. 通用错误码新增错误码 -9 的说明。                                                                                                         |
-| 2025/10/15 | V4.6.5  | 1. 计算和获取相关指令新增GetScrName指令。2. IO相关指令新增DOGroupDEC、DIGroupDEC、GetDOGroupDEC指令。3. 运动相关指令新增MovS、ArcIO、StartRTOffset、EndRTOffset、OffsetPara指令。4. 新增传送带指令。5. 运动相关指令优化Runto、Arc、Circle、GetStartPose。 |
-| 2025/05/08 | V4.6.2  | 1. 对应六轴机器人控制器4.6.2版本。2. 新增力控指令SetFCCollision、FCCollisionSwitch。                                                                                                                               |
-| 2025/03/20 | V4.6.0  | 更新GetErrorID指令的返回值。                                                                                                                                                                           |
+| **Time** | **Version** | **Revision History** |
+|----------|-------------|---------------------|
+| 2024/12/26 | V4.6.0 | 1. Corresponds to 6-axis robot controller v4.6.0. 2. Added RequestControl command, trajectory recovery commands, log export commands, force control commands, motion commands RelPointTool, RelPointUser, RelJoint. 3. Added general error code -8, added allowed TCP commands in various states. 4. Fixed StartPath command format. 5. Fixed index ranges for DO, DI, ToolDO, ToolDI, ToolAI. 6. Fixed ServoP, ServoJ command runtime ranges. 7. Optimized real-time feedback information. |
+| 2024/08/15 | V4.5.1 | Fixed ServoJ command example, added ServoJ and ServoP return values. |
+| 2024/03/25 | V4.5.1 | Corresponds to 6-axis robot controller v4.5.1. |
+| 2023/10/19 | V4.5.0 | Corresponds to 6-axis robot controller v4.5.0, added CreateTray, GetTrayPoint, ServoJ, ServoP commands, optimized some descriptions. |
+| 2023/07/26 | V4.4.0 | Corresponds to 6-axis robot controller v4.4.0. |
+| 2023/05/12 | V4.3.0 | Corresponds to 6-axis robot controller v4.3.0. |
+| 2023/02/17 | V4.2.0 | Corresponds to 6-axis robot controller v4.2.0. |
 
-| **时间**     | **版本号** | **修订记录**                                                                                                                                                                                                                                  |
-| ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2024/12/26 | V4.6.0  | 1. 对应六轴机器人控制器4.6.0版本。2. 新增RequestControl指令、轨迹恢复指令、日志导出指令、力控指令、运动相关指令RelPointTool、RelPointUser、RelJoint。3. 新增通用错误码-8, 新增各状态下允许执行的TCP指令。4. 修正StartPath指令格式。5. 修正DO、DI、ToolDO、ToolDI、ToolAI的index范围。6. 修正ServoP、ServoJ指令的运行时间范围。7. 优化实时反馈信息。 |
-| 2024/08/15 | V4.5.1  | 修正ServoJ指令示例, 补充ServoJ和ServoP的返回值。                                                                                                                                                                                                        |
-| 2024/03/25 | V4.5.1  | 对应六轴机器人控制器4.5.1版本。                                                                                                                                                                                                                        |
-| 2023/10/19 | V4.5.0  | 对应六轴机器人控制器4.5.0版本, 新增CreateTray、GetTrayPoint、ServoJ、ServoP指令, 优化部分说明。                                                                                                                                                                     |
-| 2023/07/26 | V4.4.0  | 对应六轴机器人控制器4.4.0版本。                                                                                                                                                                                                                        |
-| 2023/05/12 | V4.3.0  | 对应六轴机器人控制器4.3.0版本。                                                                                                                                                                                                                        |
-| 2023/02/17 | V4.2.0  | 对应六轴机器人控制器4.2.0版本。                                                                                                                                                                                                                        |
+# 1 Overview
 
-# 1 概述
+Due to the low cost, high reliability, strong practicality, and high performance of TCP/IP-based communication, many industrial automation projects have extensive needs for controlling robots based on TCP/IP protocol. Therefore, DOBOT robots provide rich interfaces for interaction with external devices based on TCP/IP protocol.
 
-由于基于TCP/IP的通讯具有成本低、可靠性高、实用性强、性能高等特点，许多工业自动化项目对基于TCP/IP协议控制机器人的需求广泛，因此DOBOT机器人在TCP/IP协议的基础上，提供了丰富的接口用于与外部设备的交互。
+# Port Description
 
-# 端口说明
+By design, DOBOT robots open server ports 29999, 30004, 30005, and 30006:
 
-根据设计，DOBOT机器人会开启29999、30004、30005以及30006服务器端口；
+● Port 29999: The host computer can directly send control commands to the robot through port 29999, or actively obtain certain robot status. These functions are called Dashboard.
 
-● 29999服务器端口：上位机可以通过29999端口直接发送控制指令给机器人，或者主动获取机器人的某些状态，这些功能被称为Dashboard。
+● Ports 30004, 30005, and 30006: Port 30004 is the real-time feedback port, where the client can receive real-time robot status information every 8ms. Ports 30005 and 30006 are configurable feedback ports (port 30005 defaults to 200ms feedback, port 30006 defaults to 1000ms feedback; contact technical support for modifications). Each data packet received through the real-time feedback port contains 1440 bytes, arranged in standard format.
 
-● 30004、30005以及30006服务器端口：30004端口即实时反馈端口，客户端每8ms能收到一次机器人实时状态信息。30005、30006端口为可配置的反馈机器人信息端口（30005端口默认每200ms反馈，30006端口默认每1000ms反馈，如需修改，请联系技术支持）。通过实时反馈端口每次收到的数据包有1440个字节，这些字节以标准的格式排列。
+# Message Format
 
-# 消息格式
+Message commands and responses are in ASCII format (string format).
 
-消息命令与消息应答都是ASCII码格式(字符串形式)。
+Host computer message format:
 
-上位机下发消息格式如下：
+MessageName(Param1,Param2,Param3......ParamN)
 
-消息名称(Param1,Param2,Param3......ParamN)
+Consists of message name and parameters, parameters are placed in parentheses, separated by English commas ",", and a complete message ends with a right parenthesis.
 
-由消息名称和参数组成，参数放在括号内，每一个参数之间以英文逗号”，"相隔，一个完整的消息以右括号结束。
-
-TCP/IP远程控制指令不区分大小写格式，如以下三种写法都会被识别为使能机器人的指令：
+TCP/IP remote control commands are case-insensitive. The following three formats are all recognized as enable robot commands:
 
 ● ENABLEROBOT()
 
@@ -71,52 +69,52 @@ TCP/IP远程控制指令不区分大小写格式，如以下三种写法都会�
 
 ● eNabLErobOt()
 
-机器人收到命令后，会返回应答消息，格式如下：
+After receiving the command, the robot returns a response message in the following format:
 
-ErrorID, \{value, ..., valueN}, 消息名称(Param1,Param2,Param3......ParamN);
+ErrorID, {value, ..., valueN}, MessageName(Param1,Param2,Param3......ParamN);
 
-● ErrorID 为0时表示命令接收成功，返回非0则代表命令有错误，详见通用错误码；
+● ErrorID of 0 indicates successful command reception, non-zero indicates command error (see general error codes);
 
-● \{value, ..., valueN}表示返回值，没有返回值则返回 \{};
+● {value, ..., valueN} represents return values; {} is returned if no return values;
 
-●消息名称(Param1,Param2,Param3,ParamN)为下发的命令消息。
+● MessageName(Param1,Param2,Param3,ParamN) is the sent command message.
 
-例如:
+Example:
 
-下发：
+Sent:
 
 ```
 MovL(-500,100,200,150,0,90)
 ```
 
-返回：
+Returned:
 
 ```
 0, {}, MovL(-500, 100, 200, 150, 0, 90);
 ```
 
-0表示接收成功，}表示没有返回值。
+0 indicates successful reception, {} indicates no return values.
 
-下发：
+Sent:
 
 ```
 Mov(-500,100,200,150,0,90)
 ```
 
-返回：
+Returned:
 
 ```
 -10000, {}, Mov(-500, 100, 200, 150, 0, 90);
 ```
 
--10000表示命令不存在，\{}表示没有返回值。
+-10000 indicates command does not exist, {} indicates no return values.
 
-# 队列指令与立即指令
+# Queued Commands and Immediate Commands
 
-● 队列指令：系统会等待之前的指令队列执行完毕后再执行这条指令。例如，DO指令之前是一串运动指令，系统会等待机器人运动完毕后再设置DO。
+● Queued commands: The system waits for the previous command queue to complete execution before executing this command. For example, if a DO command is preceded by a series of motion commands, the system waits for the robot to complete motion before setting DO.
 
-· 立即指令：系统会无视指令队列，在读到这条指令后立刻执行。例如，DOInstant指令之前是一串运动指令，系统不会等待机器人运动完毕，而是在读到这条指令后立刻设置DO。
+· Immediate commands: The system ignores the command queue and executes immediately after reading this command. For example, if a DOInstant command is preceded by a series of motion commands, the system does not wait for the robot to complete motion, but sets DO immediately after reading this command.
 
-如无特殊说明，读取输入的指令都是立即指令。
+Unless otherwise specified, input reading commands are all immediate commands.
 
-本文档中的示例均为伪代码，无法直接运行，仅用于说明如何使用接口。
+The examples in this document are pseudocode and cannot be run directly; they are only used to illustrate how to use the interfaces.

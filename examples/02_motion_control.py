@@ -9,7 +9,7 @@ from dobot_sdk import CoordinateType
 import time
 
 def main():
-    ROBOT_IP = "120.79.211.106"
+    ROBOT_IP = "192.168.100.51"
     
     try:
         with DobotRobot(ROBOT_IP) as robot:
@@ -56,7 +56,7 @@ def main():
             robot.motion.Arc(pose_via, pose_c, CoordinateType.CARTESIAN)
             time.sleep(3)
             
-            # ========== Circle Motion ==========
+            # ========== Circle Motion ==========f
             print("\n--- Circle Motion ---")
             print(f"Circle motion: C -> Via -> B")
             robot.motion.Circle(pose_via, pose_b, count=1, coord_type=CoordinateType.CARTESIAN)

@@ -26,7 +26,7 @@ def main():
     print(f"Log files will be saved to: {log_dir}")
     
     # Create robot object (using example IP here, replace with actual IP for real use)
-    robot = DobotRobot("192.168.1.100")
+    robot = DobotRobot("192.168.100.51")
     
     try:
         # Connect to robot (logs will automatically record the connection process)

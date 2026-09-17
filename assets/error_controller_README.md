@@ -1,20 +1,20 @@
-# HTTP 接口说明 - 错误控制器
+# HTTP Interface Documentation - Error Controller
 
-## 基础信息
+## Basic Information
 
-- **服务地址**: `http://{机器人IP}:22000`
-- **接口协议**: HTTP/JSON
-- **默认超时**: 5秒
+- **Service Address**: `http://{Robot IP}:22000`
+- **Interface Protocol**: HTTP/JSON
+- **Default Timeout**: 5 seconds
 
-## 接口列表
+## Interface List
 
-### 1. 设置语言接口
+### 1. Set Language Interface
 
-**接口**: `POST /interface/language`
+**Interface**: `POST /interface/language`
 
-**功能**: 设置机器人错误信息的显示语言
+**Function**: Set the display language for robot error messages
 
-**请求示例**:
+**Request Example**:
 ```bash
 POST http://192.168.1.100:22000/interface/language
 Content-Type: application/json
@@ -24,45 +24,45 @@ Content-Type: application/json
 }
 ```
 
-**支持的语言代码**:
-- `zh_cn` - 简体中文
-- `zh_hant` - 繁体中文
-- `en` - 英语
-- `ja` - 日语
-- `de` - 德语
-- `es` - 西班牙语
-- `ru` - 俄语
-- `ko` - 韩语
-- `vi` - 越南语
-- `fr` - 法语
+**Supported Language Codes**:
+- `zh_cn` - Simplified Chinese
+- `zh_hant` - Traditional Chinese
+- `en` - English
+- `ja` - Japanese
+- `de` - German
+- `es` - Spanish
+- `ru` - Russian
+- `ko` - Korean
+- `vi` - Vietnamese
+- `fr` - French
 
-**响应**: HTTP 200 表示成功
+**Response**: HTTP 200 indicates success
 
 ---
 
-### 2. 获取报警信息接口
+### 2. Get Alarm Information Interface
 
-**接口**: `GET /protocol/getAlarm`
+**Interface**: `GET /protocol/getAlarm`
 
-**功能**: 获取机器人当前的报警信息列表
+**Function**: Get the robot's current alarm information list
 
-**请求示例**:
+**Request Example**:
 ```bash
 GET http://192.168.1.100:22000/protocol/getAlarm
 ```
 
-**响应格式**:
+**Response Format**:
 
-**有报警时**:
+**When alarms exist**:
 ```json
 {
     "errMsg": [
         {
             "id": 1537,
             "level": 2,
-            "description": "紧急停止按钮被按下",
-            "solution": "请释放急停按钮",
-            "mode": "自动",
+            "description": "Emergency stop button pressed",
+            "solution": "Please release the emergency stop button",
+            "mode": "Auto",
             "date": "2026-06-15",
             "time": "14:30:25"
         }
@@ -70,48 +70,48 @@ GET http://192.168.1.100:22000/protocol/getAlarm
 }
 ```
 
-**无报警时**:
+**When no alarms**:
 ```json
 {}
 ```
-或
+or
 ```json
 {
     "errMsg": []
 }
 ```
 
-**响应字段说明**:
+**Response Field Description**:
 
-| 字段 | 类型 | 说明 |
+| Field | Type | Description |
 |------|------|------|
-| errMsg | Array | 报警信息数组 |
-| id | Integer | 错误码 ID |
-| level | Integer | 错误级别 |
-| description | String | 错误描述 |
-| solution | String | 解决方案 |
-| mode | String | 机器人模式 |
-| date | String | 报警日期 (YYYY-MM-DD) |
-| time | String | 报警时间 (HH:MM:SS) |
+| errMsg | Array | Alarm information array |
+| id | Integer | Error code ID |
+| level | Integer | Error level |
+| description | String | Error description |
+| solution | String | Solution |
+| mode | String | Robot mode |
+| date | String | Alarm date (YYYY-MM-DD) |
+| time | String | Alarm time (HH:MM:SS) |
 
 ---
 
-## 调用流程
+## Calling Flow
 
-推荐的调用流程：
+Recommended calling flow:
 
-1. 先调用 **设置语言接口** 设置需要的语言
-2. 再调用 **获取报警信息接口** 获取对应语言的报警信息
+1. First call the **Set Language Interface** to set the desired language
+2. Then call the **Get Alarm Information Interface** to get alarm information in the corresponding language
 
-**示例代码**:
+**Example Code**:
 ```python
 import requests
 
-# 1. 设置语言为中文
+# 1. Set language to Chinese
 language_url = "http://192.168.1.100:22000/interface/language"
 requests.post(language_url, json={"type": "zh_cn"}, timeout=5)
 
-# 2. 获取报警信息
+# 2. Get alarm information
 alarm_url = "http://192.168.1.100:22000/protocol/getAlarm"
 response = requests.get(alarm_url, timeout=5)
 
@@ -122,14 +122,14 @@ if response.status_code == 200:
 
 ---
 
-## 错误处理
+## Error Handling
 
-| HTTP 状态码 | 说明 |
+| HTTP Status Code | Description |
 |------------|------|
-| 200 | 请求成功 |
-| 其他状态码 | 请求失败 |
+| 200 | Request successful |
+| Other status codes | Request failed |
 
-**网络异常**:
-- 连接超时
-- 网络不可达
-- 端口未开放
+**Network Exceptions**:
+- Connection timeout
+- Network unreachable
+- Port not open

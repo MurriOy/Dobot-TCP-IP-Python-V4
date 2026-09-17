@@ -1,1170 +1,1170 @@
-# 手臂二开md文档段落四
+# Arm Secondary Development MD Documentation - Part Four
 
-## 2.6 总线寄存器相关指令
+## 2.6 Bus Register Related Commands
 
-# 指令列表
+# Command List
 
-总线寄存器指令用于读写Profinet或Ethernet/IP总线寄存器。
+Bus register commands are used to read and write Profinet or Ethernet/IP bus registers.
 
-| **指令**         | **功能**             | **指令类型** |
-| -------------- | ------------------ | -------- |
-| GetInputBool   | 获取输入寄存器指定地址的bool值  | 立即指令     |
-| GetInputInt    | 获取输入寄存器指定地址的int值   | 立即指令     |
-| GetInputFloat  | 获取输入寄存器指定地址的float值 | 立即指令     |
-| GetOutputBool  | 获取输出寄存器指定地址的bool值  | 立即指令     |
-| GetOutputInt   | 获取输出寄存器指定地址的int值   | 立即指令     |
-| GetOutputFloat | 获取输出寄存器指定地址的float值 | 立即指令     |
-| SetOutputBool  | 设置输出寄存器指定地址的bool值  | 立即指令     |
-| SetOutputInt   | 设置输出寄存器指定地址的int值   | 立即指令     |
-| SetOutputFloat | 设置输出寄存器指定地址的float值 | 立即指令     |
+| **Command**     | **Function**                 | **Command Type** |
+| -------------- | -------------------------- | ------------ |
+| GetInputBool   | Get bool value at specified address of input register  | Immediate Command |
+| GetInputInt    | Get int value at specified address of input register   | Immediate Command |
+| GetInputFloat  | Get float value at specified address of input register | Immediate Command |
+| GetOutputBool  | Get bool value at specified address of output register  | Immediate Command |
+| GetOutputInt   | Get int value at specified address of output register   | Immediate Command |
+| GetOutputFloat | Get float value at specified address of output register | Immediate Command |
+| SetOutputBool  | Set bool value at specified address of output register  | Immediate Command |
+| SetOutputInt   | Set int value at specified address of output register   | Immediate Command |
+| SetOutputFloat | Set float value at specified address of output register | Immediate Command |
 
 # GetInputBool
 
-# 原型：
+# Prototype:
 
 ```
 GetInputBool(address)
 ```
 
-# 描述:
+# Description:
 
-获取输入寄存器指定地址的bool类型的数值。
+Get the bool type value at the specified address of the input register.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                |
+| **Parameter Name** | **Type** | **Description**               |
 | ------- | ------ | --------------------- |
-| address | int    | 寄存器地址, 取值范围: \[0,63]。 |
+| address | int    | Register address, range: \[0,63]. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{value},GetInputBool(address);
 ```
 
-value表示指定的寄存器地址的值，为0或1。
+value represents the value at the specified register address, which is 0 or 1.
 
-# 示例：
+# Example:
 
 ```
 GetInputBool(0)
 ```
 
-读取输入寄存器地址位0的布尔值。
+Read the boolean value at input register address 0.
 
 # GetInputInt
 
-# 原型：
+# Prototype:
 
 ```
 GetInputInt(address)
 ```
 
-# 描述:
+# Description:
 
-获取输入寄存器指定地址的int类型的数值。
+Get the int type value at the specified address of the input register.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                |
+| **Parameter Name** | **Type** | **Description**               |
 | ------- | ------ | --------------------- |
-| address | int    | 寄存器地址, 取值范围: \[0,23]。 |
+| address | int    | Register address, range: \[0,23]. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {value}, GetInputInt(address);
 ```
 
-value表示指定的寄存器地址的值, 为整型数 (int32)。
+value represents the value at the specified register address, which is an integer (int32).
 
-# 示例：
+# Example:
 
 ```
 GetInputInt(1)
 ```
 
-读取输入寄存器地址位1的int值。
+Read the int value at input register address 1.
 
 # GetInputFloat
 
-# 原型：
+# Prototype:
 
 ```
 GetInputFloat(address)
 ```
 
-# 描述:
+# Description:
 
-获取输入寄存器指定地址的float类型的数值。
+Get the float type value at the specified address of the input register.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                |
+| **Parameter Name** | **Type** | **Description**               |
 | ------- | ------ | --------------------- |
-| address | int    | 寄存器地址, 取值范围: \[0,23]。 |
+| address | int    | Register address, range: \[0,23]. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{value},GetInputFloat(address);
 ```
 
-value表示指定的寄存器地址的值，为单精度浮点数 (float)
+value represents the value at the specified register address, which is a single-precision floating-point number (float).
 
-# 示例：
+# Example:
 
 ```
 GetInputFloat(2)
 ```
 
-读取输入寄存器地址位2的float值。
+Read the float value at input register address 2.
 
 # GetOutputBool
 
-# 原型：
+# Prototype:
 
 ```
 GetOutputBool(address)
 ```
 
-# 描述:
+# Description:
 
-获取输出寄存器指定地址的bool类型的数值。
+Get the bool type value at the specified address of the output register.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                |
+| **Parameter Name** | **Type** | **Description**               |
 | ------- | ------ | --------------------- |
-| address | int    | 寄存器地址, 取值范围: \[0,63]。 |
+| address | int    | Register address, range: \[0,63]. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {value}, GetOutputBool(address);
 ```
 
-value表示指定的寄存器地址的值，为0或1。
+value represents the value at the specified register address, which is 0 or 1.
 
-# 示例：
+# Example:
 
 ```
 GetOutputBool(0)
 ```
 
-获取输出寄存器地址位0的布尔值。
+Get the boolean value at output register address 0.
 
 # GetOutputInt
 
-# 原型：
+# Prototype:
 
 ```
 GetOutputInt(address)
 ```
 
-# 描述:
+# Description:
 
-获取输出寄存器指定地址的int类型的数值。
+Get the int type value at the specified address of the output register.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                |
+| **Parameter Name** | **Type** | **Description**               |
 | ------- | ------ | --------------------- |
-| address | int    | 寄存器地址, 取值范围: \[0,23]。 |
+| address | int    | Register address, range: \[0,23]. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {value}, GetOutputInt(address);
 ```
 
-value表示指定的寄存器地址的值，为整型数 (int32)。
+value represents the value at the specified register address, which is an integer (int32).
 
-# 示例：
+# Example:
 
 ```
 GetOutputInt(1)
 ```
 
-读取输出寄存器地址位1的int值。
+Read the int value at output register address 1.
 
 # GetOutputFloat
 
-# 原型：
+# Prototype:
 
 ```
 GetOutputFloat(address)
 ```
 
-# 描述:
+# Description:
 
-获取输出寄存器指定地址的float类型的数值。
+Get the float type value at the specified address of the output register.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                |
+| **Parameter Name** | **Type** | **Description**               |
 | ------- | ------ | --------------------- |
-| address | int    | 寄存器地址, 取值范围: \[0,23]。 |
+| address | int    | Register address, range: \[0,23]. |
 
-# 返回
+# Return
 
 ```
 ErrorID, {value}, GetOutputFloat(address);
 ```
 
-value表示指定的寄存器地址的值，为单精度浮点数（float）。
+value represents the value at the specified register address, which is a single-precision floating-point number (float).
 
-# 示例：
+# Example:
 
 ```
 GetOutputFloat(2)
 ```
 
-读取输出寄存器地址位2的float值。
+Read the float value at output register address 2.
 
 # SetOutputBool
 
-# 原型：
+# Prototype:
 
 ```
 SetOutputBool(address,value)
 ```
 
-# 描述:
+# Description:
 
-设置输出寄存器指定地址的bool类型的数值。
+Set the bool type value at the specified address of the output register.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                |
+| **Parameter Name** | **Type** | **Description**               |
 | ------- | ------ | --------------------- |
-| address | int    | 寄存器地址, 取值范围: \[0,63]。 |
-| value   | int    | 要设置的值, 支持0或1。         |
+| address | int    | Register address, range: \[0,63]. |
+| value   | int    | Value to set, supports 0 or 1.         |
 
-# 返回
+# Return
 
 ```
 ErrorID, {},SetOutputBool(address, value);
 ```
 
-# 示例：
+# Example:
 
 ```
 SetOutputBool(0,0)
 ```
 
-设置输出寄存器0的值为假。
+Set the value of output register 0 to false.
 
 # SetOutputInt
 
-# 原型：
+# Prototype:
 
 ```
 SetOutputInt(address,value)
 ```
 
-# 描述:
+# Description:
 
-设置输出寄存器指定地址的int类型的数值。
+Set the int type value at the specified address of the output register.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                |
+| **Parameter Name** | **Type** | **Description**               |
 | ------- | ------ | --------------------- |
-| address | int    | 寄存器地址, 取值范围: \[0,23]。 |
-| value   | int    | 要设置的值, 支持带符号的32位整型数。  |
+| address | int    | Register address, range: \[0,23]. |
+| value   | int    | Value to set, supports signed 32-bit integer.  |
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, SetOutputInt(address, value);
 ```
 
-# 示例：
+# Example:
 
 ```
 SetOutputInt(1,123)
 ```
 
-设置输出寄存器地址位1的值为123。
+Set the value at output register address 1 to 123.
 
 # SetOutputFloat
 
-# 原型：
+# Prototype:
 
 ```
 SetOutputFloat(address, value)
 ```
 
-# 描述:
+# Description:
 
-设置输出寄存器指定地址的float类型的数值。
+Set the float type value at the specified address of the output register.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                |
+| **Parameter Name** | **Type** | **Description**               |
 | ------- | ------ | --------------------- |
-| address | int    | 寄存器地址, 取值范围: \[0,23]。 |
-| value   | float  | 要设置的值, 支持单精度浮点数。      |
+| address | int    | Register address, range: \[0,23]. |
+| value   | float  | Value to set, supports single-precision floating-point number.      |
 
-# 返回
+# Return
 
 ```
 ErrorID, {}, SetOutputFloat(address, value);
 ```
 
-# 示例：
+# Example:
 
 ```
 SetOutputFloat(2,12.3)
 ```
 
-设置输出寄存器地址位2的float值为12.3。
+Set the float value at output register address 2 to 12.3.
 
-## 2.7 运动相关指令
+## 2.7 Motion Related Commands
 
-# 参数格式
+# Parameter Format
 
-运动指令中点位参数和可选参数均为string类型, 格式为“key=value”, 例如 “joint = \{10, 10, 10, 0, 0, 0}”, “user=1”。为方便用户理解参数, 下文参数表中此类参数的类型列均表示value的类型。
+In motion commands, point parameters and optional parameters are of string type, in the format "key=value", for example "joint = \{10, 10, 10, 0, 0, 0}", "user=1". For user convenience in understanding parameters, the type column for such parameters in the parameter tables below indicates the type of the value.
 
-# 运动方式
+# Motion Types
 
-机器人支持的运动方式可分为下述几类。
+The motion types supported by the robot can be divided into the following categories.
 
-# 关节运动
+# Joint Motion
 
-机器人根据当前各关节角度和目标点各关节角度的差值规划各个关节的运动，使各个关节同时完成运动。关节运动不约束TCP (Tool Center Point) 的运动轨迹，一般情况下该轨迹非直线。
+The robot plans the motion of each joint based on the difference between the current joint angles and the target point joint angles, so that each joint completes motion simultaneously. Joint motion does not constrain the TCP (Tool Center Point) trajectory, and generally this trajectory is not a straight line.
 
-当前点P1
+Current point P1
 
-关节运动不受奇异位置限制（奇异点位置详见机器人对应的硬件手册），因此如果对运动轨迹没有要求，或目标点位在奇异位置附近，建议使用关节运动。
+Joint motion is not affected by singular positions (see the corresponding robot hardware manual for details on singular point positions), so if there are no requirements for the motion trajectory, or the target point is near a singular position, joint motion is recommended.
 
-# 直线运动
+# Linear Motion
 
-机器人根据当前位姿和目标点的位姿规划运动轨迹，使TCP运动轨迹为直线，且末端姿态在运动过程中匀速变化。
+The robot plans the motion trajectory based on the current pose and the target point pose, so that the TCP trajectory is a straight line, and the end-effector attitude changes uniformly during the motion.
 
-当前点P1
+Current point P1
 
-当运动轨迹会经过奇异位置时，下发直线运动指令给机器人会产生报错，建议重新规划点位或在奇异位置附近采用关节运动。
+When the motion trajectory passes through a singular position, sending a linear motion command to the robot will produce an error. It is recommended to replan the point positions or use joint motion near the singular position.
 
-# 弧线运动
+# Arc Motion
 
-机器人通过当前位置，P1，P2三个不共线的点确定一个圆弧或整圆。运动过程中的机器人末端姿态通过当前点和P2点的姿态插补算出，P1点的姿态不参与运算（即运动过程中机器人到达P1点时的姿态可能与示教姿态不同）。
+The robot determines an arc or complete circle through three non-collinear points: the current position, P1, and P2. The end-effector attitude during the motion is calculated through interpolation from the current point and P2 point attitudes. The P1 point attitude does not participate in the calculation (i.e., the attitude when the robot reaches P1 during the motion may be different from the taught attitude).
 
-P1P1P2P2当前点当前点
+P1P1P2P2Current pointCurrent point
 
-当运动轨迹会经过奇异位置时，下发弧线运动指令给机器人会产生报错，建议重新规划点位或在奇异位置附近采用关节运动。
+When the motion trajectory passes through a singular position, sending an arc motion command to the robot will produce an error. It is recommended to replan the point positions or use joint motion near the singular position.
 
-# 点位参数
+# Point Parameters
 
-如无特殊说明，运动指令中所有点位参数 (P) 都支持两种表达方式：
+Unless otherwise specified, all point parameters (P) in motion commands support two expression methods:
 
-● 关节变量：使用各个机器人各个关节的角度（j1\~j6）表示目标点位。作为目标点时会通过正解变换为位姿变量再使用。
+● Joint Variables: Use the angles of each robot joint (j1~j6) to represent the target point position. When used as a target point, it will be converted to pose variables through forward kinematics.
 
 ```
 joint = {j1, j2, j3, j4, j5, j6}
 ```
 
-●位姿变量:使用笛卡尔坐标(x, y, z)表示目标点位在用户坐标系中的空间位置,使用欧拉角(rx, ry, z)表示TCP (Tool Center Point)到达该点时工具坐标系相对于用户坐标系的旋转角度。
+● Pose Variables: Use Cartesian coordinates (x, y, z) to represent the spatial position of the target point in the user coordinate system, and use Euler angles (rx, ry, rz) to represent the rotation angle of the tool coordinate system relative to the user coordinate system when the TCP (Tool Center Point) reaches that point.
 
-越疆机器人计算欧拉角时的旋转顺序为$X \to Y \to Z$，每个轴都是绕固定轴（用户坐标系）旋转，如下图所示（$rx=\gamma$，$ry=\beta$，$rz=\alpha$）。
+The rotation order for Dobot robot Euler angle calculation is $X \to Y \to Z$, where each axis rotates around a fixed axis (user coordinate system), as shown in the figure below ($rx=\gamma$, $ry=\beta$, $rz=\alpha$).
 
 2b2PBAC-8RA日B
 
-确定了旋转顺序后，就可以将旋转矩阵（其中$\text{ca}$为$\cos\alpha$，$\text{sa}$为$\sin\alpha$的简写，以此类推）
+After determining the rotation order, the rotation matrix can be derived (where $\text{ca}$ is shorthand for $\cos\alpha$, $\text{sa}$ is shorthand for $\sin\alpha$, and so on)
 
 ​$\begin{aligned} \begin{bmatrix} \Lambda_B R_{XYZ}(\gamma, \beta, \alpha) &= R_Z(\alpha)R_\gamma(\beta)R_X(\gamma) \\ &= \begin{bmatrix} c\alpha & -s\alpha & 0 \\ s\alpha & c\alpha & 0 \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} c\beta & 0 & s\beta \\ 0 & 1 & 0 \\ -s\beta & 0 & c\beta \end{bmatrix} \begin{bmatrix} 1 & 0 & 0 \\ 0 & c\gamma & -s\gamma \\ 0 & s\gamma & c\gamma \end{bmatrix} \end{aligned}$​
 
-推导为方程
+The equation is derived as
 
 ​$A_B^A R_{XYZ}(\gamma, \beta, \alpha) = \begin{bmatrix} c \alpha c \beta & c \alpha s \beta s \gamma - s \alpha c \gamma & c \alpha s \beta c \gamma + s \alpha s \gamma \\ s \alpha c \beta & s \alpha s \beta s \gamma + c \alpha c \gamma & s \alpha s \beta c \gamma - c \alpha s \gamma \\ -s \beta & c \beta s \gamma & c \beta c \gamma \end{bmatrix}$​
 
-通过该方程计算机机器人末端的姿态。
+The robot end-effector attitude is calculated using this equation.
 
 pose = \{x, y, z, rx, ry, rz}
 
-# 坐标系参数
+# Coordinate System Parameters
 
-笛卡尔坐标系相关的运动指令，可选参数的user和tool用于指定目标点的用户和工具坐标系：
+For Cartesian coordinate system related motion commands, the optional parameters user and tool are used to specify the user and tool coordinate systems of the target point:
 
-当前仅支持通过索引序号指定，需要先在控制软件中添加对应坐标系。
+Currently, only specification by index number is supported, and the corresponding coordinate system needs to be added in the control software first.
 
-如果不携带user和tool参数,则使用全局用户和工具坐标系,详见设置相关指令中的user和tool指令说明(未调用指令设置时的默认坐标系均为0)。
+If the user and tool parameters are not included, the global user and tool coordinate systems are used. See the user and tool command descriptions in the settings-related commands for details (the default coordinate system when no command is called is 0).
 
-# 运动参数
+# Motion Parameters
 
-# 相对速率
+# Relative Speed
 
-可选参数中的a和v用于指定机器人执行该运动指令时的加速度和速度比例。
+The optional parameters a and v are used to specify the acceleration and speed ratios when the robot executes this motion command.
 
-机器人实际运动速度 = 最大速度 x 全局速率 x 指令速率
+Robot actual motion speed = Maximum speed × Global speed ratio × Command speed ratio
 
-机器人实际运动加速度 = 最大加速度 x 指令速率
+Robot actual motion acceleration = Maximum acceleration × Command speed ratio
 
-其中最大速度/加速度受再现参数的控制，可在DobotStudio Pro的运动参数页面查看与修改。
+Where the maximum speed/acceleration is controlled by playback parameters, and can be viewed and modified in the motion parameters page of DobotStudio Pro.
 
-> 2CRSAF日设置Dobot+帮助与反馈监控FTScnsor点动速度(92%)用户管理再现参数编辑坐标系管理负载参数力矩约东开启力矩约束后，算法会根据实际运行情况进行调整加速度和加加速度，以规避力矩超限的情况运动参数笛卡尔速度在“安全限制”页面可进行设置再现速度再现参数关节正常模式缩减模式点动参数J1:19143.615/5姿态设置J2:19143.6\*/s轨迹复现通讯设置J3:19143.60/s安装设置抱拽设置J4:54234安全设置J5:5423安全设置模式设置2J6:54234\*/s高级设置X零点标定再现加速度高级功能
+> 2CRSAF日设置Dobot+帮助与反馈监控FTScnsor点动速度(92%)用户管理再现参数编辑坐标系管理负载参数力矩约东开启力矩约束后，算法会根据实际运行情况进行调整加速度和加加速度，以规避力矩超限的情况运动参数笛卡尔速度在"安全限制"页面可进行设置再现速度再现参数关节正常模式缩减模式点动参数J1:19143.615/5姿态设置J2:19143.6\*/s轨迹复现通讯设置J3:19143.60/s安装设置抱拽设置J4:54234安全设置J5:5423安全设置模式设置2J6:54234\*/s高级设置X零点标定再现加速度高级功能
 >
 > ![](attachment/1_2.png)
 >
 > ​
 
-全局速率可通过DobotStudio Pro (上图右上角)或SpeedFactor指令设置。
+The global speed ratio can be set through DobotStudio Pro (top right corner of the above image) or the SpeedFactor command.
 
-指令速率为运动指令可选参数携带的比例，未通过可选参数指定运动加速度/速度比例时，默认使用运动参数中设置的值（详见VelJ，AccJ，VelL，AccL指令，未调用指令设置时的默认值均为100）。
+The command speed ratio is the ratio carried by the optional parameter of the motion command. When the motion acceleration/speed ratio is not specified through the optional parameter, the value set in the motion parameters is used by default (see the VelJ, AccJ, VelL, AccL commands for details; the default value when no command is called is 100).
 
 ![](attachment/2.png)
 
 ​
 
-例:
+Example:
 
 ```
-AccJ(50) --设置关节运动默认加速度为50%
-VelJ(60) --设置关节运动默认速度为60%
-AccL(70) --设置直线运动默认加速度为70%
-VelL(80) --设置直线运动默认速度为80%
---全局速率为20%;
-MovJ(P1)--以(关节加速度最大值x50%)的加速度和(关节速度最大值x20%x60%)的速度关节运动至P1
-MovJ(P2,{a=30,v=80})--以(关节加速度最大值x30%)的加速度和(关节速度最大值x20%x80%)关节运动至P1
-MovL(P1)--以(笛卡尔加速度最大值x70%)的加速度和直线速度(笛卡尔速度最大值x20%x80%)的速度运动至P1
-MovL(P1,{a=40,v=90})--以(笛卡尔加速度最大值x40%)的加速度和(笛卡尔速度最大值x20% x 90%)的速度直线运动至P1
+AccJ(50) --Set joint motion default acceleration to 50%
+VelJ(60) --Set joint motion default speed to 60%
+AccL(70) --Set linear motion default acceleration to 70%
+VelL(80) --Set linear motion default speed to 80%
+--Global speed ratio is 20%;
+MovJ(P1)--Joint motion to P1 with (joint maximum acceleration×50%) acceleration and (joint maximum speed×20%×60%) speed
+MovJ(P2,{a=30,v=80})--Joint motion to P2 with (joint maximum acceleration×30%) acceleration and (joint maximum speed×20%×80%) speed
+MovL(P1)--Linear motion to P1 with (Cartesian maximum acceleration×70%) acceleration and (Cartesian maximum speed×20%×80%) speed
+MovL(P1,{a=40,v=90})--Linear motion to P1 with (Cartesian maximum acceleration×40%) acceleration and (Cartesian maximum speed×20% × 90%) speed
 ```
 
-# 绝对速度
+# Absolute Speed
 
-直线和弧线运动指令可选参数中的speed用于指定械臂执行该运动指令时的绝对速度。
+The optional parameter speed in linear and arc motion commands is used to specify the absolute speed when the robot arm executes this motion command.
 
-绝对速度不受全局速率影响，但受再现参数中的最大速度限制（如果机器人进入了缩减模式，则受缩减后的最大速度限制），即speed参数设置的目标速度如果大于再现参数中的最大速度，则以最大速度为准。
+The absolute speed is not affected by the global speed ratio, but is limited by the maximum speed in the playback parameters (if the robot has entered reduced mode, it is limited by the reduced maximum speed). That is, if the target speed set by the speed parameter is greater than the maximum speed in the playback parameters, the maximum speed is used as the standard.
 
-例:
+Example:
 
 ```
-MovL(P1, {speed = 1000}) -- 以1000的绝对速率直线移动至P1
+MovL(P1, {speed = 1000}) -- Linear move to P1 at an absolute speed of 1000
 ```
 
-MovL设置了speed为1000，小于再现参数中的最大速度2000，则机器人会以1000mm/s为目标速度进行运动，该目标速度与此时的全局速率无关。但如果机器人处于缩减模式（假设缩减率为10%），则最大速度变为200，小于1000，此时机器人会以200mm/s为目标速度进行运动。
+MovL sets speed to 1000, which is less than the maximum speed of 2000 in the playback parameters, so the robot will move with 1000mm/s as the target speed, and this target speed is independent of the current global speed ratio. However, if the robot is in reduced mode (assuming the reduction rate is 10%), the maximum speed becomes 200, which is less than 1000, so the robot will move with 200mm/s as the target speed.
 
-speed参数和v参数互斥，若同时存在以speed为准。
+The speed parameter and v parameter are mutually exclusive. If both exist, speed takes precedence.
 
-# 平滑过渡参数
+# Smoothing Transition Parameters
 
-机器人连续运动经过多个点时，可以通过平滑过渡的方式经过中间点，避免机器人拐弯过于生硬。如果用户指定的几个路径点基于不同的工具坐标系，则无法平滑过渡。
+When the robot moves continuously through multiple points, it can pass through intermediate points via smoothing transition to avoid the robot turning too abruptly. If the user specifies several path points based on different tool coordinate systems, smoothing transition is not possible.
 
-可选参数中的cp或r用于指定当前运动指令到下一条运动指令之间的平滑过渡比例（cp）或者平滑过渡半径（r），两者互斥，若同时存在以r为准。
+The optional parameters cp or r are used to specify the smoothing transition ratio (cp) or smoothing transition radius (r) between the current motion command and the next motion command. They are mutually exclusive. If both exist, r takes precedence.
 
-# i 说明：
+# Note:
 
-关节运动相关命令不支持设置平滑过渡半径（r），详见各指令的可选参数。
+Joint motion related commands do not support setting the smoothing transition radius (r). See the optional parameters of each command for details.
 
-设置平滑过渡比例时，系统会自动计算过渡曲线的弧度，CP值越大曲线越平滑，如下图所示。CP过渡曲线会受运动速度/加速度影响，即使点位和CP值都相同，运动速度/加速度不同时的过渡曲线弧度也会不同。
+When setting the smoothing transition ratio, the system will automatically calculate the arc of the transition curve. The larger the CP value, the smoother the curve, as shown in the figure below. The CP transition curve is affected by motion speed/acceleration. Even if the point position and CP value are the same, the arc of the transition curve will be different with different motion speed/acceleration.
 
 CP=0P2CP=50%CP=100%P1P3
 
-设置平滑过渡半径时，系统会以过渡点为圆心，根据指定半径计算过渡曲线。R过渡曲线不受运动速度/加速度影响，只由点位和过渡半径决定。
+When setting the smoothing transition radius, the system will use the transition point as the center and calculate the transition curve based on the specified radius. The R transition curve is not affected by motion speed/acceleration, and is only determined by the point position and transition radius.
 
-P2P1过渡曲线P3
+P2P1Transition curveP3
 
-如果用户设置的过渡半径过大(超过起始点/终点与过渡点之间的距离),则系统会自动使用起始点/终点与过渡点之间较短距离的一半作为过渡半径计算过渡曲线。
+If the user-set transition radius is too large (exceeding the distance between the start point/end point and the transition point), the system will automatically use half of the shorter distance between the start point/end point and the transition point as the transition radius to calculate the transition curve.
 
-用户设置的r实际生效的
+The user-set r that actually takes effect
 
-未通过可选参数指定平缓过渡比例或半径时，默认使用运动参数中设置的平滑过渡比例(详见CP指令，未调用指令设置时的默认值为0)。
+When the smoothing transition ratio or radius is not specified through the optional parameter, the smoothing transition ratio set in the motion parameters is used by default (see the CP command for details; the default value when no command is called is 0).
 
-# i说明:
+# Note:
 
-平滑过渡会导致机器人运动不经过中间点，因此设置了平滑过渡时，两条运动指令之间IO信号输出或功能设置（例如开关安全皮肤）指令会在过渡过程中执行。
+Smoothing transition causes the robot motion to not pass through intermediate points. Therefore, when smoothing transition is set, IO signal output or function setting commands (such as enabling/disabling the safety skin) between two motion commands will be executed during the transition process.
 
-如果希望能够在机器人准确抵达中间点时执行指令，请将前一条指令的平滑过渡参数设置为0。
+If you want to execute commands when the robot precisely reaches the intermediate point, set the smoothing transition parameter of the previous command to 0.
 
-# 指令列表
+# Command List
 
-| **指令**              | **功能**          | **指令类型** |
-| ------------------- | --------------- | -------- |
-| MovJ                | 关节运动            | 队列指令     |
-| MovL                | 直线运动            | 队列指令     |
-| MovLIO              | 直线运动并输出DO       | 队列指令     |
-| MovJIO              | 关节运动并输出DO       | 队列指令     |
-| Arc                 | 圆弧插补运动          | 队列指令     |
-| ArclO               | 圆弧运动并输出DO       | 队列指令     |
-| Circle              | 整圆插补运动          | 队列指令     |
-| ServoJ              | 基于关节空间的动态跟随命令   | 队列指令     |
-| ServoP              | 基于笛卡尔空间的动态跟随命令  | 队列指令     |
-| MoveJog             | 点动机械臂           | 立即指令     |
-| RunTo               | 运动至指定点位         | 立即指令     |
-| GetStartPose        | 获取指定轨迹的第一个点位    | 立即指令     |
-| MovS                | 拟合导入的轨迹         | 队列指令     |
-| StartPath           | 复现录制的运动轨迹       | 队列指令     |
-| RelMovJTool         | 沿工具坐标系进行相对关节运动  | 队列指令     |
-| RelMovLTool         | 沿工具坐标系进行相对直线运动  | 队列指令     |
-| RelMovJUser         | 沿用户坐标系进行相对关节运动  | 队列指令     |
-| RelMovLUser         | 沿用户坐标系进行相对直线运动  | 队列指令     |
-| RelJointMovJ        | 沿关节坐标系进行相对关节运动  | 队列指令     |
-| RelPointTool        | 沿工具坐标系笛卡尔点偏移    | 立即指令     |
-| RelPointUser        | 沿用户坐标系笛卡尔点偏移    | 立即指令     |
-| RelJoint            | 关节点位偏移          | 立即指令     |
-| GetCurrentCommandID | 获取当前执行指令的算法队列ID | 立即指令     |
-| StartRTOffset       | 启动坐标系偏移         | 队列指令     |
-| EndRTOffset         | 结束坐标系偏移         | 队列指令     |
-| OffsetPara          | 设置坐标系偏移值        | 立即指令     |
+| **Command**          | **Function**              | **Command Type** |
+| ------------------- | --------------- | ------------ |
+| MovJ                | Joint motion            | Queue Command     |
+| MovL                | Linear motion            | Queue Command     |
+| MovLIO              | Linear motion with DO output       | Queue Command     |
+| MovJIO              | Joint motion with DO output       | Queue Command     |
+| Arc                 | Arc interpolation motion          | Queue Command     |
+| ArcIO               | Arc motion with DO output       | Queue Command     |
+| Circle              | Full circle interpolation motion          | Queue Command     |
+| ServoJ              | Dynamic following command based on joint space   | Queue Command     |
+| ServoP              | Dynamic following command based on Cartesian space  | Queue Command     |
+| MoveJog             | Jog the robot arm           | Immediate Command |
+| RunTo               | Move to specified point position         | Immediate Command |
+| GetStartPose        | Get the first point of specified trajectory    | Immediate Command |
+| MovS                | Fit imported trajectory         | Queue Command     |
+| StartPath           | Reproduce recorded motion trajectory       | Queue Command     |
+| RelMovJTool         | Relative joint motion along tool coordinate system  | Queue Command     |
+| RelMovLTool         | Relative linear motion along tool coordinate system  | Queue Command     |
+| RelMovJUser         | Relative joint motion along user coordinate system  | Queue Command     |
+| RelMovLUser         | Relative linear motion along user coordinate system  | Queue Command     |
+| RelJointMovJ        | Relative joint motion along joint coordinate system  | Queue Command     |
+| RelPointTool        | Cartesian point offset along tool coordinate system    | Immediate Command |
+| RelPointUser        | Cartesian point offset along user coordinate system    | Immediate Command |
+| RelJoint            | Joint point offset          | Immediate Command |
+| GetCurrentCommandID | Get algorithm queue ID of currently executing command | Immediate Command |
+| StartRTOffset       | Start coordinate system offset         | Queue Command     |
+| EndRTOffset         | End coordinate system offset         | Queue Command     |
+| OffsetPara          | Set coordinate system offset value        | Immediate Command |
 
 # MovJ
 
-# 原型
+# Prototype
 
 MovJ(P, user, tool, a, v, cp)
 
-# 描述
+# Description
 
-从当前位置以关节运动方式运动至目标点。
+Move from the current position to the target point using joint motion.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                      |
+| **Parameter Name** | **Type** | **Description**                                                                                      |
 | ------- | ------ | ------------------------------------------------------------------------------------------- |
-| p       | string | 目标点, 支持关节变量或位姿变量。格式为 "joint = \{j1, j2, j3, j4, j5, j6}" 或 "pose = \{x, y, z, rx, ry, rz}"。 |
+| p       | string | Target point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                |
+| **Parameter Name** | **Type** | **Description**                                               |
 | ------- | ------ | ----------------------------------------------------- |
-| user    | string | 格式为"user=index", index为已标定的用户坐标系索引。取值范围:\[0,50]。      |
-| tool    | string | 格式为"tool=index", index为已标定的工具坐标系索引。取值范围:\[0,50]。      |
-| a       | string | 格式为"a=value"。value表示执行该条指令时的机器人运动加速度比例。取值范围:\[1,100]。 |
-| v       | string | 格式为"v=value"。value表示执行该条指令时的机器人运动速度比例。取值范围:\[1,100]。  |
-| cp      | string | 格式为"cp=value"。value表示平滑过渡比例。取值范围:\[0,100]。            |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].      |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].      |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100]. |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command. Range: \[1,100].  |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio. Range: \[0,100].            |
 
-# 返回
+# Return
 
 ```
-ErrorID,{\ResultID},MovJ(P,user,tool,a,v,cp);
+ErrorID,{ResultID},MovJ(P,user,tool,a,v,cp);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例
+# Example
 
 ```
 MovJ(pose={-500,100,200,150,0,90},user=1,tool=0, a=20, v=50, cp=100)
 ```
 
-机器人从当前位置以50%速度，20%加速度，100%平滑过渡比例通过关节运动方式运动至笛卡尔坐标点\{-500,100,200,150,0,90}（用户坐标系1，工具坐标系0）。
+The robot moves from the current position to Cartesian coordinate point \{-500,100,200,150,0,90} (user coordinate system 1, tool coordinate system 0) at 50% speed, 20% acceleration, and 100% smoothing transition ratio using joint motion.
 
 # MovL
 
-# 原型
+# Prototype
 
 ```
 MovL(P,user,tool,a,v|speed,cp|r)
 ```
 
-# 描述
+# Description
 
-从当前位置以直线运动方式运动至目标点。
+Move from the current position to the target point using linear motion.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                   |
+| **Parameter Name** | **Type** | **Description**                                                                                  |
 | ------- | ------ | ---------------------------------------------------------------------------------------- |
-| P       | string | 目标点, 支持关节变量或位姿变量。格式为"joint = \{j1, j2, j3, j4, j5, j6}"或"pose = \{x, y, z, rx, ry, rz}"。 |
+| P       | string | Target point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                                    |
+| **Parameter Name** | **Type** | **Description**                                                                                   |
 | ------- | ------ | ----------------------------------------------------------------------------------------- |
-| user    | string | 格式为"user=index", index为已标定的用户坐标系索引。取值范围: \[0,50]。                                         |
-| tool    | string | 格式为"tool=index", index为已标定的工具坐标系索引。取值范围: \[0,50]。                                         |
-| a       | string | 格式为"a=value"。value表示执行该条指令时的机器人运动加速度比例。取值范围: \[1,100]。                                    |
-| v       | string | 格式为"v=value"。value表示执行该条指令时的机器人运动速度比例,与speed互斥。取值范围: \[1,100]。                            |
-| speed   | string | 格式为"speed=value"。value表示执行该条指令时的机器人运动目标速度,与v互斥,若同时存在以speed为准。取值范围: \[1,最大运动速度], 单位: mm/s。 |
-| cp      | string | 格式为"cp=value"。value表示平滑过渡比例,与r互斥。取值范围: \[0,100]。                                          |
-| r       | string | 格式为"r=value"。value表示平滑过渡半径,与cp互斥。若同时存在以r为准。单位: mm。                                        |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].                                         |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].                                         |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100].                                    |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command, mutually exclusive with speed. Range: \[1,100].                            |
+| speed   | string | Format is "speed=value". Value represents the robot motion target speed when executing this command, mutually exclusive with v, if both exist, speed takes precedence. Range: \[1, maximum motion speed], unit: mm/s. |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio, mutually exclusive with r. Range: \[0,100].                                          |
+| r       | string | Format is "r=value". Value represents the smoothing transition radius, mutually exclusive with cp. If both exist, r takes precedence. Unit: mm.                                        |
 
-# 返回
+# Return
 
 ```
 ErrorID, {ResultID}, MovL(P, user, tool, a, v| speed, cp|r);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例
+# Example
 
 ```
 MovL (pose={-500,100,200,150,0,90}, v=60)
 ```
 
-机器人从当前位置以60%的速度通过直线运动方式运动至笛卡尔坐标点\{-500,100,200,150,0,90}。
+The robot moves from the current position to Cartesian coordinate point \{-500,100,200,150,0,90} at 60% speed using linear motion.
 
 # MovLIO
 
-# 原型
+# Prototype
 
 ```
 MovLIO(P,{Mode,Distance,Index,Status},...,{Mode,Distance,Index,Status},user,tool,a,v|speed,cp|r)
 ```
 
-# 描述
+# Description
 
-从当前位置以直线运动方式运动至目标点，运动时并行设置数字输出端口状态。
+Move from the current position to the target point using linear motion, while setting digital output port status in parallel during the motion.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                   |
+| **Parameter Name** | **Type** | **Description**                                                                                  |
 | ------- | ------ | ---------------------------------------------------------------------------------------- |
-| P       | string | 目标点, 支持关节变量或位姿变量。格式为"joint = \{j1, j2, j3, j4, j5, j6}"或"pose = \{x, y, z, rx, ry, rz}"。 |
+| P       | string | Target point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". |
 
-\{Mode,Distance,Index,Status}为并行数字输出参数，用于设置当机器人运动到指定距离或百分比时，触发指定DO。可设置多组，最少设置一组数据；参数具体含义如下：
+\{Mode,Distance,Index,Status} are parallel digital output parameters, used to set when the robot moves to a specified distance or percentage, trigger the specified DO. Multiple groups can be set, with a minimum of one group of data. The specific meanings of the parameters are as follows:
 
-| **参数名**  | **类型** | **说明**                                                                                                                                                                          |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                                                          |
 | -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mode     | int    | 设置触发模式。0: 表示百分比触发1: 表示距离触发                                                                                                                                                      |
-| Distance | int    | 运行指定的距离。当Mode为0时, Distance表示起始点与目标点之间距离的百分比; 取值范围: (0,100)。当Mode为1时, Distance表示离起始点或目标点的距离; 单位: mm。Distance为0时, 表示起点即触发。Distance为正数时, 表示离起点的百分比/距离。Distance为负数时, 表示离目标点的百分比/距离。 |
-| Index    | int    | DO端子的编号。取值范围: \[1,24]或\[100,1000]。当取值范围为\[100,1000]时, 需要有拓展IO模块的硬件支持。不同机型, 取值范围有所差异。                                                                                            |
-| Status   | int    | 要设置的DO状态, 0表示无信号 (DO关闭), 1表示有信号 (DO开启)。                                                                                                                                         |
+| Mode     | int    | Set trigger mode. 0: percentage trigger 1: distance trigger                                                                                                                                                      |
+| Distance | int    | Run the specified distance. When Mode is 0, Distance represents the percentage of the distance between the start point and the target point; range: (0,100). When Mode is 1, Distance represents the distance from the start point or target point; unit: mm. When Distance is 0, it means trigger at the start point. When Distance is a positive number, it represents the percentage/distance from the start point. When Distance is a negative number, it represents the percentage/distance from the target point. |
+| Index    | int    | DO terminal number. Range: \[1,24] or \[100,1000]. When the range is \[100,1000], hardware support for the expansion IO module is required. The range varies depending on the model.                                                                                            |
+| Status   | int    | DO status to set, 0 means no signal (DO off), 1 means signal present (DO on).                                                                                                                                         |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                                 |
+| **Parameter Name** | **Type** | **Description**                                                                                |
 | ------- | ------ | -------------------------------------------------------------------------------------- |
-| user    | string | 格式为"user=index", index为已标定的用户坐标系索引。取值范围:\[0,50]。                                       |
-| tool    | string | 格式为"tool=index", index为已标定的工具坐标系索引。取值范围:\[0,50]。                                       |
-| a       | string | 格式为"a=value"。value表示执行该条指令时的机器人运动加速度比例。取值范围:\[1,100]。                                  |
-| v       | string | 格式为"v=value"。value表示执行该条指令时的机器人运动速度比例,与speed互斥。取值范围:\[1,100]。                          |
-| speed   | string | 格式为"speed=value"。value表示执行该条指令时的机器人运动目标速度,与v互斥,若同时存在以speed为准。取值范围:\[1,最大运动速度],单位:mm/s。 |
-| cp      | string | 格式为"cp=value"。value表示平滑过渡比例,与r互斥。取值范围:\[0,100]。                                        |
-| r       | string | 格式为"r=value"。value表示平滑过渡半径,与cp互斥,若同时存在以r为准。单位:mm。                                      |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].                                       |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].                                       |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100].                                  |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command, mutually exclusive with speed. Range: \[1,100].                          |
+| speed   | string | Format is "speed=value". Value represents the robot motion target speed when executing this command, mutually exclusive with v, if both exist, speed takes precedence. Range: \[1, maximum motion speed], unit: mm/s. |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio, mutually exclusive with r. Range: \[0,100].                                        |
+| r       | string | Format is "r=value". Value represents the smoothing transition radius, mutually exclusive with cp, if both exist, r takes precedence. Unit: mm.                                      |
 
-# 返回
+# Return
 
 ```
 ErrorID, {ResultID}, MovLIO(P, {Mode, Distance, Index, Status}, ..., {Mode, Distance, Index, Status}, user, tool, a, v | speed, cp | r);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例1
+# Example 1
 
 ​$\text{MovLIO}(\text{pose}=\{-500,100,200,150,0,90\},\{\text{0},\text{30},\text{2},\text{1}\})$​
 
-机器人从当前位置通过直线运动方式运动至笛卡尔坐标点\{-500,100,200,150,0,90}，当运动到距离起点30%的位置时，将DO2设置为打开。
+The robot moves from the current position to Cartesian coordinate point \{-500,100,200,150,0,90} using linear motion. When it reaches 30% of the distance from the start point, set DO2 to ON.
 
-当前点P1DO2=ON30%
+Current pointP1DO2=ON30%
 
-# 示例2
+# Example 2
 
 ​$\text{MovLIO}(\text{pose}=\{-500,100,200,150,0,90\},\{ 1,\ -15,\ 3,\ \emptyset\})$​
 
-机器人从当前位置通过直线运动方式运动至笛卡尔坐标点\{-500,100,200,150,0,90}，当运动到距离终点15mm的位置时，将DO3设置为关闭。
+The robot moves from the current position to Cartesian coordinate point \{-500,100,200,150,0,90} using linear motion. When it reaches 15mm from the end point, set DO3 to OFF.
 
-P1当前点DO3=OFF15mm
+P1Current pointDO3=OFF15mm
 
 # MovJIO
 
-# 原型
+# Prototype
 
 ```
 MovJIO(P,{Mode,Distance,Index,Status},...,{Mode,Distance,Index,Status},user,tool,a,v,cp)
 ```
 
-# 描述
+# Description
 
-从当前位置以关节运动方式运动至目标点，运动时并行设置数字输出端口状态。
+Move from the current position to the target point using joint motion, while setting digital output port status in parallel during the motion.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                   |
+| **Parameter Name** | **Type** | **Description**                                                                                  |
 | ------- | ------ | ---------------------------------------------------------------------------------------- |
-| P       | string | 目标点, 支持关节变量或位姿变量。格式为"joint = \{j1, j2, j3, j4, j5, j6}"或"pose = \{x, y, z, rx, ry, rz}"。 |
+| P       | string | Target point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". |
 
-\{Mode,Distance,Index,Status}为并行数字输出参数，用于设置当机器人运动到指定距离或百分比时，触发指定DO。可设置多组，最少设置一组数据；参数具体含义如下：
+\{Mode,Distance,Index,Status} are parallel digital output parameters, used to set when the robot moves to a specified distance or percentage, trigger the specified DO. Multiple groups can be set, with a minimum of one group of data. The specific meanings of the parameters are as follows:
 
-| **参数名**  | **类型** | **说明**                                                                                                                                                                          |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                                                          |
 | -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mode     | int    | 设置触发模式。0: 表示百分比触发1: 表示距离触发                                                                                                                                                      |
-| Distance | int    | 运行指定的距离。当Mode为0时, Distance表示起始点与目标点之间距离的百分比; 取值范围: (0,100)。当Mode为1时, Distance表示离起始点或目标点的距离; 单位: mm。Distance为0时, 表示起点即触发。Distance为正数时, 表示离起点的百分比/距离。Distance为负数时, 表示离目标点的百分比/距离。 |
-| Index    | int    | DO端子的编号。取值范围: \[1,24]或\[100,1000]。当取值范围为\[100,1000]时, 需要有拓展IO模块的硬件支持。不同机型, 取值范围有所差异。                                                                                            |
-| Status   | int    | 要设置的DO状态, 0表示无信号 (DO关闭), 1表示有信号 (DO开启)。                                                                                                                                         |
+| Mode     | int    | Set trigger mode. 0: percentage trigger 1: distance trigger                                                                                                                                                      |
+| Distance | int    | Run the specified distance. When Mode is 0, Distance represents the percentage of the distance between the start point and the target point; range: (0,100). When Mode is 1, Distance represents the distance from the start point or target point; unit: mm. When Distance is 0, it means trigger at the start point. When Distance is a positive number, it represents the percentage/distance from the start point. When Distance is a negative number, it represents the percentage/distance from the target point. |
+| Index    | int    | DO terminal number. Range: \[1,24] or \[100,1000]. When the range is \[100,1000], hardware support for the expansion IO module is required. The range varies depending on the model.                                                                                            |
+| Status   | int    | DO status to set, 0 means no signal (DO off), 1 means signal present (DO on).                                                                                                                                         |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                 |
+| **Parameter Name** | **Type** | **Description**                                                |
 | ------- | ------ | ------------------------------------------------------ |
-| user    | string | 格式为“user=index”, index为已标定的用户坐标系索引。取值范围: \[0,50]。      |
-| tool    | string | 格式为“tool=index”, index为已标定的工具坐标系索引。取值范围: \[0,50]。      |
-| a       | int    | 格式为“a=value”。value表示执行该条指令时的机器人运动加速度比例。取值范围: \[1,100]。 |
-| v       | int    | 格式为“v=value”。value表示执行该条指令时的机器人运动速度比例。取值范围: \[1,100]。  |
-| cp      | int    | 格式为“cp=value”。value表示平滑过渡比例。取值范围: \[0,100]。            |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].      |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].      |
+| a       | int    | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100]. |
+| v       | int    | Format is "v=value". Value represents the robot motion speed ratio when executing this command. Range: \[1,100].  |
+| cp      | int    | Format is "cp=value". Value represents the smoothing transition ratio. Range: \[0,100].            |
 
-# 返回
+# Return
 
 ```
 ErrorID, {ResultID}, MovJIO(P, {Mode, Distance, Index, Status}, ..., {Mode, Distance, Index, Status}, user, tool, a, v, cp);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例1
+# Example 1
 
 ​$\text{MovJIO}(\text{pose}=\{-500,100,200,150,0,90\},\{0,30,2,1\})$​
 
-机器人从当前位置通过关节运动方式运动至笛卡尔坐标点\{-500,100,200,150,0,90}\$，当运动到距离起点30%的位置时，将DO2设置为打开。
+The robot moves from the current position to Cartesian coordinate point \{-500,100,200,150,0,90} using joint motion. When it reaches 30% of the distance from the start point, set DO2 to ON.
 
-P1当前点(关节角合成量(关节角合成量DO2=ON30%
+P1Current point(Joint angle composition(Joint angle compositionDO2=ON30%
 
-# 示例2
+# Example 2
 
 ​$\text{MovJIO}(\text{pose}=\{-500,100,200,150,0,90\},\{ 1,\ -15,\ 3,\ 0\})$​
 
-机器人从当前位置通过关节运动方式运动至笛卡尔坐标点\{-500,100,200,150,0,90}，当运动到距离终点还有15°的位置时，将DO3设置为关闭。
+The robot moves from the current position to Cartesian coordinate point \{-500,100,200,150,0,90} using joint motion. When it reaches 15° from the end point, set DO3 to OFF.
 
-P1当前点(关节角合成量(关节角合成量DO3=OFF150
+P1Current point(Joint angle composition(Joint angle compositionDO3=OFF150
 
 # Arc
 
-# 原型
+# Prototype
 
 ```
 Arc(P1,P2,user,tool,a,v|speed,cp|r,mode)
 ```
 
-# 描述
+# Description
 
-从当前位置以圆弧插补方式运动至目标点。
+Move from the current position to the target point using arc interpolation.
 
-需要通过当前位置，圆弧中间点，运动目标点三个点确定一个圆弧，因此当前位置不能在P1和P2确定的直线上。
+Three points are needed to determine an arc: the current position, the arc intermediate point, and the motion target point. Therefore, the current position cannot be on the line determined by P1 and P2.
 
-P1当前点P2
+P1Current pointP2
 
-运动过程中的机械臂末端姿态通过当前点和P2点的姿态插补算出，P1点的姿态不参与运算（即运动过程中机械臂到达P1点时的姿态可能与示教姿态不同）。
+The end-effector attitude during the motion is calculated through interpolation from the current point and P2 point attitudes. The P1 point attitude does not participate in the calculation (i.e., the attitude when the robot arm reaches P1 during the motion may be different from the taught attitude).
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                        |
+| **Parameter Name** | **Type** | **Description**                                                                                       |
 | ------- | ------ | --------------------------------------------------------------------------------------------- |
-| P1      | string | 圆弧中间点, 支持关节变量或位姿变量。格式为 "joint = \{j1, j2, j3, j4, j5, j6}" 或 "pose = \{x, y, z, rx, ry, rz}”。 |
-| P2      | string | 运动目标点, 支持关节变量或位姿变量。格式为 "joint = \{j1, j2, j3, j4, j5, j6}" 或 "pose = \{x, y, z, rx, ry, rz}”。 |
+| P1      | string | Arc intermediate point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". |
+| P2      | string | Motion target point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                                                                                                                                                                                                                                           |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                                                                                                                                                                                                           |
 | ------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| user    | string | 格式为"user=index", index为已标定的用户坐标系索引。取值范围: \[0,50]。                                                                                                                                                                                                                                                                                |
-| tool    | string | 格式为"tool=index", index为已标定的工具坐标系索引。取值范围: \[0,50]。                                                                                                                                                                                                                                                                                |
-| a       | string | 格式为"a=value"。value表示执行该条指令时的机械臂运动加速度比例。取值范围: \[1,100]。                                                                                                                                                                                                                                                                           |
-| v       | string | 格式为"v=value"。value表示执行该条指令时的机械臂运动速度比例。取值范围: \[1,100]。                                                                                                                                                                                                                                                                            |
-| speed   | string | 格式为"speed=value"。value表示执行该条指令时的机械臂运动目标速度,与v互斥,若同时存在以speed为准。取值范围: \[1,最大运动速度], 单位: mm/s。                                                                                                                                                                                                                                        |
-| cp      | string | 格式为"cp=value"。value表示平滑过渡比例,与r互斥。取值范围: \[0,100]。                                                                                                                                                                                                                                                                                 |
-| r       | string | 格式为"r=value"。value表示平滑过渡半径,与cp互斥,若同时存在以r为准。单位:mm。平滑过渡会改变机械臂运动轨迹,对DO输出的时机造成影响,请谨慎使用。                                                                                                                                                                                                                                              |
-| mode    | int    | 格式为"mode=value"。通过设置姿态控制参数,对插补过程中机器人相对圆弧的姿态进行自适应控制,满足不同场景的使用需求。取值范围: \[0,2]。• mode=0: 线性模式。从当前姿态插值到P2目标位姿,忽略P1姿态。该模式下,只能实现小于$180^{\circ}$的姿态变化。适用于对机器人姿态无要求的场合。• mode=1: 过中间点模式。从当前姿态开始,经过中间点位姿,插值到P2目标位姿。主要用于焊接应用中。• mode=2: 固定模式。从当前姿态开始,TCP保持相对于圆弧切线的方向不变,忽略P1和P2姿态。该模式下,姿态旋转角度与圆弧角度一致,可实现超过$180^{\circ}$的姿态变化。主要用于涂胶、打磨等应用中。 |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].                                                                                                                                                                                                                                                                                |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].                                                                                                                                                                                                                                                                                |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100].                                                                                                                                                                                                                                                                           |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command. Range: \[1,100].                                                                                                                                                                                                                                                                            |
+| speed   | string | Format is "speed=value". Value represents the robot motion target speed when executing this command, mutually exclusive with v, if both exist, speed takes precedence. Range: \[1, maximum motion speed], unit: mm/s.                                                                                                                                                                                                                                        |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio, mutually exclusive with r. Range: \[0,100].                                                                                                                                                                                                                                                                                 |
+| r       | string | Format is "r=value". Value represents the smoothing transition radius, mutually exclusive with cp, if both exist, r takes precedence. Unit: mm. Smoothing transition will change the robot motion trajectory and affect the timing of DO output, use with caution.                                                                                                                                                                                                                                              |
+| mode    | int    | Format is "mode=value". By setting attitude control parameters, the robot's attitude relative to the arc during interpolation is adaptively controlled to meet the usage requirements of different scenarios. Range: \[0,2]. • mode=0: Linear mode. Interpolate from current attitude to P2 target pose, ignoring P1 attitude. In this mode, only attitude changes less than $180^{\circ}$ can be achieved. Suitable for occasions with no requirements on robot attitude. • mode=1: Pass through intermediate point mode. Starting from current attitude, pass through intermediate point pose, interpolate to P2 target pose. Mainly used in welding applications. • mode=2: Fixed mode. Starting from current attitude, TCP maintains a constant direction relative to the arc tangent, ignoring P1 and P2 attitudes. In this mode, the attitude rotation angle is consistent with the arc angle, and attitude changes greater than $180^{\circ}$ can be achieved. Mainly used in applications such as dispensing and polishing. |
 
-P2P2P2P1P1P1Current PoseCurrent PoseCurrent Pose线性模式过中间点模式固定模式示教姿态实际轨迹姿态
+P2P2P2P1P1P1Current PoseCurrent PoseCurrent PoseLinear modePass through intermediate point modeFixed modeTaught attitudeActual trajectory attitude
 
-# i 说明：
+# Note:
 
-· 当设置为mode=1（过中间点模式）时，为了保证圆弧运动速度的均匀性，示教圆弧轨迹时，尽可能保证中间点的位置处于实际圆弧的一半。
+· When set to mode=1 (pass through intermediate point mode), to ensure the uniformity of arc motion speed, when teaching the arc trajectory, try to ensure the intermediate point position is at the middle of the actual arc.
 
-●当设置为mode=1(过中间点模式)时，需要适当调整各点姿态，保证起始点到中间点的姿态变化与中间点到目标点的姿态变化角度接近。否则所构造的姿态曲线可能超出机器人的可达范围，运行时会报错。
+●When set to mode=1 (pass through intermediate point mode), it is necessary to appropriately adjust the attitude of each point to ensure the attitude change from the starting point to the intermediate point is close to the attitude change from the intermediate point to the target point. Otherwise, the constructed attitude curve may exceed the robot's reachable range, and an error will be reported during operation.
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},Arc(P1,P2,user,tool,a,v|speed,cp|r,mode);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例
+# Example
 
 ```
 Arc(pose={-350,-200,200,150,0,90},pose={-300,-250,200,150,0,90})
 ```
 
-机器人从当前位置通过圆弧运动方式经由笛卡尔坐标点\{-350,-200,200,150,0,90}运动至笛卡尔坐标点\{-300,-250,200,150,0,90}。
+The robot moves from the current position to Cartesian coordinate point \{-300,-250,200,150,0,90} via Cartesian coordinate point \{-350,-200,200,150,0,90} using arc motion.
 
 # ArcIO
 
-# 原型：
+# Prototype:
 
 ```
 ArcIO(P1,P2,{Mode,Distance,Index,Status},...,{Mode,Distance,Index,Status},user,tool,a,v|speed,
 cp|r,mode)
 ```
 
-# 描述:
+# Description:
 
-在圆弧插补过程中并行输出指定DO信号。适用于涂胶应用场景，控制涂胶头的提前出胶和提前收胶（如音响涂胶，轨迹主要为圆弧）。
+Output specified DO signals in parallel during arc interpolation. Suitable for dispensing application scenarios, controlling the early dispensing and early stopping of the dispensing head (e.g., speaker dispensing, where the trajectory is mainly arcs).
 
-需要通过当前点，P1，P2三个点确定一个圆弧，因此当前位置不能在P1和P2确定的直线上。
+Three points are needed to determine an arc: the current point, P1, and P2. Therefore, the current position cannot be on the line determined by P1 and P2.
 
-P1P2当前点
+P1P2Current point
 
-# 必选参数：
+# Required Parameters:
 
-| **参数名** | **类型** | **说明**                                                                                     |
+| **Parameter Name** | **Type** | **Description**                                                                                     |
 | ------- | ------ | ------------------------------------------------------------------------------------------ |
-| P1      | string | 圆弧中间点, 支持关节变量或位姿变量。格式为"joint = \{j1, j2, j3, j4, j5, j6}"或"pose = \{x, y, z, rx, ry, rz}"。 |
-| P2      | string | 运动目标点, 支持关节变量或位姿变量。格式为"joint = \{j1, j2, j3, j4, j5, j6}"或"pose = \{x, y, z, rx, ry, rz}"。 |
+| P1      | string | Arc intermediate point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". |
+| P2      | string | Motion target point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". |
 
-\{Mode,Distance,Index,Status}为并行数字输出参数，用于设置当机器人运动到指定距离或百分比时，触发指定DO。可设置多组，最少设置一组数据；参数具体含义如下：
+\{Mode,Distance,Index,Status} are parallel digital output parameters, used to set when the robot moves to a specified distance or percentage, trigger the specified DO. Multiple groups can be set, with a minimum of one group of data. The specific meanings of the parameters are as follows:
 
-| **参数名**  | **类型** | **说明**                                                                                                                                                                          |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                                                          |
 | -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mode     | int    | 设置触发模式。0: 表示百分比触发1: 表示距离触发                                                                                                                                                      |
-| Distance | int    | 运行指定的距离。当Mode为0时, Distance表示起始点与目标点之间距离的百分比; 取值范围: (0,100)。当Mode为1时, Distance表示离起始点或目标点的距离; 单位: mm。Distance为0时, 表示起点即触发。Distance为正数时, 表示离起点的百分比/距离。Distance为负数时, 表示离目标点的百分比/距离。 |
-| Index    | int    | DO端子的编号。取值范围: \[1,24]或\[100,1000]。当取值范围为\[100,1000]时, 需要有拓展IO模块的硬件支持。不同机型, 取值范围有所差异。                                                                                            |
-| Status   | int    | 要设置的DO状态, 0表示无信号 (DO关闭), 1表示有信号 (DO开启)。                                                                                                                                         |
+| Mode     | int    | Set trigger mode. 0: percentage trigger 1: distance trigger                                                                                                                                                      |
+| Distance | int    | Run the specified distance. When Mode is 0, Distance represents the percentage of the distance between the start point and the target point; range: (0,100). When Mode is 1, Distance represents the distance from the start point or target point; unit: mm. When Distance is 0, it means trigger at the start point. When Distance is a positive number, it represents the percentage/distance from the start point. When Distance is a negative number, it represents the percentage/distance from the target point. |
+| Index    | int    | DO terminal number. Range: \[1,24] or \[100,1000]. When the range is \[100,1000], hardware support for the expansion IO module is required. The range varies depending on the model.                                                                                            |
+| Status   | int    | DO status to set, 0 means no signal (DO off), 1 means signal present (DO on).                                                                                                                                         |
 
-# 可选参数:
+# Optional Parameters:
 
-| **参数名** | **类型** | **说明**                                                                                                                                                                                                                                                                                               |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                                                                                                                                                                               |
 | ------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| user    | string | 格式为"user=index", index为已标定的用户坐标系索引。取值范围:\[0,50]。                                                                                                                                                                                                                                                     |
-| tool    | string | 格式为"tool=index", index为已标定的工具坐标系索引。取值范围:\[0,50]。                                                                                                                                                                                                                                                     |
-| a       | string | 格式为"a=value"。value表示执行该条指令时的机械臂运动加速度比例。取值范围:\[1,100]。                                                                                                                                                                                                                                                |
-| v       | string | 格式为"v=value"。value表示执行该条指令时的机械臂运动速度比例。取值范围:\[1,100]。                                                                                                                                                                                                                                                 |
-| speed   | string | 格式为"speed=value"。value表示执行该条指令时的机械臂运动目标速度,与v互斥,若同时存在以speed为准。取值范围:\[1,最大运动速度],单位:mm/s。                                                                                                                                                                                                               |
-| cp      | string | 格式为"cp=value"。value表示平滑过渡比例,与r互斥。取值范围:\[0,100]。                                                                                                                                                                                                                                                      |
-| r       | string | 格式为"r=value"。value表示平滑过渡半径,与cp互斥,若同时存在以r为准。单位:mm。平滑过渡会改变机械臂运动轨迹,对DO输出的时机造成影响,请谨慎使用。                                                                                                                                                                                                                  |
-| mode    | int    | 格式为"mode=value"。通过设置姿态控制参数,对插补过程中机器人相对圆弧的姿态进行自适应控制,满足不同场景的使用需求。取值范围:\[0,2]。mode=0:线性模式。从当前姿态插值到P2目标位姿,忽略P1姿态。该模式下,只能实现小于180°的姿态变化。适用于对机器人姿态无要求的场合。mode=1:过中间点模式。从当前姿态开始,经过中间点位姿,插值到P2目标位姿。主要用于焊接应用中。mode=2:固定模式。从当前姿态开始,TCP保持相对于圆弧切线的方向不变,忽略P1和P2姿态。该模式下,姿态旋转角度与圆弧角度一致,可实现超过180°的姿态变化。主要用于涂胶、打磨等应用中。 |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].                                                                                                                                                                                                                                                     |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].                                                                                                                                                                                                                                                     |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100].                                                                                                                                                                                                                                                |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command. Range: \[1,100].                                                                                                                                                                                                                                                 |
+| speed   | string | Format is "speed=value". Value represents the robot motion target speed when executing this command, mutually exclusive with v, if both exist, speed takes precedence. Range: \[1, maximum motion speed], unit: mm/s.                                                                                                                                                                                                               |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio, mutually exclusive with r. Range: \[0,100].                                                                                                                                                                                                                                                      |
+| r       | string | Format is "r=value". Value represents the smoothing transition radius, mutually exclusive with cp, if both exist, r takes precedence. Unit: mm. Smoothing transition will change the robot motion trajectory and affect the timing of DO output, use with caution.                                                                                                                                                                                                                  |
+| mode    | int    | Format is "mode=value". By setting attitude control parameters, the robot's attitude relative to the arc during interpolation is adaptively controlled to meet the usage requirements of different scenarios. Range: \[0,2].mode=0:Linear mode. Interpolate from current attitude to P2 target pose, ignoring P1 attitude. In this mode, only attitude changes less than 180° can be achieved. Suitable for occasions with no requirements on robot attitude.mode=1:Pass through intermediate point mode. Starting from current attitude, pass through intermediate point pose, interpolate to P2 target pose. Mainly used in welding applications.mode=2:Fixed mode. Starting from current attitude, TCP maintains a constant direction relative to the arc tangent, ignoring P1 and P2 attitudes. In this mode, the attitude rotation angle is consistent with the arc angle, and attitude changes greater than 180° can be achieved. Mainly used in applications such as dispensing and polishing. |
 
-P2P2P2P1P1P1Current PoseCurrent PoseCurrent Pose线性模式过中间点模式固定模式示教姿态实际轨迹姿态
+P2P2P2P1P1P1Current PoseCurrent PoseCurrent PoseLinear modePass through intermediate point modeFixed modeTaught attitudeActual trajectory attitude
 
-# i说明:
+# Note:
 
-●当设置为mode=1(过中间点模式)时，为了保证圆弧运动速度的均匀性，示教圆弧轨迹时，尽可能保证中间点的位置处于实际圆弧的一半。
+●When set to mode=1 (pass through intermediate point mode), to ensure the uniformity of arc motion speed, when teaching the arc trajectory, try to ensure the intermediate point position is at the middle of the actual arc.
 
-● 当设置为mode=1(过中间点模式)时，需要适当调整各点姿态，保证起始点到中间点的姿态变化与中间点到目标点的姿态变化角度接近。否则所构造的姿态曲线可能超出机器人的可达范围，运行时会报错。
+● When set to mode=1 (pass through intermediate point mode), it is necessary to appropriately adjust the attitude of each point to ensure the attitude change from the starting point to the intermediate point is close to the attitude change from the intermediate point to the target point. Otherwise, the constructed attitude curve may exceed the robot's reachable range, and an error will be reported during operation.
 
-# ▲注意:
+# ▲Note:
 
-若Mode为0，Distance不在\[0,100]范围内，会报参数超限错误。
+If Mode is 0 and Distance is not within \[0,100] range, a parameter out-of-range error will be reported.
 
-# 示例：
+# Example:
 
 ```
 ArcIO(pose={-1140.580322,-31.398853,93.642189,10.629999,21.659998,-86.040001},pose={-1220.2070,31,-281.265533,93.642189,10.629999,21.659998,-86.040001},{0,25,1,1},{0,50,2,1},{0,75,3,1},{0,1,00,4,1},user=1,tool=2,a=20,v=50,cp=100)
 ```
 
-机械臂经中间点P1向目标点P2进行圆弧运动，当运动到距离起点25%的位置时，将DO1设置为开。当运动到距离起点50%的位置时，将DO2设置为开。当运动到距离起点75%的位置时，将DO3设置为开。当运动到终点位置时，将DO4设置为开。
+The robot arm moves from the current position via intermediate point P1 to target point P2 in arc motion. When it reaches 25% of the distance from the start point, set DO1 to ON. When it reaches 50% of the distance from the start point, set DO2 to ON. When it reaches 75% of the distance from the start point, set DO3 to ON. When it reaches the end point, set DO4 to ON.
 
 # Circle
 
-# 原型
+# Prototype
 
 ```
 Circle(P1,P2,count,user,tool,a,v|speed,cp|r,mode)
 ```
 
-# 描述
+# Description
 
-从当前位置进行整圆插补运动，运动指定圈数后重新回到当前位置。
+Perform full circle interpolation motion from the current position, returning to the current position after the specified number of revolutions.
 
-需要通过当前位置，P1，P2三个点确定一个整圆，因此当前位置不能在P1和P2确定的直线上，且三个点确定的整圆不能超出机器人的运动范围。
+Three points are needed to determine a full circle: the current position, P1, and P2. Therefore, the current position cannot be on the line determined by P1 and P2, and the full circle determined by the three points cannot exceed the robot's motion range.
 
-P1P2当前点
+P1P2Current point
 
-运动过程中的机械臂末端姿态通过当前点和P2点的姿态插补算出，P1点的姿态不参与运算（即运动过程中机械臂到达P1点时的姿态可能与示教姿态不同）。
+The end-effector attitude during the motion is calculated through interpolation from the current point and P2 point attitudes. The P1 point attitude does not participate in the calculation (i.e., the attitude when the robot arm reaches P1 during the motion may be different from the taught attitude).
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                      |
+| **Parameter Name** | **Type** | **Description**                                                                                      |
 | ------- | ------ | ------------------------------------------------------------------------------------------- |
-| P1      | string | 整圆中间点, 支持关节变量或位姿变量。格式为"joint = \{j1, j2, j3, j4, j5, j6}"或"pose = \{x, y, z, rx, ry, rz}"。  |
-| P2      | string | 整圆结束点点, 支持关节变量或位姿变量。格式为"joint = \{j1, j2, j3, j4, j5, j6}"或"pose = \{x, y, z, rx, ry, rz}"。 |
-| count   | int    | 进行整圆运动的圈数, 取值范围: \[1,999]。                                                                  |
+| P1      | string | Full circle intermediate point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}".  |
+| P2      | string | Full circle end point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". |
+| count   | int    | Number of revolutions for full circle motion, range: \[1,999].                                                                  |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                                                                                                                                                                                                                                          |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                                                                                                                                                                                                          |
 | ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| user    | string | 格式为"user=index", index为已标定的用户坐标系索引。取值范围: \[0,50]。                                                                                                                                                                                                                                                                               |
-| tool    | string | 格式为"tool=index", index为已标定的工具坐标系索引。取值范围: \[0,50]。                                                                                                                                                                                                                                                                               |
-| a       | string | 格式为"a=value"。value表示执行该条指令时的机械臂运动加速度比例。取值范围: \[1,100]。                                                                                                                                                                                                                                                                          |
-| v       | string | 格式为"v=value"。value表示执行该条指令时的机械臂运动速度比例。取值范围: \[1,100]。                                                                                                                                                                                                                                                                           |
-| speed   | string | 格式为“speed=value”。value表示执行该条指令时的机械臂运动目标速度,与v互斥,若同时存在以speed为准。取值范围:\[1,最大运动速度],单位:mm/s。                                                                                                                                                                                                                                          |
-| cp      | string | 格式为“cp=value”。value表示平滑过渡比例,与r互斥。取值范围:\[0,100]。                                                                                                                                                                                                                                                                                 |
-| r       | string | 格式为“r=value”。value表示平滑过渡半径,与cp互斥,若同时存在以为准。单位:mm。平滑过渡会改变机械臂运动轨迹,对DO输出的时机造成影响,请谨慎使用。                                                                                                                                                                                                                                              |
-| mode    | int    | 格式为“mode=value”。通过设置姿态控制参数,对插补过程中机器人相对圆弧的姿态进行自适应控制,满足不同场景的使用需求。取值范围:\[0,2]。• mode=0: 线性模式。从当前姿态插值到P2目标位姿,忽略P1姿态。该模式下,只能实现小于$180^{\circ}$的姿态变化。适用于对机器人姿态无要求的场合。• mode=1: 过中间点模式。从当前姿态开始,经过中间点位姿,插值到P2目标位姿。主要用于焊接应用中。• mode=2: 固定模式。从当前姿态开始,TCP保持相对于圆弧切线的方向不变,忽略P1和P2姿态。该模式下,姿态旋转角度与圆弧角度一致,可实现超过$180^{\circ}$的姿态变化。主要用于涂胶、打磨等应用中。 |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].                                                                                                                                                                                                                                                                               |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].                                                                                                                                                                                                                                                                               |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100].                                                                                                                                                                                                                                                                          |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command. Range: \[1,100].                                                                                                                                                                                                                                                                           |
+| speed   | string | Format is "speed=value". Value represents the robot motion target speed when executing this command, mutually exclusive with v, if both exist, speed takes precedence. Range: \[1, maximum motion speed], unit: mm/s.                                                                                                                                                                                                                                          |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio, mutually exclusive with r. Range: \[0,100].                                                                                                                                                                                                                                                                                 |
+| r       | string | Format is "r=value". Value represents the smoothing transition radius, mutually exclusive with cp, if both exist, r takes precedence. Unit: mm. Smoothing transition will change the robot motion trajectory and affect the timing of DO output, use with caution.                                                                                                                                                                                                                                              |
+| mode    | int    | Format is "mode=value". By setting attitude control parameters, the robot's attitude relative to the arc during interpolation is adaptively controlled to meet the usage requirements of different scenarios. Range: \[0,2].• mode=0: Linear mode. Interpolate from current attitude to P2 target pose, ignoring P1 attitude. In this mode, only attitude changes less than $180^{\circ}$ can be achieved. Suitable for occasions with no requirements on robot attitude.• mode=1: Pass through intermediate point mode. Starting from current attitude, pass through intermediate point pose, interpolate to P2 target pose. Mainly used in welding applications.• mode=2: Fixed mode. Starting from current attitude, TCP maintains a constant direction relative to the arc tangent, ignoring P1 and P2 attitudes. In this mode, the attitude rotation angle is consistent with the arc angle, and attitude changes greater than $180^{\circ}$ can be achieved. Mainly used in applications such as dispensing and polishing. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},Circle(P1,P2,count,user,tool,a,v|speed,cp|r,mode);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例
+# Example
 
 ```
 Circle(pose={-350,-200,200,150,0,90},pose={-300,-250,200,150,0,90},1)
 ```
 
-机器人从当前位置经由笛卡尔坐标点\{-350,-200,200,150,0,90}和\{-300,-250,200,150,0,90}整圆运动一圈。
+The robot performs one full circle motion from the current position via Cartesian coordinate points \{-350,-200,200,150,0,90} and \{-300,-250,200,150,0,90}.
 
 # ServoJ
 
-# 原型
+# Prototype
 
 ```
 ServoJ(J1,J2,J3,J4,J5,J6,t,aheadtime,gain)
 ```
 
-# 描述
+# Description
 
-基于关节空间的动态跟随命令，一般用于在线控制的寸动功能，通过循环调用实现动态跟随。调用频率建议设置为33Hz，即循环调用的间隔时间为30ms。
+Dynamic following command based on joint space, generally used for inching function in online control, achieving dynamic following through cyclic calling. The recommended calling frequency is 33Hz, i.e., the cyclic calling interval is 30ms.
 
-# 注意：
+# Note:
 
-该指令不受全局速率影响，但受速度限制约束。
+This command is not affected by the global speed ratio, but is subject to speed limit constraints.
 
-t值设置过小时，机器人执行指令时会因为速度限制无法满足指定的t。
+When the t value is set too small, the robot will not be able to meet the specified t due to speed limit when executing the command.
 
-调用该指令前建议对运行点位进行速度规划，按照固定时间间隔t下发速度规划后的点位，保证机器人能平稳跟踪目标点位。
+Before calling this command, it is recommended to perform speed planning on the motion points, and send the speed-planned points at fixed time intervals t to ensure the robot can smoothly track the target points.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**           | **类型** | **说明**                      |
+| **Parameter Name**  | **Type** | **Description**                     |
 | ----------------- | ------ | --------------------------- |
-| J1,J2,J3,J4,J5,J6 | double | 点J1,J2,J3,J4,J5,J6轴位置，单位：度。 |
+| J1,J2,J3,J4,J5,J6 | double | Joint J1,J2,J3,J4,J5,J6 axis positions, unit: degrees. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名**   | **类型** | **说明**                                                                              |
+| **Parameter Name** | **Type** | **Description**                                                                             |
 | --------- | ------ | ----------------------------------------------------------------------------------- |
-| t         | float  | 格式为“t=value”。value表示该点位的运行时间，单位：s，取值范围:\[0.004,3600.0]，默认值0.1。                      |
-| aheadtime | float  | 格式为“aheadtime=value”。value表示提前量，作用类似于PID控制中的D项。标量，无单位，取值范围：\[20.0,100.0]，默认值50。     |
-| gain      | float  | 格式为“gain=value”。value表示目标位置的比例增益，作用类似于PID控制中的P项。标量，无单位，取值范围：\[200.0,1000.0]，默认值500。 |
+| t         | float  | Format is "t=value". Value represents the running time of this point, unit: s, range: \[0.004,3600.0], default 0.1.                      |
+| aheadtime | float  | Format is "aheadtime=value". Value represents the advance amount, functionally similar to the D term in PID control. Scalar, no unit, range: \[20.0,100.0], default 50.     |
+| gain      | float  | Format is "gain=value". Value represents the proportional gain of the target position, functionally similar to the P term in PID control. Scalar, no unit, range: \[200.0,1000.0], default 500. |
 
-aheadtime和gain参数共同决定机器人运动的响应时间和轨迹平滑度，较小的aheadtime值或较大的gain值能使机器人快速响应，但可能造成不稳定和抖动。
+The aheadtime and gain parameters jointly determine the response time and trajectory smoothness of robot motion. A smaller aheadtime value or larger gain value can make the robot respond quickly, but may cause instability and jitter.
 
-# 返回
+# Return
 
 ```
-ErrorID,{ResultID},ServoJ(J1,J2,J3,J4,J5,J6,t,aheadtime,gain)；
+ErrorID,{ResultID},ServoJ(J1,J2,J3,J4,J5,J6,t,aheadtime,gain);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例
+# Example
 
 ```
 ServoJ(0,0,-90,0,90,0,t=0.1,aheadtime=50,gain=500)
-// 间隔30ms循环调用，每次第三个参数加1
+// Cyclic calling at 30ms intervals, incrementing the third parameter by 1 each time
 ServoJ(0,0,-89,0,90,0,t=0.1,aheadtime=50,gain=500)
 ```
 
-J3轴进行步伐为1度的寸动。
+Perform 1-degree inching on the J3 axis.
 
 # ServoP
 
-# 原型
+# Prototype
 
 ```
 ServoP(X,Y,Z,Rx,Ry,Rz,t,aheadtime,gain)
 ```
 
-# 描述
+# Description
 
-基于笛卡尔空间的动态跟随命令，一般用于在线控制的寸动功能，通过循环调用实现动态跟随。调用频率建议设置为33Hz，即循环调用的间隔时间为30ms。
+Dynamic following command based on Cartesian space, generally used for inching function in online control, achieving dynamic following through cyclic calling. The recommended calling frequency is 33Hz, i.e., the cyclic calling interval is 30ms.
 
-# 注意：
+# Note:
 
-该指令不受全局速率影响，但受速度限制约束。
+This command is not affected by the global speed ratio, but is subject to speed limit constraints.
 
-t值设置过小时，机器人执行指令时会因为速度限制无法满足指定的t。
+When the t value is set too small, the robot will not be able to meet the specified t due to speed limit when executing the command.
 
-调用该指令前建议对运行点位进行速度规划，按照固定时间间隔t下发速度规划后的点位，保证机器人能平稳跟踪目标点位。
+Before calling this command, it is recommended to perform speed planning on the motion points, and send the speed-planned points at fixed time intervals t to ensure the robot can smoothly track the target points.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**        | **类型** | **说明**                                                                             |
+| **Parameter Name**   | **Type** | **Description**                                                                            |
 | -------------- | ------ | ---------------------------------------------------------------------------------- |
-| X,Y,Z,Rx,Ry,Rz | double | 目标点位位姿变量。X,Y,Z单位：毫米，Rx,Ry,Rz单位：度。参考坐标系为全局用户和工具坐标系，详见设置相关指令中的User和Tool指令说明（默认值均为0）。 |
+| X,Y,Z,Rx,Ry,Rz | double | Target point pose variables. X,Y,Z unit: mm, Rx,Ry,Rz unit: degrees. Reference coordinate system is the global user and tool coordinate systems. See the User and Tool command descriptions in the settings-related commands for details (default values are both 0). |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名**   | **类型** | **说明**                                                                              |
+| **Parameter Name** | **Type** | **Description**                                                                             |
 | --------- | ------ | ----------------------------------------------------------------------------------- |
-| t         | float  | 格式为“t=value”。value表示该点位的运行时间，单位：s，取值范围：\[0.004,3600.0]，默认值0.1。                      |
-| aheadtime | float  | 格式为“aheadtime=value”。value表示提前量，作用类似于PID控制中的D项。标量，无单位，取值范围：\[20.0,100.0]，默认值50。     |
-| gain      | float  | 格式为“gain=value”。value表示目标位置的比例增益，作用类似于PID控制中的P项。标量，无单位，取值范围：\[200.0,1000.0]，默认值500。 |
+| t         | float  | Format is "t=value". Value represents the running time of this point, unit: s, range: \[0.004,3600.0], default 0.1.                      |
+| aheadtime | float  | Format is "aheadtime=value". Value represents the advance amount, functionally similar to the D term in PID control. Scalar, no unit, range: \[20.0,100.0], default 50.     |
+| gain      | float  | Format is "gain=value". Value represents the proportional gain of the target position, functionally similar to the P term in PID control. Scalar, no unit, range: \[200.0,1000.0], default 500. |
 
-aheadtime和gain参数共同决定机器人运动的响应时间和轨迹平滑度，较小的aheadtime值或较大的gain值能使机器人快速响应，但可能造成不稳定和抖动。
+The aheadtime and gain parameters jointly determine the response time and trajectory smoothness of robot motion. A smaller aheadtime value or larger gain value can make the robot respond quickly, but may cause instability and jitter.
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},ServoP(X,Y,Z,Rx,Ry,Rz,t,aheadtime,gain);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例
+# Example
 
 ```
 ServoP(-500,100,200,150,0,90）
-// 间隔30ms循环调用，每次第一个参数加1
+// Cyclic calling at 30ms intervals, incrementing the first parameter by 1 each time
 ServoP(-499,100,200,150,0,90）
 ```
 
-沿X轴进行步伐为1mm的寸动。
+Perform 1mm inching along the X axis.
 
 # MoveJog
 
-# 原型
+# Prototype
 
 ```
 MoveJog(axisID,coordtype,user,tool)
 ```
 
-# 描述
+# Description
 
-点动或停止点动机器人。下发命令后机器人会沿指定轴持续点动，需要再下发MoveJog()停止机器人运动。另外，机器人点动时下发携带任意非指定string的MoveJog(string)也会使机器人停止运动。
+Jog or stop jogging the robot. After sending the command, the robot will continue jogging along the specified axis. Another MoveJog() needs to be sent to stop the robot motion. Additionally, sending MoveJog(string) with any non-specified string while the robot is jogging will also stop the robot motion.
 
-该指令为立即指令，支持在工程暂停时调用。
+This command is an immediate command that supports calling when the project is paused.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                                                                                                                                                                                                                                                                                                          |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                                                                                                                                                                                                                                                                          |
 | ------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| axisID  | string | 点动运动轴，请注意大小写。不携带或携带错误的参数表示停止点动机器人 J1+ 表示关节1正方向运动， J1- 表示关节1负方向运动 J2+ 表示关节2正方向运动， J2- 表示关节2负方向运动 J3+ 表示关节3正方向运动，J3- 表示关节3负方向运动 J4+ 表示关节4正方向运动，J4- 表示关节4负方向运动 J5+ 表示关节5正方向运动，J5- 表示关节5负方向运动 J6+ 表示关节6正方向运动，J6- 表示关节6负方向运动 X+ 表示X轴正方向运动，X- 表示X轴负方向运动 Y+ 表示Y轴正方向运动，Y- 表示Y轴负方向运动 Z+ 表示Z轴正方向运动，Z- 表示Z轴负方向运动 Rx+ 表示Rx轴正方向运动，Rx- 表示Rx轴负方向运动 Ry+ 表示Ry轴正方向运动，Ry- 表示Ry轴负方向运动 Rz+ 表示Rz轴正方向运动，Rz- 表示Rz轴负方向运动 |
+| axisID  | string | Jog motion axis, please note the case sensitivity. Not carrying or carrying incorrect parameters means stop jogging the robot. J1+ means joint 1 positive direction motion, J1- means joint 1 negative direction motion. J2+ means joint 2 positive direction motion, J2- means joint 2 negative direction motion. J3+ means joint 3 positive direction motion, J3- means joint 3 negative direction motion. J4+ means joint 4 positive direction motion, J4- means joint 4 negative direction motion. J5+ means joint 5 positive direction motion, J5- means joint 5 negative direction motion. J6+ means joint 6 positive direction motion, J6- means joint 6 negative direction motion. X+ means X axis positive direction motion, X- means X axis negative direction motion. Y+ means Y axis positive direction motion, Y- means Y axis negative direction motion. Z+ means Z axis positive direction motion, Z- means Z axis negative direction motion. Rx+ means Rx axis positive direction motion, Rx- means Rx axis negative direction motion. Ry+ means Ry axis positive direction motion, Ry- means Ry axis negative direction motion. Rz+ means Rz axis positive direction motion, Rz- means Rz axis negative direction motion. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名**   | **类型** | **说明**                                                                                                                                                                     |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                                                     |
 | --------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coordtype | string | 格式为“coordtype=value”。value表示指定运动轴所属的坐标系。0表示关节点动，1表示用户坐标系，2表示工具坐标系。默认值为上次成功调用时的设置值。 当axisID为关节轴时，coordtype只能取值0（忽略用户携带的该参数）。 当axisID为笛卡尔坐标轴时，coordtype只能取值1或2，取值为0会返回错误码-6。 |
-| user      | string | 格式为"user=index"，index为已标定的用户坐标系索引。取值范围：\[0,50]。                                                                                                                            |
-| tool      | string | 格式为"tool=index"，index为已标定的工具坐标系索引。取值范围：\[0,50]。                                                                                                                            |
+| coordtype | string | Format is "coordtype=value". Value represents the coordinate system to which the specified motion axis belongs. 0 means joint jogging, 1 means user coordinate system, 2 means tool coordinate system. The default value is the setting value from the last successful call. When axisID is a joint axis, coordtype can only take the value 0 (the user-carried parameter is ignored). When axisID is a Cartesian coordinate axis, coordtype can only take the value 1 or 2, taking the value 0 will return error code -6. |
+| user      | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].                                                                                                                            |
+| tool      | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].                                                                                                                            |
 
-# 返回
+# Return
 
 ```
 ErrorID,{},MoveJog(axisID,coordtype,user,tool);
 ```
 
-# 示例1
+# Example 1
 
 ```
 MoveJog(J2-)
-// 停止点动
+// Stop jogging
 MoveJog()
 ```
 
-沿J2轴负方向点动，然后停止点动。
+Jog along J2 axis negative direction, then stop jogging.
 
-# 示例2
+# Example 2
 
 ```
 MoveJog(X+,coordtype=1,user=1)
-// 停止点动
+// Stop jogging
 MoveJog()
 ```
 
-沿用户坐标系1的X轴正方向点动，然后停止点动。
+Jog along the positive X axis of user coordinate system 1, then stop jogging.
 
-# 示例3
+# Example 3
 
 ```
 MoveJog(J2-,coordtype=1,user=1)
-// 停止点动
+// Stop jogging
 MoveJog()
 ```
 
-沿J2轴负方向点动，然后停止点动。axisID指定关节时，可选参数无效。
+Jog along J2 axis negative direction, then stop jogging. When axisID specifies a joint, optional parameters are invalid.
 
 # RunTo
 
-# 原型
+# Prototype
 
 ```
 RunTo(P,moveType,user,tool,a,v)
 ```
 
-# 描述
+# Description
 
-从当前位置运动至目标点。
+Move from the current position to the target point.
 
-该指令为立即指令，支持在工程暂停时调用。
+This command is an immediate command that supports calling when the project is paused.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**                                                                                  |
+| **Parameter Name** | **Type** | **Description**                                                                                  |
 | ------- | ------ | --------------------------------------------------------------------------------------- |
-| P       | string | 目标点，支持关节变量或位姿变量。格式为"joint = \{j1, j2, j3, j4, j5, j6}"或"pose = \{x, y, z, rx, ry, rz}"。 |
+| P       | string | Target point, supports joint variables or pose variables. Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名**  | **类型** | **说明**                                                                                                                                                                                                     |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                                                                                     |
 | -------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| moveType | string | 设置运动类型，参数格式为“moveType=value”。取值范围\[0,4]，默认值为1（直线运动）。 moveType=0：关节运动； moveType=1：直线运动； moveType=2：关节运动至指定偏移角度； moveType=3：沿工具坐标系进行相对直线运动（必须使用位姿变量，不能使用关节变量）； moveType=4：沿用户坐标系进行相对直线运动（必须使用位姿变量，不能使用关节变量）。 |
-| user     | string | 格式为"user=index"，index为已标定的用户坐标系索引。取值范围：\[0,50]。                                                                                                                                                            |
-| tool     | string | 格式为"tool=index"，index为已标定的工具坐标系索引。取值范围：\[0,50]。                                                                                                                                                            |
-| a        | string | 格式为“a=value”。value表示执行该条指令时的机械臂运动加速度比例。取值范围：\[1,100]。                                                                                                                                                      |
-| v        | string | 格式为“v=value”。value表示执行该条指令时的机械臂运动速度比例。取值范围：\[1,100]。                                                                                                                                                       |
+| moveType | string | Set motion type, parameter format is "moveType=value". Range \[0,4], default is 1 (linear motion). moveType=0: Joint motion; moveType=1: Linear motion; moveType=2: Joint motion to specified offset angle; moveType=3: Relative linear motion along tool coordinate system (must use pose variables, cannot use joint variables); moveType=4: Relative linear motion along user coordinate system (must use pose variables, cannot use joint variables). |
+| user     | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].                                                                                                                                                            |
+| tool     | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].                                                                                                                                                            |
+| a        | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100].                                                                                                                                                      |
+| v        | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command. Range: \[1,100].                                                                                                                                                       |
 
-# 返回
+# Return
 
 ```
 ErrorID,{},RunTo(P,moveType,user,tool,a,v);
 ```
 
-# 示例1
+# Example 1
 
 ```
 RunTo(joint = {0, 0, 90, 0, 90, 90}, moveType = 0, a = 20, v = 50)
 ```
 
-机器人从当前位置以50%速度，20%加速度通过关节运动方式运动至关节坐标\{0, 0, 90, 0, 90,90}。
+The robot moves from the current position to joint coordinates \{0, 0, 90, 0, 90,90} at 50% speed, 20% acceleration using joint motion.
 
-# 示例2
+# Example 2
 
 ```
 RunTo(pose= {-500,100,200,150,0,90}, moveType = 1, user = 1, tool = 0, a = 20, v = 50)
 ```
 
-机器人从当前位置以50%速度，20%加速度通过直线运动方式运动至笛卡尔坐标点\{-500,100,200,150,0,90}（用户坐标系1，工具坐标系0）。
+The robot moves from the current position to Cartesian coordinate point \{-500,100,200,150,0,90} (user coordinate system 1, tool coordinate system 0) at 50% speed, 20% acceleration using linear motion.
 
 # MovS
 
-# 原型：
+# Prototype:
 
 ```
 MovS(P1,P2,P3,... ,user,tool,a,v|speed,freq)
 MovS(file,user,tool,a,v|speed,freq)
 ```
 
-# 描述:
+# Description:
 
-拟合指定的轨迹。调用该指令前需要用户自行运行机械臂到轨迹的起始点。
+Fit the specified trajectory. Before calling this command, the user needs to move the robot arm to the starting point of the trajectory.
 
-# 可选参数
+# Optional Parameters
 
-| **参数名**     | **类型** | **说明**                                                                                                                                       |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                       |
 | ----------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| P1,P2,P3... | string | 待拟合的点位，支持关节点位或位姿点位。格式为"joint = \{j1,j2, j3, j4, j5, j6}"或"pose = \{x, y, z, rx, ry, rz}"。点位数量范围是\[4, 50]。                                    |
-| file        | string | 待拟合的轨迹文件,格式为"file=x.csv"，代表一个轨迹文件的名字（含后缀名）。                                                                                                  |
-| user        | string | 指定轨迹点位对应的用户坐标系索引，不指定时使用轨迹文件中记录的用户坐标系索引。具有最高优先级的可选参数。格式为"user=index"，index为已标定的用户坐标系索引。取值范围：\[0,50]。                                          |
-| tool        | string | 指定轨迹点位对应的工具坐标系索引，不指定时使用轨迹文件中记录的工具坐标系索引。具有最高优先级的可选参数。格式为"tool=index"，index为已标定的工具坐标系索引。取值范围：\[0,50]。                                          |
-| a           | string | 格式为“a=value”。value表示执行该条指令时的机器人运动加速度比例。取值范围：\[1,100]。                                                                                        |
-| v           | string | 格式为“v=value”。value表示执行该条指令时的机器人运动速度比例，与speed互斥。取值范围：\[1,100]。                                                                                |
-| speed       | string | 格式为“speed=value”。value表示执行该条指令时的机器人运动目标速度，与v互斥，若同时存在以speed为准。取值范围：\[1, 最大运动速度]，单位：mm/s。                                                      |
-| freq        | string | 滤波系数，格式为“freq=value”。值越小，拟合的轨迹曲线越平滑，但相对原轨迹的变形越严重，请根据原轨迹的平滑程度设置合适的滤波系数。取值范围：（0,1]，默认1（表示关闭滤波）。 CAD输出的轨迹可以设置为1，保证精度；如果是3D相机等曲线，建议打开滤波，保证曲线的平滑。 |
+| P1,P2,P3... | string | Points to be fitted, supports joint points or pose points. Format is "joint = \{j1,j2, j3, j4, j5, j6}" or "pose = \{x, y, z, rx, ry, rz}". Number of points range is \[4, 50].                                    |
+| file        | string | Trajectory file to be fitted, format is "file=x.csv", representing the name of a trajectory file (including extension).                                                                                                  |
+| user        | string | Specifies the user coordinate system index corresponding to the trajectory points. When not specified, the user coordinate system index recorded in the trajectory file is used. Optional parameter with the highest priority. Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].                                          |
+| tool        | string | Specifies the tool coordinate system index corresponding to the trajectory points. When not specified, the tool coordinate system index recorded in the trajectory file is used. Optional parameter with the highest priority. Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].                                          |
+| a           | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100].                                                                                        |
+| v           | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command, mutually exclusive with speed. Range: \[1,100].                                                                                |
+| speed       | string | Format is "speed=value". Value represents the robot motion target speed when executing this command, mutually exclusive with v, if both exist, speed takes precedence. Range: \[1, maximum motion speed], unit: mm/s.                                                      |
+| freq        | string | Filter coefficient, format is "freq=value". The smaller the value, the smoother the fitted trajectory curve, but the more severe the deformation relative to the original trajectory. Please set an appropriate filter coefficient according to the smoothness of the original trajectory. Range: (0,1], default 1 (indicating filter off). For CAD output trajectories, it can be set to 1 to ensure accuracy; for curves from 3D cameras, it is recommended to enable the filter to ensure curve smoothness. |
 
-# 注意：
+# Note:
 
-该指令必须输入点位列表P1,P2,P3,...或轨迹文件file其中一个参数。
+This command must input one of the point list P1,P2,P3,... or the trajectory file file parameter.
 
-# 返回
+# Return
 
 ```
 ErrorID,{},MovS(P1,P2,P3,... ,user,tool,a,v|speed,freq);
 ErrorID,{},MovS(file,user,tool,a,v|speed,freq);
 ```
 
-# 示例
+# Example
 
 ```
 MovS(pose={100,0,100,0,0,0},pose={100,20,100,0,0,0},pose={100,30,100,0,0,0}，pose={100,40,100,0,0,0})
@@ -1172,493 +1172,493 @@ MovS(pose={100,0,100,0,0,0},pose={100,20,100,0,0,0},pose={100,30,100,0,0,0}，po
 
 # GetStartPose
 
-# 原型
+# Prototype
 
 ```
 GetStartPose(traceName,pathType)
 ```
 
-# 描述
+# Description
 
-获取指定轨迹的第一个点位。
+Get the first point of the specified trajectory.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**   | **类型** | **说明**                                                                                                                                                |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                                |
 | --------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| traceName | string | 轨迹文件名（含后缀.csv）。 轨迹文件存放在/dobot/userdata/project/process/trajectory/或 /dobot/userdata/project/process/track/。 如果名称包含中文，必须将发送端的编码方式设置为UTF-8，否则会导致中文接收异常。 |
+| traceName | string | Trajectory file name (including extension .csv). Trajectory files are stored in /dobot/userdata/project/process/trajectory/ or /dobot/userdata/project/process/track/. If the name contains Chinese characters, the encoding method of the sending end must be set to UTF-8, otherwise the Chinese characters will not be received properly. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名**  | **类型** | **说明**                                                                                                                                   |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                   |
 | -------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| pathType | int    | 轨迹的类型，可不填或者1、2。 1：默认值，用于复现的轨迹，轨迹存放在/dobot/userdata/project/process/trajectory/。 2：用于拟合的轨迹，轨迹文件存放在/dobot/userdata/project/process/track/。 |
+| pathType | int    | Trajectory type, can be omitted or 1, 2. 1: Default, for trajectories to be reproduced, stored in /dobot/userdata/project/process/trajectory/. 2: For trajectories to be fitted, stored in /dobot/userdata/project/process/track/. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{pointtype,{j1,j2,j3,j4,j5,j6},user,tool,{x,y,z,rx,ry,rz}},GetStartPose(traceName,path Type);
 ```
 
-其中pointtype表示返回点位的类型，0：示教点，1：关节变量，2：位姿变量。根据点位类型不同，携带的点位数据也有所不同，示例如下：
+Where pointtype indicates the type of returned point, 0: taught point, 1: joint variable, 2: pose variable. Depending on the point type, the carried point data is also different. Examples are as follows:
 
 ```
-ErrorID,{0,{j1,j2,j3,j4,j5,j6},user,tool,{x,y,z,rx,ry,rz}},GetStartPose(traceName); // 示教点
-ErrorID,{1,{j1,j2,j3,j4,j5,j6}},GetStartPose(traceName); // 关节变量
-ErrorID,{2,{x,y,z,rx,ry,rz}},GetStartPose(traceName); // 位姿变量
-ErrorID,{2,{x,y,z,rx,ry,rz}},GetStartPose(traceNamel,2);// 位姿变量
+ErrorID,{0,{j1,j2,j3,j4,j5,j6},user,tool,{x,y,z,rx,ry,rz}},GetStartPose(traceName); // Taught point
+ErrorID,{1,{j1,j2,j3,j4,j5,j6}},GetStartPose(traceName); // Joint variable
+ErrorID,{2,{x,y,z,rx,ry,rz}},GetStartPose(traceName); // Pose variable
+ErrorID,{2,{x,y,z,rx,ry,rz}},GetStartPose(traceNamel,2);// Pose variable
 ```
 
-# 示例
+# Example
 
 ```
 GetStartPose(recv_string.csv)
 ```
 
-获取recv\_string.csv中记录的第一个点位。
+Get the first point recorded in recv\_string.csv.
 
 # StartPath
 
-# 原型
+# Prototype
 
 ```
 StartPath(traceName,isConst,multi,sample,freq,user,tool)
 ```
 
-# 描述
+# Description
 
-根据指定的轨迹文件中的记录点位进行运动，复现录制的运动轨迹。
+Move according to the recorded points in the specified trajectory file, reproducing the recorded motion trajectory.
 
-下发轨迹复现指令成功后，用户可以通过RobotMode指令查询机器人运行状态，
+After successfully sending the trajectory reproduction command, the user can query the robot running status through the RobotMode command,
 
-ROBOT\_MODE\_RUNNING表示机器人在轨迹复现运行中，变成ROBOT\_MODE\_IDLE表示轨迹复现运行完成，ROBOT\_MODE\_ERROR表示报警。
+ROBOT\_MODE\_RUNNING indicates the robot is running in trajectory reproduction, changing to ROBOT\_MODE\_IDLE indicates trajectory reproduction is complete, ROBOT\_MODE\_ERROR indicates an alarm.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**   | **类型** | **说明**                                                                                                  |
+| **Parameter Name** | **Type** | **Description**                                                                                                  |
 | --------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| traceName | string | 轨迹文件名（含后缀）；轨迹文件存放在/dobot/userdata/project/process/trajectory/；如果名称包含中文，必须将发送端的编码方式设置为UTF-8，否则会导致中文接收异常。 |
+| traceName | string | Trajectory file name (including extension); trajectory files are stored in /dobot/userdata/project/process/trajectory/; if the name contains Chinese characters, the encoding method of the sending end must be set to UTF-8, otherwise the Chinese characters will not be received properly. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                                                                                      |
+| **Parameter Name** | **Type** | **Description**                                                                                                                                      |
 | ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| isConst | string | 格式为“isConst=value”。value表示是否匀速复现，默认值为0。 isConst=1表示匀速复现，机械臂会按照全局速率匀速复现轨迹。 isConst=0表示按照轨迹录制时的原速复现，并可以使用multi参数等比缩放运动速度，此时机械臂的运动速度不受全局速率的影响。 |
-| multi   | string | 格式为“multi=value”。value表示复现时的速度倍数，仅当 isConst=0时有效。取值范围：\[0.25, 2]，默认值为1。                                                                     |
-| sample  | string | 格式为“sample=value”。value表示轨迹点位采样间隔，即生成轨迹文件时相邻两个点位的采样时间差。取值范围：\[8,1000]，单位ms，默认值为50ms（控制器录制轨迹文件时的采样间隔）。                                       |
-| freq    | string | 格式为“freq=value”。value表示滤波系数，该参数的值越小，复现的轨迹曲线越平滑，但相对原轨迹的变形越严重。请根据原轨迹的平滑程度设置合适的滤波系数。取值范围：(0,1]，当取值为1时，表示关闭滤波；默认值为0.2。                          |
-| user    | string | 格式为"user=index"，index为轨迹点位对应的用户坐标系索引，不指定时使用轨迹文件中记录的用户坐标系索引。取值范围：\[0,50]。                                                                    |
-| tool    | string | 格式为"tool=index"，index为轨迹点位对应的工具坐标系索引，不指定时使用轨迹文件中记录的工具坐标系索引。取值范围：\[0,50]。                                                                    |
+| isConst | string | Format is "isConst=value". Value represents whether to reproduce at constant speed, default is 0. isConst=1 means constant speed reproduction, the robot arm will reproduce the trajectory at constant speed according to the global speed ratio. isConst=0 means reproduce at the original speed when the trajectory was recorded, and the multi parameter can be used to proportionally scale the motion speed. At this time, the robot motion speed is not affected by the global speed ratio. |
+| multi   | string | Format is "multi=value". Value represents the speed multiplier during reproduction, only effective when isConst=0. Range: \[0.25, 2], default is 1.                                                                     |
+| sample  | string | Format is "sample=value". Value represents the trajectory point sampling interval, i.e., the sampling time difference between adjacent points when the trajectory file was generated. Range: \[8,1000], unit ms, default 50ms (sampling interval when the controller records the trajectory file).                                       |
+| freq    | string | Format is "freq=value". Value represents the filter coefficient. The smaller the value, the smoother the reproduced trajectory curve, but the more severe the deformation relative to the original trajectory. Please set an appropriate filter coefficient according to the smoothness of the original trajectory. Range: (0,1], when the value is 1, it indicates the filter is off; default is 0.2.                          |
+| user    | string | Format is "user=index", index is the user coordinate system index corresponding to the trajectory points. When not specified, the user coordinate system index recorded in the trajectory file is used. Range: \[0,50].                                                                    |
+| tool    | string | Format is "tool=index", index is the tool coordinate system index corresponding to the trajectory points. When not specified, the tool coordinate system index recorded in the trajectory file is used. Range: \[0,50].                                                                    |
 
-# 返回
+# Return
 
 ```
 ErrorID,{},StartPath(traceName,isConst,multi,sample,freq,user,tool);
 ```
 
-# 示例
+# Example
 
 ```
 StartPath(recv_string.csv,isConst=0,multi=1,sample=20,freq=1,user=0,tool=0)
 ```
 
-按原速复现recv\_string.csv中记录的轨迹。轨迹点位采样间隔为20ms，滤波系数为1（完全还原录制的轨迹），用户和工具坐标系均为0。
+Reproduce the trajectory recorded in recv\_string.csv at original speed. The trajectory point sampling interval is 20ms, the filter coefficient is 1 (completely restoring the recorded trajectory), and the user and tool coordinate systems are both 0.
 
 # RelMovJTool
 
-# 原型
+# Prototype
 
 ```
 RelMovJTool(offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz,user,tool,a,v,cp)
 ```
 
-# 描述
+# Description
 
-沿工具坐标系进行相对运动，末端运动方式为关节运动。
+Perform relative motion along the tool coordinate system, with the end-effector motion type being joint motion.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**  | **类型** | **说明**         |
+| **Parameter Name** | **Type** | **Description**        |
 | -------- | ------ | -------------- |
-| offsetX  | double | X轴方向偏移量，单位：mm。 |
-| offsetY  | double | Y轴方向偏移量，单位：mm。 |
-| offsetZ  | double | Z轴方向偏移量，单位：mm。 |
-| offsetRx | double | Rx轴方向偏移量，单位：度。 |
-| offsetRy | double | Ry轴方向偏移量，单位：度。 |
-| offseRrz | double | Rz轴方向偏移量，单位：度。 |
+| offsetX  | double | X axis direction offset, unit: mm. |
+| offsetY  | double | Y axis direction offset, unit: mm. |
+| offsetZ  | double | Z axis direction offset, unit: mm. |
+| offsetRx | double | Rx axis direction offset, unit: degrees. |
+| offsetRy | double | Ry axis direction offset, unit: degrees. |
+| offseRrz | double | Rz axis direction offset, unit: degrees. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                |
+| **Parameter Name** | **Type** | **Description**                                               |
 | ------- | ------ | ----------------------------------------------------- |
-| user    | string | 格式为"user=index"，index为已标定的用户坐标系索引。取值范围：\[0,50]。       |
-| tool    | string | 格式为"tool=index"，index为已标定的工具坐标系索引。取值范围：\[0,50]。       |
-| a       | string | 格式为“a=value”。value表示执行该条指令时的机器人运动加速度比例。取值范围：\[1,100]。 |
-| v       | string | 格式为“v=value”。value表示执行该条指令时的机器人运动速度比例。取值范围：\[1,100]。  |
-| cp      | string | 格式为“cp=value”。value表示平滑过渡比例。取值范围：\[0,100]。            |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].       |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].       |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100]. |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command. Range: \[1,100].  |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio. Range: \[0,100].            |
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},RelMovJTool(offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz,user,tool,a,v,cp);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例
+# Example
 
 ```
 RelMovJTool(10,10,10,0,0,0)
 ```
 
-机器人沿工具坐标系进行相对关节运动，在X、Y、Z轴上各偏移10mm。
+The robot performs relative joint motion along the tool coordinate system, offsetting 10mm in X, Y, Z axes respectively.
 
 # RelMovLTool
 
-# 原型
+# Prototype
 
 ```
 RelMovLTool(offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz,user,tool,a,v|speed,cp|r)
 ```
 
-# 描述
+# Description
 
-沿工具坐标系进行相对运动，末端运动方式为直线运动。
+Perform relative motion along the tool coordinate system, with the end-effector motion type being linear motion.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**  | **类型** | **说明**         |
+| **Parameter Name** | **Type** | **Description**        |
 | -------- | ------ | -------------- |
-| offsetX  | double | X轴方向偏移量，单位：mm。 |
-| offsetY  | double | Y轴方向偏移量，单位：mm。 |
-| offsetZ  | double | Z轴方向偏移量，单位：mm。 |
-| offsetRx | double | Rx轴方向偏移量，单位：度。 |
-| offsetRy | double | Ry轴方向偏移量，单位：度。 |
-| offsetRz | double | Rz轴方向偏移量，单位：度。 |
+| offsetX  | double | X axis direction offset, unit: mm. |
+| offsetY  | double | Y axis direction offset, unit: mm. |
+| offsetZ  | double | Z axis direction offset, unit: mm. |
+| offsetRx | double | Rx axis direction offset, unit: degrees. |
+| offsetRy | double | Ry axis direction offset, unit: degrees. |
+| offsetRz | double | Rz axis direction offset, unit: degrees. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                                  |
+| **Parameter Name** | **Type** | **Description**                                                                                  |
 | ------- | ------ | --------------------------------------------------------------------------------------- |
-| user    | string | 格式为"user=index"，index为已标定的用户坐标系索引。取值范围：\[0,50]。                                         |
-| tool    | string | 格式为"tool=index"，index为已标定的工具坐标系索引。取值范围：\[0,50]。                                         |
-| a       | string | 格式为“a=value”。value表示执行该条指令时的机器人运动加速度比例。取值范围：\[1,100]。                                   |
-| v       | string | 格式为“v=value”。value表示执行该条指令时的机器人运动速度比例，与speed互斥。取值范围：\[1,100]。                           |
-| speed   | string | 格式为“speed=value”。value表示执行该条指令时的机器人运动目标速度，与v互斥，若同时存在以speed为准。取值范围：\[1, 最大运动速度]，单位：mm/s。 |
-| cp      | string | 格式为“cp=value”。value表示平滑过渡比例，与r互斥。取值范围：\[0,100]。                                         |
-| r       | string | 格式为“r=value”。value表示平滑过渡半径，与cp互斥，若同时存在以r为准。单位：mm。                                       |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].                                         |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].                                         |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100].                                   |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command, mutually exclusive with speed. Range: \[1,100].                           |
+| speed   | string | Format is "speed=value". Value represents the robot motion target speed when executing this command, mutually exclusive with v, if both exist, speed takes precedence. Range: \[1, maximum motion speed], unit: mm/s. |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio, mutually exclusive with r. Range: \[0,100].                                         |
+| r       | string | Format is "r=value". Value represents the smoothing transition radius, mutually exclusive with cp, if both exist, r takes precedence. Unit: mm.                                       |
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},RelMovLTool(offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz,user,tool,a,v|speed,cp|r);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例
+# Example
 
 ```
 RelMovLTool(10,10,10,0,0,0)
 ```
 
-机器人沿工具坐标系进行相对直线运动，在X、Y、Z轴上各偏移10mm。
+The robot performs relative linear motion along the tool coordinate system, offsetting 10mm in X, Y, Z axes respectively.
 
 # RelMovJUser
 
-# 原型
+# Prototype
 
 ```
 RelMovJUser(offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz,user,tool,a,v,cp)
 ```
 
-# 描述
+# Description
 
-沿用户坐标系进行相对运动，末端运动方式为关节运动。
+Perform relative motion along the user coordinate system, with the end-effector motion type being joint motion.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**  | **类型** | **说明**         |
+| **Parameter Name** | **Type** | **Description**        |
 | -------- | ------ | -------------- |
-| offsetX  | double | X轴方向偏移量，单位：mm。 |
-| offsetY  | double | Y轴方向偏移量，单位：mm。 |
-| offsetZ  | double | Z轴方向偏移量，单位：mm。 |
-| offsetRx | double | Rx轴偏移量，单位：度。   |
-| offsetRy | double | Ry轴偏移量，单位：度。   |
-| offsetRz | double | Rz轴偏移量，单位：度。   |
+| offsetX  | double | X axis direction offset, unit: mm. |
+| offsetY  | double | Y axis direction offset, unit: mm. |
+| offsetZ  | double | Z axis direction offset, unit: mm. |
+| offsetRx | double | Rx axis offset, unit: degrees.   |
+| offsetRy | double | Ry axis offset, unit: degrees.   |
+| offsetRz | double | Rz axis offset, unit: degrees.   |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                |
+| **Parameter Name** | **Type** | **Description**                                               |
 | ------- | ------ | ----------------------------------------------------- |
-| user    | string | 格式为"user=index"，index为已标定的用户坐标系索引。取值范围：\[0,50]。       |
-| tool    | string | 格式为"tool=index"，index为已标定的工具坐标系索引。取值范围：\[0,50]。       |
-| a       | string | 格式为“a=value”。value表示执行该条指令时的机器人运动加速度比例。取值范围：\[1,100]。 |
-| v       | string | 格式为“v=value”。value表示执行该条指令时的机器人运动速度比例。取值范围：\[1,100]。  |
-| cp      | string | 格式为“cp=value”。value表示平滑过渡比例。取值范围：\[0,100]。            |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].       |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].       |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100]. |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command. Range: \[1,100].  |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio. Range: \[0,100].            |
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},RelMovJUser(offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz,user,tool,a,v,cp);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例
+# Example
 
 ```
 RelMovJUser(10,10,10,0,0,0)
 ```
 
-机器人沿用户坐标系进行相对关节运动，在X、Y、Z轴上各偏移10mm。
+The robot performs relative joint motion along the user coordinate system, offsetting 10mm in X, Y, Z axes respectively.
 
 # RelMovLUser
 
-# 原型
+# Prototype
 
 ```
 RelMovLUser(offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz,user,tool,a,v|speed,cp|r)
 ```
 
-# 描述
+# Description
 
-沿用户坐标系进行相对运动，末端运动方式为直线运动。
+Perform relative motion along the user coordinate system, with the end-effector motion type being linear motion.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**  | **类型** | **说明**         |
+| **Parameter Name** | **Type** | **Description**        |
 | -------- | ------ | -------------- |
-| offsetX  | double | X轴方向偏移量，单位：mm。 |
-| offsetY  | double | Y轴方向偏移量，单位：mm。 |
-| offsetZ  | double | Z轴方向偏移量，单位：mm。 |
-| offsetRx | double | Rx轴偏移量，单位：度。   |
-| offsetRy | double | Ry轴偏移量，单位：度。   |
-| offsetRz | double | Rz轴偏移量，单位：度。   |
+| offsetX  | double | X axis direction offset, unit: mm. |
+| offsetY  | double | Y axis direction offset, unit: mm. |
+| offsetZ  | double | Z axis direction offset, unit: mm. |
+| offsetRx | double | Rx axis offset, unit: degrees.   |
+| offsetRy | double | Ry axis offset, unit: degrees.   |
+| offsetRz | double | Rz axis offset, unit: degrees.   |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                                                  |
+| **Parameter Name** | **Type** | **Description**                                                                                  |
 | ------- | ------ | --------------------------------------------------------------------------------------- |
-| user    | string | 格式为"user=index"，index为已标定的用户坐标系索引。取值范围：\[0,50]。                                         |
-| tool    | string | 格式为"tool=index"，index为已标定的工具坐标系索引。取值范围：\[0,50]。                                         |
-| a       | string | 格式为“a=value”。value表示执行该条指令时的机器人运动加速度比例。取值范围：\[1,100]。                                   |
-| v       | string | 格式为“v=value”。value表示执行该条指令时的机器人运动速度比例，与speed互斥。取值范围：\[1,100]。                           |
-| speed   | string | 格式为“speed=value”。value表示执行该条指令时的机器人运动目标速度，与v互斥，若同时存在以speed为准。取值范围：\[1, 最大运动速度]，单位：mm/s。 |
-| cp      | string | 格式为“cp=value”。value表示平滑过渡比例，与r互斥。取值范围：\[0,100]。                                         |
-| r       | string | 格式为“r=value”。value表示平滑过渡半径，与cp互斥，若同时存在以r为准。单位：mm。                                       |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].                                         |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].                                         |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100].                                   |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command, mutually exclusive with speed. Range: \[1,100].                           |
+| speed   | string | Format is "speed=value". Value represents the robot motion target speed when executing this command, mutually exclusive with v, if both exist, speed takes precedence. Range: \[1, maximum motion speed], unit: mm/s. |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio, mutually exclusive with r. Range: \[0,100].                                         |
+| r       | string | Format is "r=value". Value represents the smoothing transition radius, mutually exclusive with cp, if both exist, r takes precedence. Unit: mm.                                       |
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},RelMovLUser(offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz,user,tool,a,v|speed,cp|r);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例
+# Example
 
 ```
 RelMovLUser(10,10,10,0,0,0)
 ```
 
-机器人沿用户坐标系进行相对直线运动，在X、Y、Z轴上各偏移10mm。
+The robot performs relative linear motion along the user coordinate system, offsetting 10mm in X, Y, Z axes respectively.
 
 # RelJointMovJ
 
-# 原型
+# Prototype
 
 ```
 RelJointMovJ(offset1,offset2,offset3,offset4,offset5,offset6,user,tool,a,v,cp)
 ```
 
-# 描述
+# Description
 
-沿关节坐标系进行相对运动，末端运动方式为关节运动。
+Perform relative motion along the joint coordinate system, with the end-effector motion type being joint motion.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**       |
+| **Parameter Name** | **Type** | **Description**      |
 | ------- | ------ | ------------ |
-| offset1 | double | J1轴偏移量，单位：度。 |
-| offset2 | double | J2轴偏移量，单位：度。 |
-| offset3 | double | J3轴偏移量，单位：度。 |
-| offset4 | double | J4轴偏移量，单位：度。 |
-| offset5 | double | J5轴偏移量，单位：度。 |
-| offset6 | double | J6轴偏移量，单位：度。 |
+| offset1 | double | J1 axis offset, unit: degrees. |
+| offset2 | double | J2 axis offset, unit: degrees. |
+| offset3 | double | J3 axis offset, unit: degrees. |
+| offset4 | double | J4 axis offset, unit: degrees. |
+| offset5 | double | J5 axis offset, unit: degrees. |
+| offset6 | double | J6 axis offset, unit: degrees. |
 
-# 可选参数
+# Optional Parameters
 
-| **参数名** | **类型** | **说明**                                                |
+| **Parameter Name** | **Type** | **Description**                                               |
 | ------- | ------ | ----------------------------------------------------- |
-| user    | string | 格式为"user=index"，index为已标定的用户坐标系索引。取值范围：\[0,50]。       |
-| tool    | string | 格式为"tool=index"，index为已标定的工具坐标系索引。取值范围：\[0,50]。       |
-| a       | string | 格式为“a=value”。value表示执行该条指令时的机器人运动加速度比例。取值范围：\[1,100]。 |
-| v       | string | 格式为“v=value”。value表示执行该条指令时的机器人运动速度比例。取值范围：\[1,100]。  |
-| cp      | string | 格式为“cp=value”。value表示平滑过渡比例。取值范围：\[0,100]。            |
+| user    | string | Format is "user=index", index is the calibrated user coordinate system index. Range: \[0,50].       |
+| tool    | string | Format is "tool=index", index is the calibrated tool coordinate system index. Range: \[0,50].       |
+| a       | string | Format is "a=value". Value represents the robot motion acceleration ratio when executing this command. Range: \[1,100]. |
+| v       | string | Format is "v=value". Value represents the robot motion speed ratio when executing this command. Range: \[1,100].  |
+| cp      | string | Format is "cp=value". Value represents the smoothing transition ratio. Range: \[0,100].            |
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},RelJointMovJ(offset1,offset2,offset3,offset4,offset5,offset6,user,tool,a,v,cp);
 ```
 
-ResultID为算法队列ID，可用于判断指令执行顺序。
+ResultID is the algorithm queue ID, which can be used to determine the command execution order.
 
-# 示例
+# Example
 
 ```
 RelJointMovJ(10,10,10,0,0,0)
 ```
 
-机器人J1，J2，J3轴分别偏移10度。
+The robot's J1, J2, J3 axes are offset by 10 degrees respectively.
 
 # RelPointTool
 
-# 原型
+# Prototype
 
 ```
 RelPointTool(p, {offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz})
 ```
 
-# 描述
+# Description
 
-沿工具坐标系笛卡尔点偏移。
+Cartesian point offset along the tool coordinate system.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**                                                | **类型** | **说明**                                                                            |
+| **Parameter Name**                                           | **Type** | **Description**                                                                           |
 | ------------------------------------------------------ | ------ | --------------------------------------------------------------------------------- |
-| p                                                      | string | 格式为"joint = \{j1, j2, j3, j4, j5, j6}" 或"pose =\{x, y, z, rx, ry, rz}"。表示偏移的起始点位。 |
-| \{offsetX,offsetY,offsetZ, offsetRx,offsetRy,offsetRz} | double | 在笛卡尔坐标系下沿X轴、 Y轴、 Z轴、Rx轴、Ry轴、Rz轴方向上的偏移量。                                           |
+| p                                                      | string | Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose =\{x, y, z, rx, ry, rz}". Represents the starting point of the offset. |
+| \{offsetX,offsetY,offsetZ, offsetRx,offsetRy,offsetRz} | double | Offset values along X axis, Y axis, Z axis, Rx axis, Ry axis, Rz axis directions in Cartesian coordinate system.                                           |
 
-# 返回
+# Return
 
 ```
 ErrorID,{X,Y,Z,Rx,Ry,Rz},RelPointTool(p, {offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz});
 ```
 
-\{X,Y,Z,Rx,Ry,Rz}表示笛卡尔坐标值。
+\{X,Y,Z,Rx,Ry,Rz} represents the Cartesian coordinate values.
 
 # RelPointUser
 
-# 原型
+# Prototype
 
 ```
 RelPointUser(p, {offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz})
 ```
 
-# 描述
+# Description
 
-沿用户坐标系笛卡尔点偏移。
+Cartesian point offset along the user coordinate system.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**                                                | **类型** | **说明**                                                                            |
+| **Parameter Name**                                           | **Type** | **Description**                                                                           |
 | ------------------------------------------------------ | ------ | --------------------------------------------------------------------------------- |
-| p                                                      | string | 格式为"joint = \{j1, j2, j3, j4, j5, j6}" 或"pose =\{x, y, z, rx, ry, rz}"。表示偏移的起始点位。 |
-| \{offsetX,offsetY,offsetZ, offsetRx,offsetRy,offsetRz} | double | 在笛卡尔坐标系下沿X轴、 Y轴、 Z轴、Rx轴、Ry轴、Rz轴方向上的偏移量。                                           |
+| p                                                      | string | Format is "joint = \{j1, j2, j3, j4, j5, j6}" or "pose =\{x, y, z, rx, ry, rz}". Represents the starting point of the offset. |
+| \{offsetX,offsetY,offsetZ, offsetRx,offsetRy,offsetRz} | double | Offset values along X axis, Y axis, Z axis, Rx axis, Ry axis, Rz axis directions in Cartesian coordinate system.                                           |
 
-# 返回
+# Return
 
 ```
 ErrorID,{X,Y,Z,Rx,Ry,Rz},RelPointUser(p, {offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz});
 ```
 
-\{X,Y,Z,Rx,Ry,Rz}表示笛卡尔坐标值。
+\{X,Y,Z,Rx,Ry,Rz} represents the Cartesian coordinate values.
 
 # RelJoint
 
-# 原型
+# Prototype
 
 ```
 RelJoint(J1,J2,J3,J4,J5,J6,{offset1,offset2,offset3,offset4,offset5,offset6})
 ```
 
-# 描述
+# Description
 
-关节点位偏移。
+Joint point offset.
 
-# 必选参数
+# Required Parameters
 
-| **参数名**                                            | **类型** | **说明**                  |
+| **Parameter Name**                                          | **Type** | **Description**                 |
 | -------------------------------------------------- | ------ | ----------------------- |
-| J1                                                 | double | 点J1轴位置，单位：度。            |
-| J2                                                 | double | 点J2轴位置，单位：度。            |
-| J3                                                 | double | 点J3轴位置，单位：度。            |
-| J4                                                 | double | 点J4轴位置，单位：度。            |
-| J5                                                 | double | 点J5轴位置，单位：度。            |
-| J6                                                 | double | 点J6轴位置，单位：度。            |
-| \{offset1,offset2,offset3,offset4,offset5,offset6} | double | 关节1/2/3/4/5/6的偏移值，单位：度。 |
+| J1                                                 | double | Joint J1 axis position, unit: degrees.            |
+| J2                                                 | double | Joint J2 axis position, unit: degrees.            |
+| J3                                                 | double | Joint J3 axis position, unit: degrees.            |
+| J4                                                 | double | Joint J4 axis position, unit: degrees.            |
+| J5                                                 | double | Joint J5 axis position, unit: degrees.            |
+| J6                                                 | double | Joint J6 axis position, unit: degrees.            |
+| \{offset1,offset2,offset3,offset4,offset5,offset6} | double | Offset values for joints 1/2/3/4/5/6, unit: degrees. |
 
-# 返回
+# Return
 
 ```
 ErrorID,{J1,J2,J3,J4,J5,J6},RelJoint(J1,J2,J3,J4,J5,J6,{offset1,offset2,offset3,offset4,offset 5,offset6});
 ```
 
-\{J1,J2,J3,J4,J5,J6}表示关节值。
+\{J1,J2,J3,J4,J5,J6} represents the joint values.
 
 # GetCurrentCommandID
 
-# 原型
+# Prototype
 
 ```
 GetCurrentCommandID()
 ```
 
-# 描述
+# Description
 
-获取当前执行指令的算法队列ID，可以用于判断当前机器人执行到了哪一条指令。
+Get the algorithm queue ID of the currently executing command, which can be used to determine which command the robot is currently executing.
 
-下列的指令下发成功后会立刻返回，代表指令已被接受，实际上指令会进入算法队列，在后台按顺序排队执行，下发时返回的ResultID就是该指令在算法队列中的ID。
+After the following commands are successfully sent, they return immediately, indicating the commands have been accepted. In fact, the commands will enter the algorithm queue and be executed sequentially in the background. The ResultID returned when sending is the ID of the command in the algorithm queue.
 
 ```
 User(), Tool(), SetPayload(), DO(), ToolDO(), AO(), SetCollisionLevel(), DOGroup(), SetSafeWallEnable(), SetBackDistance(), SetPostCollisionMode(), SetUser(), SetTool(), MovJ(), MovL(), MovLIO(), MovJIO(), Arc(), Circle(), StartPath(), RelMovJTool(), RelMovLTool(), RelMovJUser(), RelMovLUser(), RelJointMovJ(), EnableSafeSkin(), SetSafeSkin()
 ```
 
-机器人当前实际执行到了哪条指令，以及指令是否执行完毕，需要结合算法指令ID和机器人状态判断，参考本指令的示例。
+Which command the robot is currently actually executing, and whether the command has finished executing, needs to be determined by combining the algorithm command ID and robot status. See the example of this command for reference.
 
-# 返回
+# Return
 
 ```
 ErrorID,{ResultID},GetCurrentCommandID();
 ```
 
-ResultID为当前执行指令的算法队列ID。
+ResultID is the algorithm queue ID of the currently executing command.
 
-# 示例
+# Example
 
 ```
 MovJ(P1)
 
-uint64_t p2Id = parseResultId(MovJ(P2)); // parseResultId用于获取指令返回的ResultID，请自行实现
+uint64_t p2Id = parseResultId(MovJ(P2)); // parseResultId is used to get the ResultID returned by the command, implement it yourself
 
 while(true) {
-    uint64_t currentId = parseResultId (GetCurrentCommndID()); // 获取当前执行指令的ResultID
-    bool isStop = parseResultId (RobotMode()) == 5; // RobotMode为5表示使能且空闲，即运动指令已执行完毕
-    if (currentId == p2Id && isStop ) { // currentId等于p2Id，且运动指令执行完毕。
-        break; // 退出循环
+    uint64_t currentId = parseResultId (GetCurrentCommndID()); // Get the ResultID of the currently executing command
+    bool isStop = parseResultId (RobotMode()) == 5; // RobotMode being 5 means enabled and idle, i.e., the motion command has finished executing
+    if (currentId == p2Id && isStop ) { // currentId equals p2Id, and the motion command has finished executing.
+        break; // Exit the loop
     }
     Sleep(1);
 }
 ```
 
-上述示例结合算法队列ID和机器人状态，判断机器人已运动到P2点，然后退出循环。
+The above example combines the algorithm queue ID and robot status to determine that the robot has moved to point P2, then exits the loop.
 
 # StartRTOffset
 
-# 原型
+# Prototype
 
 ```
 StartRTOffset()
 ```
 
-# 描述
+# Description
 
-启动坐标系偏移。
+Start coordinate system offset.
 
-# 返回
+# Return
 
 ```
 ErrorID,{},StartRTOffset();
@@ -1666,17 +1666,17 @@ ErrorID,{},StartRTOffset();
 
 # EndRTOffset
 
-# 原型
+# Prototype
 
 ```
 EndRTOffset()
 ```
 
-# 描述
+# Description
 
-结束坐标系偏移。
+End coordinate system offset.
 
-# 返回
+# Return
 
 ```
 ErrorID,{},EndRTOffset();
@@ -1684,37 +1684,37 @@ ErrorID,{},EndRTOffset();
 
 # OffsetPara
 
-# 原型
+# Prototype
 
 ```
 OffsetPara(x, y, z, rx, ry, rz)
 ```
 
-# 描述
+# Description
 
-设置坐标系偏移值。
+Set the coordinate system offset value.
 
-# 必选参数
+# Required Parameters
 
-| **参数名** | **类型** | **说明**         |
+| **Parameter Name** | **Type** | **Description**        |
 | ------- | ------ | -------------- |
-| x       | double | X轴方向偏移量，单位：mm。 |
-| y       | double | Y轴方向偏移量，单位：mm。 |
-| z       | double | Z轴方向偏移量，单位：mm。 |
-| rx      | double | Rx轴偏移量，单位：度。   |
-| ry      | double | Ry轴偏移量，单位：度。   |
-| rz      | double | Rz轴偏移量，单位：度。   |
+| x       | double | X axis direction offset, unit: mm. |
+| y       | double | Y axis direction offset, unit: mm. |
+| z       | double | Z axis direction offset, unit: mm. |
+| rx      | double | Rx axis offset, unit: degrees.   |
+| ry      | double | Ry axis offset, unit: degrees.   |
+| rz      | double | Rz axis offset, unit: degrees.   |
 
-# 返回
+# Return
 
 ```
 ErrorID,{},OffsetPara(x, y, z, rx, ry, rz);
 ```
 
-# 示例
+# Example
 
 ```
 OffsetPara(10, 10, 10, 0, 0, 0)
 ```
 
-机器人基于原有坐标系在X、Y、Z轴上各偏移10mm。
+The robot offsets 10mm in X, Y, Z axes respectively based on the original coordinate system.
