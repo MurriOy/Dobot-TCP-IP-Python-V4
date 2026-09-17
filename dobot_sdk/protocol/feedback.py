@@ -2,9 +2,9 @@
 # Licensed under the MIT License
 
 """
-Feedback协议
+Feedback Protocol
 
-解析机器人状态反馈数据
+Parse robot status feedback data
 """
 
 import numpy as np
@@ -14,19 +14,19 @@ from ..models.status import RobotStatus, RobotMode, JointState, CartesianPose, Q
 
 
 class FeedbackParser:
-    """Feedback数据解析器"""
+    """Feedback data parser"""
 
     PACKET_SIZE = 1440
 
     def parse(self, data: bytes) -> Optional[RobotStatus]:
         """
-        解析Feedback数据包
+        Parse Feedback data packet
 
         Args:
-            data: 1440字节的原始数据
+            data: 1440 bytes of raw data
 
         Returns:
-            RobotStatus或None
+            RobotStatus or None
         """
         if len(data) != self.PACKET_SIZE:
             return None
@@ -34,21 +34,21 @@ class FeedbackParser:
         try:
             parsed = np.frombuffer(data, dtype=MyType)
 
-            # 验证魔数
+            # Verify magic number
             if hex(parsed['TestValue'][0]) != hex(TEST_VALUE_MAGIC):
                 return None
 
             return self._build_status(parsed)
 
         except Exception as e:
-            print(f"解析Feedback失败: {e}")
+            print(f"Failed to parse Feedback: {e}")
             return None
 
     def _build_status(self, parsed: np.ndarray) -> RobotStatus:
-        """从NumPy数组构建状态对象"""
+        """Build status object from NumPy array"""
         status = RobotStatus()
 
-        # 基本状态
+        # Basic status
         robot_mode_value = int(parsed['RobotMode'][0])
         try:
             status.robot_mode = RobotMode(robot_mode_value)
@@ -64,27 +64,27 @@ class FeedbackParser:
         status.jog_status = int(parsed['JogStatusCR'][0])
         status.robot_type = int(parsed['CRRobotType'][0])
 
-        # IO状态
+        # IO status
         status.digital_inputs = int(parsed['DigitalInputs'][0])
         status.digital_outputs = int(parsed['DigitalOutputs'][0])
         status.safety_io_in = int(parsed['SafetyIOIn'][0])
         status.safety_io_out = int(parsed['SafetyIOOut'][0])
 
-        # 时间信息
+        # Time information
         status.timestamp = int(parsed['TimeStamp'][0])
         status.run_time = int(parsed['RunTime'][0])
 
-        # 电气信息
+        # Electrical information
         status.voltage = float(parsed['VRobot'][0])
         status.current = float(parsed['IRobot'][0])
 
-        # 程序状态
+        # Program status
         status.program_state = float(parsed['ProgramState'][0])
 
-        # 当前指令ID
+        # Current command ID
         status.current_command_id = int(parsed['CurrentCommandId'][0])
 
-        # 关节状态
+        # Joint state
         status.joint_state = JointState(
             q_actual=parsed['QActual'][0].tolist(),
             q_target=parsed['QTarget'][0].tolist(),
@@ -100,7 +100,7 @@ class FeedbackParser:
             voltages=parsed['VActual'][0].tolist()
         )
 
-        # 笛卡尔位姿
+        # Cartesian pose
         actual = parsed['ToolVectorActual'][0]
         status.tool_vector_actual = CartesianPose(
             x=float(actual[0]), y=float(actual[1]), z=float(actual[2]),
@@ -113,7 +113,7 @@ class FeedbackParser:
             rx=float(target[3]), ry=float(target[4]), rz=float(target[5])
         )
 
-        # TCP速度
+        # TCP speed
         tcp_speed_actual = parsed['TCPSpeedActual'][0]
         status.tcp_speed_actual = CartesianPose(
             x=float(tcp_speed_actual[0]), y=float(tcp_speed_actual[1]), z=float(tcp_speed_actual[2]),
@@ -126,23 +126,23 @@ class FeedbackParser:
             rx=float(tcp_speed_target[3]), ry=float(tcp_speed_target[4]), rz=float(tcp_speed_target[5])
         )
 
-        # 力信息
+        # Force information
         status.actual_tcp_force = parsed['ActualTCPForce'][0].tolist()
         status.tcp_force = parsed['TCPForce'][0].tolist()
 
-        # 负载信息
+        # Load information
         status.load = float(parsed['Load'][0])
         status.load_center_x = float(parsed['CenterX'][0])
         status.load_center_y = float(parsed['CenterY'][0])
         status.load_center_z = float(parsed['CenterZ'][0])
 
-        # 坐标系
+        # Coordinate system
         status.user_coordinate = int(parsed['User'][0])
         status.tool_coordinate = int(parsed['Tool'][0])
         status.user_value = parsed['UserValue'][0].tolist()
         status.tool_value = parsed['ToolValue'][0].tolist()
 
-        # 四元数
+        # Quaternion
         target_quat = parsed['TargetQuaternion'][0]
         status.target_quaternion = Quaternion(
             qw=float(target_quat[0]), qx=float(target_quat[1]),
@@ -155,7 +155,7 @@ class FeedbackParser:
             qy=float(actual_quat[2]), qz=float(actual_quat[3])
         )
 
-        # 速度/加速度比例
+        # Velocity/acceleration ratio
         status.velocity_ratio = int(parsed['VelocityRatio'][0])
         status.acceleration_ratio = int(parsed['AccelerationRatio'][0])
         status.xyz_velocity_ratio = int(parsed['XYZVelocityRatio'][0])
@@ -163,25 +163,25 @@ class FeedbackParser:
         status.xyz_acceleration_ratio = int(parsed['XYZAccelerationRatio'][0])
         status.r_acceleration_ratio = int(parsed['RAccelerationRatio'][0])
 
-        # 队列状态
+        # Queue status
         status.run_queued_cmd = int(parsed['RunQueuedCmd'][0])
         status.pause_cmd_flag = int(parsed['PauseCmdFlag'][0])
 
-        # 手系
+        # Hand type
         status.hand_type = parsed['HandType'][0].tolist()
 
-        # 末端按钮信号
+        # End effector button signals
         status.drag_button_signal = int(parsed['DragButtonSignal'][0])
         status.enable_button_signal = int(parsed['EnableButtonSignal'][0])
         status.record_button_signal = int(parsed['RecordButtonSignal'][0])
         status.reappear_button_signal = int(parsed['ReappearButtonSignal'][0])
         status.jaw_button_signal = int(parsed['JawButtonSignal'][0])
 
-        # 六维力传感器
+        # Six-axis force sensor
         status.six_force_online = int(parsed['SixForceOnline'][0])
         status.six_force_value = parsed['SixForceValue'][0].tolist()
 
-        # 安全状态
+        # Safety state
         status.collision_state = int(parsed['CollisionState'][0])
         status.arm_approach_state = int(parsed['ArmApproachState'][0])
         status.j4_approach_state = int(parsed['J4ApproachState'][0])
@@ -190,10 +190,10 @@ class FeedbackParser:
         status.safety_state = int(parsed['SafetyState'][0])
         status.safe_state = int(parsed['SafeState'][0])
 
-        # 抖动检测
+        # Vibration detection
         status.vibration_dis_z = float(parsed['VibrationDisZ'][0])
 
-        # 模式
+        # Mode
         status.auto_manual_mode = int(parsed['AutoManualMode'][0])
         status.export_status = int(parsed['ExportStatus'][0])
 

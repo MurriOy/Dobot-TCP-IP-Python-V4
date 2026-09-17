@@ -10,7 +10,7 @@ import time
 
 
 def main():
-    ROBOT_IP = "120.79.211.106"
+    ROBOT_IP = "192.168.100.51"
     
     try:
         with DobotRobot(ROBOT_IP) as robot:

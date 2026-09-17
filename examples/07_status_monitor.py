@@ -169,7 +169,7 @@ def main():
     set_log_level("INFO")
     
     # Robot IP address
-    ROBOT_IP = "192.168.1.100"
+    ROBOT_IP = "192.168.100.51"
     
     print(f"Connecting to robot {ROBOT_IP}...")
     

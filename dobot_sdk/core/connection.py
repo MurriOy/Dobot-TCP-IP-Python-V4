@@ -2,9 +2,9 @@
 # Licensed under the MIT License
 
 """
-TCP连接管理器
+TCP connection manager
 
-提供通用的TCP连接功能，支持自动重连和连接状态监听
+Provides general TCP connection functionality with auto-reconnect and connection state monitoring
 """
 
 import socket
@@ -19,23 +19,23 @@ logger = logging.getLogger("dobot_sdk")
 
 class DobotConnection:
     """
-    TCP连接管理器
+    TCP connection manager
     
-    负责建立和维护与机器人的TCP连接，支持：
-    - 接收超时设置
-    - 自动重连机制
-    - 指数退避重连策略
-    - 连接状态变化回调
+    Responsible for establishing and maintaining TCP connections with the robot, supporting:
+    - Receive timeout settings
+    - Auto-reconnect mechanism
+    - Exponential backoff reconnect strategy
+    - Connection state change callback
     """
     
     def __init__(self, ip: str, port: int, buffer_size: int = 144000):
         """
-        初始化连接
+        Initialize connection
         
         Args:
-            ip: 机器人IP地址
-            port: 端口号(29999或30004)
-            buffer_size: 接收缓冲区大小
+            ip: Robot IP address
+            port: Port number (29999 or 30004)
+            buffer_size: Receive buffer size
         """
         self.ip = ip
         self.port = port
@@ -44,32 +44,32 @@ class DobotConnection:
         self._lock = threading.Lock()
         self._connected = False
         
-        # 超时设置
-        self._connect_timeout = 5.0      # 连接超时（秒）
-        self._receive_timeout = 10.0     # 接收超时（秒）
+        # Timeout settings
+        self._connect_timeout = 5.0      # Connection timeout (seconds)
+        self._receive_timeout = 10.0     # Receive timeout (seconds)
         
-        # 自动重连设置
-        self._auto_reconnect = False     # 是否启用自动重连
-        self._reconnect_running = False  # 重连线程是否运行
-        self._reconnect_thread = None    # 重连线程
-        self._reconnect_callback = None  # 连接状态回调函数
+        # Auto-reconnect settings
+        self._auto_reconnect = False     # Whether auto-reconnect is enabled
+        self._reconnect_running = False  # Whether reconnect thread is running
+        self._reconnect_thread = None    # Reconnect thread
+        self._reconnect_callback = None  # Connection state callback function
         
-        # 指数退避参数
-        self._min_reconnect_delay = 1    # 最小重连延迟（秒）
-        self._max_reconnect_delay = 30   # 最大重连延迟（秒）
-        self._reconnect_attempts = 0     # 当前重连尝试次数
+        # Exponential backoff parameters
+        self._min_reconnect_delay = 1    # Minimum reconnect delay (seconds)
+        self._max_reconnect_delay = 30   # Maximum reconnect delay (seconds)
+        self._reconnect_attempts = 0     # Current reconnect attempt count
         
-        # 验证端口
+        # Validate port
         if port not in [29999, 30004, 30005, 30006]:
             raise ValueError(f"Invalid port: {port}. Must be 29999, 30004, 30005, or 30006")
     
     def set_timeout(self, connect_timeout: float = None, receive_timeout: float = None):
         """
-        设置超时时间
+        Set timeout values
         
         Args:
-            connect_timeout: 连接超时时间（秒），默认5秒
-            receive_timeout: 接收超时时间（秒），默认10秒
+            connect_timeout: Connection timeout (seconds), default 5 seconds
+            receive_timeout: Receive timeout (seconds), default 10 seconds
         """
         if connect_timeout is not None:
             self._connect_timeout = connect_timeout
@@ -78,11 +78,11 @@ class DobotConnection:
     
     def enable_auto_reconnect(self, enable: bool = True, callback: Callable[[bool], None] = None):
         """
-        启用/禁用自动重连
+        Enable/disable auto-reconnect
         
         Args:
-            enable: 是否启用自动重连
-            callback: 连接状态变化回调函数，接收一个布尔参数表示连接状态
+            enable: Whether to enable auto-reconnect
+            callback: Connection state change callback function, receives a boolean parameter indicating connection state
         """
         self._auto_reconnect = enable
         self._reconnect_callback = callback
@@ -91,7 +91,7 @@ class DobotConnection:
             self._start_reconnect_loop()
     
     def _start_reconnect_loop(self):
-        """启动重连循环线程"""
+        """Start reconnect loop thread"""
         if self._reconnect_running:
             return
         
@@ -101,39 +101,39 @@ class DobotConnection:
             daemon=True
         )
         self._reconnect_thread.start()
-        logger.info(f"自动重连已启动: {self.ip}:{self.port}")
+        logger.info(f"Auto-reconnect started: {self.ip}:{self.port}")
     
     def _stop_reconnect_loop(self):
-        """停止重连循环线程"""
+        """Stop reconnect loop thread"""
         self._reconnect_running = False
         if self._reconnect_thread:
             self._reconnect_thread.join(timeout=2.0)
             self._reconnect_thread = None
         self._reconnect_attempts = 0
-        logger.info(f"自动重连已停止: {self.ip}:{self.port}")
+        logger.info(f"Auto-reconnect stopped: {self.ip}:{self.port}")
     
     def _reconnect_loop(self):
-        """重连循环，使用指数退避策略"""
+        """Reconnect loop with exponential backoff strategy"""
         while self._reconnect_running:
             try:
-                # 计算指数退避延迟
+                # Calculate exponential backoff delay
                 delay = min(
                     self._min_reconnect_delay * (2 ** self._reconnect_attempts),
                     self._max_reconnect_delay
                 )
                 
-                logger.info(f"等待 {delay:.1f} 秒后尝试重连: {self.ip}:{self.port}")
+                logger.info(f"Waiting {delay:.1f}s before reconnect attempt: {self.ip}:{self.port}")
                 time.sleep(delay)
                 
                 if not self._reconnect_running:
                     break
                 
-                # 尝试重新连接
+                # Attempt to reconnect
                 self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self._socket.settimeout(self._connect_timeout)
                 self._socket.connect((self.ip, self.port))
                 
-                # 设置接收缓冲区和超时
+                # Set receive buffer and timeout
                 self._socket.setsockopt(
                     socket.SOL_SOCKET, 
                     socket.SO_RCVBUF, 
@@ -142,41 +142,41 @@ class DobotConnection:
                 self._socket.settimeout(self._receive_timeout)
                 
                 self._connected = True
-                self._reconnect_attempts = 0  # 重置重连计数
+                self._reconnect_attempts = 0  # Reset reconnect counter
                 
-                logger.info(f"TCP重连成功: {self.ip}:{self.port}")
+                logger.info(f"TCP reconnect successful: {self.ip}:{self.port}")
                 
-                # 调用连接成功回调
+                # Call connect success callback
                 if self._reconnect_callback:
                     try:
                         self._reconnect_callback(True)
                     except Exception as e:
-                        logger.error(f"连接成功回调执行失败: {str(e)}")
+                        logger.error(f"Connect success callback failed: {str(e)}")
                 
-                # 重连成功，退出重连循环
+                # Reconnect successful, exit reconnect loop
                 self._stop_reconnect_loop()
                 
             except socket.timeout:
                 self._reconnect_attempts += 1
-                logger.warning(f"重连超时 ({self._reconnect_attempts}次): {self.ip}:{self.port}")
+                logger.warning(f"Reconnect timeout ({self._reconnect_attempts} times): {self.ip}:{self.port}")
                 
             except socket.error as e:
                 self._reconnect_attempts += 1
-                logger.warning(f"重连失败 ({self._reconnect_attempts}次): {self.ip}:{self.port} - {str(e)}")
+                logger.warning(f"Reconnect failed ({self._reconnect_attempts} times): {self.ip}:{self.port} - {str(e)}")
                 
             except Exception as e:
                 self._reconnect_attempts += 1
-                logger.error(f"重连异常 ({self._reconnect_attempts}次): {self.ip}:{self.port} - {str(e)}")
+                logger.error(f"Reconnect exception ({self._reconnect_attempts} times): {self.ip}:{self.port} - {str(e)}")
     
     def connect(self, timeout: float = None):
         """
-        建立TCP连接
+        Establish TCP connection
         
         Args:
-            timeout: 连接超时时间（秒），默认为初始化时设置的值
+            timeout: Connection timeout (seconds), defaults to value set during initialization
             
         Raises:
-            ConnectionError: 连接失败时抛出
+            ConnectionError: Raised when connection fails
         """
         actual_timeout = timeout if timeout is not None else self._connect_timeout
         
@@ -185,7 +185,7 @@ class DobotConnection:
             self._socket.settimeout(actual_timeout)
             self._socket.connect((self.ip, self.port))
             
-            # 设置接收缓冲区和超时
+            # Set receive buffer and timeout
             self._socket.setsockopt(
                 socket.SOL_SOCKET, 
                 socket.SO_RCVBUF, 
@@ -194,176 +194,176 @@ class DobotConnection:
             self._socket.settimeout(self._receive_timeout)
             
             self._connected = True
-            self._reconnect_attempts = 0  # 重置重连计数
+            self._reconnect_attempts = 0  # Reset reconnect counter
             
-            logger.info(f"TCP连接成功: {self.ip}:{self.port}")
+            logger.info(f"TCP connection successful: {self.ip}:{self.port}")
             
-            # 调用连接成功回调
+            # Call connect success callback
             if self._reconnect_callback:
                 try:
                     self._reconnect_callback(True)
                 except Exception as e:
-                    logger.error(f"连接成功回调执行失败: {str(e)}")
+                    logger.error(f"Connect success callback failed: {str(e)}")
             
         except socket.timeout:
-            logger.error(f"TCP连接超时: {self.ip}:{self.port}")
+            logger.error(f"TCP connection timeout: {self.ip}:{self.port}")
             self._trigger_disconnect_callback()
-            raise ConnectionError("连接超时", ip=self.ip, port=self.port)
+            raise ConnectionError("Connection timeout", ip=self.ip, port=self.port)
         except socket.error as e:
-            logger.error(f"TCP连接失败: {self.ip}:{self.port} - {str(e)}")
+            logger.error(f"TCP connection failed: {self.ip}:{self.port} - {str(e)}")
             self._trigger_disconnect_callback()
-            raise ConnectionError(f"连接失败: {str(e)}", ip=self.ip, port=self.port)
+            raise ConnectionError(f"Connection failed: {str(e)}", ip=self.ip, port=self.port)
     
     def _trigger_disconnect_callback(self, force: bool = False):
         """
-        触发连接断开回调
+        Trigger disconnect callback
         
         Args:
-            force: 是否强制触发回调（不检查连接状态）
+            force: Whether to force callback trigger (without checking connection state)
         """
         if self._reconnect_callback and (force or self._connected):
             try:
                 self._reconnect_callback(False)
             except Exception as e:
-                logger.error(f"连接断开回调执行失败: {str(e)}")
+                logger.error(f"Disconnect callback failed: {str(e)}")
     
     def disconnect(self):
-        """关闭连接"""
-        # 停止自动重连
+        """Close connection"""
+        # Stop auto-reconnect
         self._stop_reconnect_loop()
         
         if self._socket:
             try:
                 self._socket.shutdown(socket.SHUT_RDWR)
                 self._socket.close()
-                logger.info(f"TCP连接已断开: {self.ip}:{self.port}")
+                logger.info(f"TCP connection disconnected: {self.ip}:{self.port}")
             except Exception as e:
-                logger.warning(f"TCP断开连接时发生错误: {str(e)}")
+                logger.warning(f"Error during TCP disconnect: {str(e)}")
             finally:
                 self._socket = None
                 self._connected = False
-                # 强制触发断开回调（用户主动断开）
+                # Force trigger disconnect callback (user-initiated disconnect)
                 self._trigger_disconnect_callback(force=True)
     
     def send_text(self, text: str):
         """
-        发送文本命令（Dashboard用）
+        Send text command (for Dashboard)
         
         Args:
-            text: 要发送的命令字符串
+            text: Command string to send
         """
         if not self._connected or not self._socket:
-            raise ConnectionError("未连接到机器人")
+            raise ConnectionError("Not connected to robot")
         
         try:
-            # 直接编码发送，添加换行符
+            # Send directly encoded, add newline
             command = text if text.endswith('\n') else text + '\n'
             self._socket.send(command.encode('utf-8'))
-            logger.debug(f"发送命令: {text.strip()}")
+            logger.debug(f"Send command: {text.strip()}")
         except Exception as e:
             self._connected = False
-            logger.error(f"发送命令失败: {text.strip()} - {str(e)}")
+            logger.error(f"Send command failed: {text.strip()} - {str(e)}")
             self._trigger_disconnect_callback()
             
-            # 如果启用了自动重连，启动重连循环
+            # If auto-reconnect is enabled, start reconnect loop
             if self._auto_reconnect and not self._reconnect_running:
                 self._start_reconnect_loop()
             
-            raise ConnectionError(f"发送失败 {str(e)}")
+            raise ConnectionError(f"Send failed {str(e)}")
     
     def receive_text(self, buffer_size: int = 1024) -> str:
         """
-        接收文本响应（Dashboard用）
+        Receive text response (for Dashboard)
         
         Args:
-            buffer_size: 接收缓冲区大小
+            buffer_size: Receive buffer size
             
         Returns:
-            str: 接收到的字符串
+            str: Received string
         """
         if not self._connected or not self._socket:
-            raise ConnectionError("未连接到机器人")
+            raise ConnectionError("Not connected to robot")
         
         try:
             data = self._socket.recv(buffer_size)
             if not data:
-                raise ConnectionError("连接已关闭")
+                raise ConnectionError("Connection closed")
             
             response = data.decode('utf-8').strip()
-            logger.debug(f"接收响应: {response}")
+            logger.debug(f"Receive response: {response}")
             return response
         except socket.timeout:
             self._connected = False
-            logger.error(f"接收响应超时: {self.ip}:{self.port}")
+            logger.error(f"Receive response timeout: {self.ip}:{self.port}")
             self._trigger_disconnect_callback()
             
-            # 如果启用了自动重连，启动重连循环
+            # If auto-reconnect is enabled, start reconnect loop
             if self._auto_reconnect and not self._reconnect_running:
                 self._start_reconnect_loop()
             
-            raise ConnectionError("接收超时")
+            raise ConnectionError("Receive timeout")
         except Exception as e:
             self._connected = False
-            logger.error(f"接收响应失败: {str(e)}")
+            logger.error(f"Receive response failed: {str(e)}")
             self._trigger_disconnect_callback()
             
-            # 如果启用了自动重连，启动重连循环
+            # If auto-reconnect is enabled, start reconnect loop
             if self._auto_reconnect and not self._reconnect_running:
                 self._start_reconnect_loop()
             
-            raise ConnectionError(f"接收失败: {str(e)}")
+            raise ConnectionError(f"Receive failed: {str(e)}")
     
     def receive_bytes(self, buffer_size: int = 144000) -> bytes:
         """
-        接收原始字节（Feedback用）
+        Receive raw bytes (for Feedback)
         
         Args:
-            buffer_size: 接收缓冲区大小
+            buffer_size: Receive buffer size
             
         Returns:
-            bytes: 接收到的原始字节
+            bytes: Received raw bytes
         """
         if not self._connected or not self._socket:
-            raise ConnectionError("未连接到机器人")
+            raise ConnectionError("Not connected to robot")
         
         try:
             data = self._socket.recv(buffer_size)
             if not data:
-                raise ConnectionError("连接已关闭")
+                raise ConnectionError("Connection closed")
             
-            logger.debug(f"接收字节数据: {len(data)} bytes")
+            logger.debug(f"Receive byte data: {len(data)} bytes")
             return data
         except socket.timeout:
             self._connected = False
-            logger.error(f"接收字节数据超时: {self.ip}:{self.port}")
+            logger.error(f"Receive byte data timeout: {self.ip}:{self.port}")
             self._trigger_disconnect_callback()
             
-            # 如果启用了自动重连，启动重连循环
+            # If auto-reconnect is enabled, start reconnect loop
             if self._auto_reconnect and not self._reconnect_running:
                 self._start_reconnect_loop()
             
-            raise ConnectionError("接收超时")
+            raise ConnectionError("Receive timeout")
         except Exception as e:
             self._connected = False
-            logger.error(f"接收字节数据失败: {str(e)}")
+            logger.error(f"Receive byte data failed: {str(e)}")
             self._trigger_disconnect_callback()
             
-            # 如果启用了自动重连，启动重连循环
+            # If auto-reconnect is enabled, start reconnect loop
             if self._auto_reconnect and not self._reconnect_running:
                 self._start_reconnect_loop()
             
-            raise ConnectionError(f"接收失败: {str(e)}")
+            raise ConnectionError(f"Receive failed: {str(e)}")
     
     def send_receive_text(self, text: str, recv_size: int = 1024) -> str:
         """
-        发送并接收响应（线程安全）
+        Send and receive response (thread-safe)
         
         Args:
-            text: 发送的字符串
-            recv_size: 接收缓冲区大小
+            text: String to send
+            recv_size: Receive buffer size
             
         Returns:
-            str: 接收到的响应
+            str: Received response
         """
         with self._lock:
             self.send_text(text)
@@ -371,24 +371,24 @@ class DobotConnection:
     
     @property
     def is_connected(self) -> bool:
-        """检查连接状态"""
+        """Check connection status"""
         return self._connected
     
     @property
     def reconnect_enabled(self) -> bool:
-        """检查是否启用了自动重连"""
+        """Check if auto-reconnect is enabled"""
         return self._auto_reconnect
     
     def __enter__(self):
-        """上下文管理器入口"""
+        """Context manager entry"""
         self.connect()
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """上下文管理器出口"""
+        """Context manager exit"""
         self.disconnect()
         return False
     
     def __del__(self):
-        """析构函数"""
+        """Destructor"""
         self.disconnect()

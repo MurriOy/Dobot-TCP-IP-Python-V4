@@ -1,7 +1,7 @@
 # Copyright (c) 2026 Dobot
 # Licensed under the MIT License
 
-"""运动相关模块 - 所有运动指令、轨迹控制"""
+"""Motion-related module - All motion commands and trajectory control"""
 
 from typing import Sequence
 from enum import IntEnum
@@ -9,33 +9,33 @@ from ..core.connection import DobotConnection
 
 
 class CoordinateType(IntEnum):
-    """坐标系类型枚举（与文档coordtype值完全一致）
+    """Coordinate system type enum (matches doc coordtype values exactly)
 
-    值对应关系：
-    0 = 关节坐标 (joint)
-    1 = 用户坐标 (user / 笛卡尔)
-    2 = 工具坐标 (tool / 笛卡尔)
+    Value mapping:
+    0 = Joint coordinates (joint)
+    1 = User coordinates (user / Cartesian)
+    2 = Tool coordinates (tool / Cartesian)
     """
-    JOINT = 0     # 关节角度 — 文档coordtype=0
-    CARTESIAN = 1 # 用户坐标系下的笛卡尔位姿 — 文档coordtype=1
-    USER = 1      # 用户坐标别名，等价于CARTESIAN
-    TOOL = 2      # 工具坐标系下的笛卡尔位姿 — 文档coordtype=2
+    JOINT = 0     # Joint angles — doc coordtype=0
+    CARTESIAN = 1 # Cartesian pose in user coordinate system — doc coordtype=1
+    USER = 1      # User coordinate alias, equivalent to CARTESIAN
+    TOOL = 2      # Cartesian pose in tool coordinate system — doc coordtype=2
 
 
 class Motion:
-    """运动模块 - 处理所有运动相关指令"""
+    """Motion module - Handles all motion-related commands"""
     
     def __init__(self, connection: DobotConnection):
         self.connection = connection
     
     def _fmt_pose(self, pose: Sequence[float], coord_type: CoordinateType) -> str:
-        """格式化位姿为 joint={...} 或 pose={...}
+        """Format pose as joint={...} or pose={...}
 
-        注意：USER(1)和TOOL(2)在点位格式上都使用 pose= 前缀，
-        实际的用户/工具坐标系通过 user= 和 tool= 参数单独指定。
+        Note: USER(1) and TOOL(2) both use pose= prefix in the point format.
+        The actual user/tool coordinate system is specified separately via user= and tool= parameters.
         """
         if len(pose) != 6:
-            raise ValueError(f"位姿需要6个参数，实际{len(pose)}个")
+            raise ValueError(f"Pose requires6 parameters, got{len(pose)}")
         
         values = ",".join([f"{v:.6f}" for v in pose])
         if coord_type == CoordinateType.JOINT:
@@ -44,26 +44,26 @@ class Motion:
             return f"pose={{{values}}}"
     
     def _send_cmd(self, command: str) -> str:
-        """发送命令并接收响应"""
+        """Send command and receive response"""
         return self.connection.send_receive_text(command)
     
-    # ==================== 基础运动 ====================
+    # ==================== Basic Motion ====================
     
     def MovJ(self, pose: Sequence[float], 
              coord_type: CoordinateType,
              user: int = -1, tool: int = -1,
              a: int = -1, v: int = -1, cp: int = -1) -> str:
         """
-        MovJ关节运动（队列指令）
+        MovJ Joint Motion (Queued Command)
         
         Args:
-            pose: 6个坐标值[x,y,z,rx,ry,rz] 或[j1,j2,j3,j4,j5,j6]
-            coord_type: 坐标系类型(CoordinateType.CARTESIAN 或 CoordinateType.JOINT)
-            user: 用户坐标系编号(0-50, -1表示使用当前)
-            tool: 工具坐标系编号(0-50, -1表示使用当前)
-            a: 加速度比例 (1-100, -1表示使用全局)
-            v: 速度比例 (1-100, -1表示使用全局)
-            cp: 平滑过渡比例 (0-100, -1表示不使用)
+            pose:6 coordinate values [x,y,z,rx,ry,rz] or [j1,j2,j3,j4,j5,j6]
+            coord_type: Coordinate system type (CoordinateType.CARTESIAN or CoordinateType.JOINT)
+            user: User coordinate system index (0-50, -1 for current)
+            tool: Tool coordinate system index (0-50, -1 for current)
+            a: Acceleration ratio (1-100, -1 for global)
+            v: Velocity ratio (1-100, -1 for global)
+            cp: Smoothing ratio (0-100, -1 for disabled)
 
         Returns:
             str: ErrorID,{ResultID},MovJ(...);
@@ -91,18 +91,18 @@ class Motion:
              a: int = -1, v: int = -1, speed: int = -1,
              cp: int = -1, r: int = -1) -> str:
         """
-        MovL直线运动（队列指令）
+        MovL Linear Motion (Queued Command)
         
         Args:
-            pose: 6个笛卡尔坐标 [x,y,z,rx,ry,rz]
-            coord_type: 坐标系类型(必须指定)
-            user: 用户坐标系编号(0-50)
-            tool: 工具坐标系编号(0-50)
-            a: 加速度比例 (1-100)
-            v: 速度比例 (1-100), 与speed互斥
-            speed: 目标速度 (mm/s), 与v互斥
-            cp: 平滑过渡比例 (0-100), 与r互斥
-            r: 平滑过渡半径 (mm), 与cp互斥
+            pose:6 Cartesian coordinates [x,y,z,rx,ry,rz]
+            coord_type: Coordinate system type (required)
+            user: User coordinate system index (0-50)
+            tool: Tool coordinate system index (0-50)
+            a: Acceleration ratio (1-100)
+            v: Velocity ratio (1-100), mutually exclusive with speed
+            speed: Target speed (mm/s), mutually exclusive with v
+            cp: Smoothing ratio (0-100), mutually exclusive with r
+            r: Smoothing radius (mm), mutually exclusive with cp
 
         Returns:
             str: ErrorID,{ResultID},MovL(...);
@@ -134,20 +134,20 @@ class Motion:
                 a: int = -1, v: int = -1, speed: int = -1,
                 cp: int = -1, r: int = -1) -> str:
         """
-        MovLIO直线运动并输出DO（队列指令）
+        MovLIO Linear Motion with DO Output (Queued Command)
         
         Args:
-            pose: 6个笛卡尔坐标 [x,y,z,rx,ry,rz]
-            do_list: DO输出列表，每个元素为[Mode, Distance, Index, Status]
+            pose:6 Cartesian coordinates [x,y,z,rx,ry,rz]
+            do_list: DO output list, each element is [Mode, Distance, Index, Status]
                      Mode=0/1, Distance=mm, Index=DO index, Status=0/1
-            coord_type: 坐标系类型
-            user: 用户坐标系编号(0-50)
-            tool: 工具坐标系编号(0-50)
-            a: 加速度比例 (1-100)
-            v: 速度比例 (1-100), 与speed互斥
-            speed: 目标速度 (mm/s), 与v互斥
-            cp: 平滑过渡比例 (0-100), 与r互斥
-            r: 平滑过渡半径 (mm), 与cp互斥
+            coord_type: Coordinate system type
+            user: User coordinate system index (0-50)
+            tool: Tool coordinate system index (0-50)
+            a: Acceleration ratio (1-100)
+            v: Velocity ratio (1-100), mutually exclusive with speed
+            speed: Target speed (mm/s), mutually exclusive with v
+            cp: Smoothing ratio (0-100), mutually exclusive with r
+            r: Smoothing radius (mm), mutually exclusive with cp
 
         Returns:
             str: ErrorID,{ResultID},MovLIO(...);
@@ -157,7 +157,7 @@ class Motion:
         params = [pose_str]
         for do_item in do_list:
             if len(do_item) != 4:
-                raise ValueError("每个DO参数需要4个值[Mode, Distance, Index, Status]")
+                raise ValueError("Each DO parameter requires4 values[Mode, Distance, Index, Status]")
             mode, distance, index, status = do_item
             params.append(f"{{{mode},{distance},{index},{status}}}")
         if user != -1:
@@ -183,18 +183,18 @@ class Motion:
                 user: int = -1, tool: int = -1,
                 a: int = -1, v: int = -1, cp: int = -1) -> str:
         """
-        MovJIO关节运动并输出DO（队列指令）
+        MovJIO Joint Motion with DO Output (Queued Command)
         
         Args:
-            pose: 6个坐标值[x,y,z,rx,ry,rz] 或[j1,j2,j3,j4,j5,j6]
-            do_list: DO输出列表，每个元素为[Mode, Distance, Index, Status]
+            pose:6 coordinate values [x,y,z,rx,ry,rz] or [j1,j2,j3,j4,j5,j6]
+            do_list: DO output list, each element is [Mode, Distance, Index, Status]
                      Mode=0/1, Distance=mm, Index=DO index, Status=0/1
-            coord_type: 坐标系类型
-            user: 用户坐标系编号(0-50)
-            tool: 工具坐标系编号(0-50)
-            a: 加速度比例 (1-100)
-            v: 速度比例 (1-100)
-            cp: 平滑过渡比例 (0-100)
+            coord_type: Coordinate system type
+            user: User coordinate system index (0-50)
+            tool: Tool coordinate system index (0-50)
+            a: Acceleration ratio (1-100)
+            v: Velocity ratio (1-100)
+            cp: Smoothing ratio (0-100)
 
         Returns:
             str: ErrorID,{ResultID},MovJIO(...);
@@ -204,7 +204,7 @@ class Motion:
         params = [pose_str]
         for do_item in do_list:
             if len(do_item) != 4:
-                raise ValueError("每个DO参数需要4个值[Mode, Distance, Index, Status]")
+                raise ValueError("Each DO parameter requires4 values[Mode, Distance, Index, Status]")
             mode, distance, index, status = do_item
             params.append(f"{{{mode},{distance},{index},{status}}}")
         if user != -1:
@@ -227,26 +227,26 @@ class Motion:
             a: int = -1, v: int = -1, speed: int = -1,
             cp: int = -1, r: int = -1, mode: int = 0) -> str:
         """
-        Arc圆弧插补运动（队列指令）
+        Arc Interpolation Motion (Queued Command)
         
         Args:
-            p1: 圆弧中间点
-            p2: 目标点位姿
-            coord_type: 坐标系类型
-            user: 用户坐标系编号(0-50, -1表示使用当前)
-            tool: 工具坐标系编号(0-50, -1表示使用当前)
-            a: 加速度比例 (1-100, -1表示使用全局)
-            v: 速度比例 (1-100, -1表示使用全局)
-            speed: 目标速度 (mm/s), 与v互斥
-            cp: 平滑过渡比例 (0-100), 与r互斥
-            r: 平滑过渡半径 (mm), 与cp互斥
-            mode: 姿态控制模式(0-线性 1-过中间点, 2-固定)
+            p1: Arc midpoint
+            p2: Target point pose
+            coord_type: Coordinate system type
+            user: User coordinate system index (0-50, -1 for current)
+            tool: Tool coordinate system index (0-50, -1 for current)
+            a: Acceleration ratio (1-100, -1 for global)
+            v: Velocity ratio (1-100, -1 for global)
+            speed: Target speed (mm/s), mutually exclusive with v
+            cp: Smoothing ratio (0-100), mutually exclusive with r
+            r: Smoothing radius (mm), mutually exclusive with cp
+            mode: Pose control mode (0-linear 1-through midpoint, 2-fixed)
 
         Returns:
             str: ErrorID,{ResultID},Arc(...);
         """
         if len(p1) != 6 or len(p2) != 6:
-            raise ValueError(f"位姿需要6个参数")
+            raise ValueError(f"Pose requires6 parameters")
         
         if coord_type == CoordinateType.JOINT:
             p1_str = f"joint={{{','.join([f'{v:.6f}' for v in p1])}}}"
@@ -284,28 +284,28 @@ class Motion:
                a: int = -1, v: int = -1, speed: int = -1,
                cp: int = -1, r: int = -1, mode: int = 0) -> str:
         """
-        ArcIO圆弧运动并输出DO（队列指令）
+        ArcIO Arc Motion with DO Output (Queued Command)
         
         Args:
-            p1: 圆弧中间点
-            p2: 目标点位姿
-            do_list: DO输出列表，每个元素为[Mode, Distance, Index, Status]
+            p1: Arc midpoint
+            p2: Target point pose
+            do_list: DO output list, each element is [Mode, Distance, Index, Status]
                      Mode=0/1, Distance=mm, Index=DO index, Status=0/1
-            coord_type: 坐标系类型
-            user: 用户坐标系编号(0-50)
-            tool: 工具坐标系编号(0-50)
-            a: 加速度比例 (1-100)
-            v: 速度比例 (1-100)
-            speed: 目标速度 (mm/s), 与v互斥
-            cp: 平滑过渡比例 (0-100), 与r互斥
-            r: 平滑过渡半径 (mm), 与cp互斥
-            mode: 姿态控制模式(0-2)
+            coord_type: Coordinate system type
+            user: User coordinate system index (0-50)
+            tool: Tool coordinate system index (0-50)
+            a: Acceleration ratio (1-100)
+            v: Velocity ratio (1-100)
+            speed: Target speed (mm/s), mutually exclusive with v
+            cp: Smoothing ratio (0-100), mutually exclusive with r
+            r: Smoothing radius (mm), mutually exclusive with cp
+            mode: Pose control mode (0-2)
 
         Returns:
             str: ErrorID,{ResultID},ArcIO(...);
         """
         if len(p1) != 6 or len(p2) != 6:
-            raise ValueError(f"位姿需要6个参数")
+            raise ValueError(f"Pose requires6 parameters")
         
         if coord_type == CoordinateType.JOINT:
             p1_str = f"joint={{{','.join([f'{v:.6f}' for v in p1])}}}"
@@ -317,7 +317,7 @@ class Motion:
         params = [p1_str, p2_str]
         for do_item in do_list:
             if len(do_item) != 4:
-                raise ValueError("每个DO参数需要4个值[Mode, Distance, Index, Status]")
+                raise ValueError("Each DO parameter requires4 values[Mode, Distance, Index, Status]")
             mode_do, distance, index, status = do_item
             params.append(f"{{{mode_do},{distance},{index},{status}}}")
         
@@ -347,30 +347,30 @@ class Motion:
                a: int = -1, v: int = -1, speed: int = -1,
                cp: int = -1, r: int = -1, mode: int = 0) -> str:
         """
-        Circle整圆插补运动（队列指令）
+        Circle Full Circle Interpolation Motion (Queued Command)
         
         Args:
-            p1: 整圆中间点位姿
-            p2: 整圆结束点位姿（应与起点相同）
-            count: 圈数 (1-999)
-            coord_type: 坐标系类型
-            user: 用户坐标系编号(0-50)
-            tool: 工具坐标系编号(0-50)
-            a: 加速度比例 (1-100)
-            v: 速度比例 (1-100)
-            speed: 目标速度 (mm/s), 与v互斥
-            cp: 平滑过渡比例 (0-100), 与r互斥
-            r: 平滑过渡半径 (mm), 与cp互斥
-            mode: 姿态控制模式(0-2)
+            p1: Full circle midpoint pose
+            p2: Full circle endpoint pose (should be same as start point)
+            count: Number of circles (1-999)
+            coord_type: Coordinate system type
+            user: User coordinate system index (0-50)
+            tool: Tool coordinate system index (0-50)
+            a: Acceleration ratio (1-100)
+            v: Velocity ratio (1-100)
+            speed: Target speed (mm/s), mutually exclusive with v
+            cp: Smoothing ratio (0-100), mutually exclusive with r
+            r: Smoothing radius (mm), mutually exclusive with cp
+            mode: Pose control mode (0-2)
 
         Returns:
             str: ErrorID,{ResultID},Circle(...);
         """
         if not 1 <= count <= 999:
-            raise ValueError(f"圈数必须在1-999之间")
+            raise ValueError(f"Count must be between1-999")
         
         if len(p1) != 6 or len(p2) != 6:
-            raise ValueError(f"位姿需要6个参数")
+            raise ValueError(f"Pose requires6 parameters")
         
         if coord_type == CoordinateType.JOINT:
             p1_str = f"joint={{{','.join([f'{v:.6f}' for v in p1])}}}"
@@ -401,28 +401,28 @@ class Motion:
         cmd = f"Circle({','.join(params)})"
         return self._send_cmd(cmd)
     
-    # ==================== 伺服运动 ====================
+    # ==================== Servo Motion ====================
     
     def ServoJ(self, joints: Sequence[float],
                 t: float = 0.1, aheadtime: float = 50.0, gain: float = 500.0) -> str:
         """
-        ServoJ基于关节空间的动态跟随命令（队列指令）        
+        ServoJ Joint-space Dynamic Following Command (Queued Command)        
         Args:
-            joints: 6个关节角度 [j1,j2,j3,j4,j5,j6]
-            t: 运行时间 (秒) 0.004-3600.0
-            aheadtime: 提前量(20.0-100.0), 类似PID的D参数
-            gain: 比例增益 (200.0-1000.0), 类似PID的P参数
+            joints:6 joint angles [j1,j2,j3,j4,j5,j6]
+            t: Runtime (seconds) 0.004-3600.0
+            aheadtime: Advance time (20.0-100.0), similar to PID D parameter
+            gain: Proportional gain (200.0-1000.0), similar to PID P parameter
         Returns:
             str: ErrorID,{ResultID},ServoJ(...);
         """
         if len(joints) != 6:
-            raise ValueError("joints需要6个关节角度")
+            raise ValueError("joints requires6 joint angles")
         if not 0.004 <= t <= 3600.0:
-            raise ValueError(f"t必须在0.004-3600.0之间")
+            raise ValueError(f"t must be between0.004-3600.0")
         if not 20.0 <= aheadtime <= 100.0:
-            raise ValueError(f"aheadtime必须在20.0-100.0之间")
+            raise ValueError(f"aheadtime must be between20.0-100.0")
         if not 200.0 <= gain <= 1000.0:
-            raise ValueError(f"gain必须在200.0-1000.0之间")
+            raise ValueError(f"gain must be between200.0-1000.0")
         
         cmd = f"ServoJ({joints[0]:.6f},{joints[1]:.6f},{joints[2]:.6f},{joints[3]:.6f},{joints[4]:.6f},{joints[5]:.6f},t={t:.3f},aheadtime={aheadtime:.1f},gain={gain:.1f})"
         return self._send_cmd(cmd)
@@ -430,47 +430,47 @@ class Motion:
     def ServoP(self, pose: Sequence[float],
                 t: float = 0.1, aheadtime: float = 50.0, gain: float = 500.0) -> str:
         """
-        ServoP基于笛卡尔空间的动态跟随命令（队列指令）        
+        ServoP Cartesian-space Dynamic Following Command (Queued Command)        
         Args:
-            pose: 笛卡尔位姿 [x,y,z,rx,ry,rz]
-            t: 运行时间 (秒) 0.004-3600.0
-            aheadtime: 提前量(20.0-100.0)
-            gain: 比例增益 (200.0-1000.0)
+            pose: Cartesian pose [x,y,z,rx,ry,rz]
+            t: Runtime (seconds) 0.004-3600.0
+            aheadtime: Advance time (20.0-100.0)
+            gain: Proportional gain (200.0-1000.0)
 
         Returns:
             str: ErrorID,{ResultID},ServoP(...);
         """
         if len(pose) != 6:
-            raise ValueError("pose需要6个笛卡尔位姿参数")
+            raise ValueError("pose requires6 Cartesian pose parameters")
         if not 0.004 <= t <= 3600.0:
-            raise ValueError(f"t必须在0.004-3600.0之间")
+            raise ValueError(f"t must be between0.004-3600.0")
         if not 20.0 <= aheadtime <= 100.0:
-            raise ValueError(f"aheadtime必须在20.0-100.0之间")
+            raise ValueError(f"aheadtime must be between20.0-100.0")
         if not 200.0 <= gain <= 1000.0:
-            raise ValueError(f"gain必须在200.0-1000.0之间")
+            raise ValueError(f"gain must be between200.0-1000.0")
         
         cmd = f"ServoP({pose[0]:.6f},{pose[1]:.6f},{pose[2]:.6f},{pose[3]:.6f},{pose[4]:.6f},{pose[5]:.6f},t={t:.3f},aheadtime={aheadtime:.1f},gain={gain:.1f})"
         return self._send_cmd(cmd)
     
-    # ==================== 点动 ====================
+    # ==================== Jog ====================
     
     def MoveJog(self, axis: str = "", coord_type: CoordinateType = None,
                  user: int = None, tool: int = None) -> str:
         """
-        MoveJog点动机械臂（立即指令)
+        MoveJog Robot Arm Jogging (Immediate Command)
 
-        说明（与文档完全一致）：
-        - coordtype默认值为"上次成功调用时的设置值"，未传入时不发送该参数
-        - user/tool未显式传入时也不发送，由控制器使用其默认值
-        - 当axisID为关节轴（J1~J6）时，coordtype只能取0（忽略传入值）
-        - 当axisID为笛卡尔轴（X/Y/Z/Rx/Ry/Rz）时，coordtype只能取1或2，取0会返回错误码-6
+        Notes (matches documentation exactly):
+        - coordtype default is "last successful call setting", not sent if not provided
+        - user/tool not sent if not explicitly provided, controller uses its default
+        - When axisID is joint axis (J1~J6), coordtype can only be0 (ignores input)
+        - When axisID is Cartesian axis (X/Y/Z/Rx/Ry/Rz), coordtype can only be1 or2,0 returns error code-6
 
         Args:
-            axis: "X+", "X-", "J1+" 等，空字符串停止
-            coord_type: 坐标系类型，可选。None=使用控制器上次成功设置
-                        JOINT=0（关节点动）, USER/CARTESIAN=1（用户坐标系）, TOOL=2（工具坐标系）
-            user: 用户坐标系编号，可选。None=使用控制器默认
-            tool: 工具坐标系编号，可选。None=使用控制器默认
+            axis: "X+", "X-", "J1+" etc., empty string stops
+            coord_type: Coordinate system type, optional. None=use controller's last successful setting
+                        JOINT=0(joint jog), USER/CARTESIAN=1(user coordinate), TOOL=2(tool coordinate)
+            user: User coordinate system index, optional. None=use controller default
+            tool: Tool coordinate system index, optional. None=use controller default
         Returns:
             str: ErrorID,{},MoveJog(...);
         """
@@ -488,34 +488,34 @@ class Motion:
         cmd = f"MoveJog({','.join(params)})"
         return self._send_cmd(cmd)
     
-    # ==================== 运动至点位====================
+    # ==================== Move to Point ====================
     
     def RunTo(self, point: Sequence[float], move_type: int,
               user: int = -1, tool: int = -1,
               a: int = -1, v: int = -1,
               coord_type: CoordinateType = CoordinateType.CARTESIAN) -> str:
         """
-        RunTo运动至指定点位（立即指令)
+        RunTo Move to Specified Point (Immediate Command)
         
         Args:
-            point: 6个坐标值[x,y,z,rx,ry,rz] 或[j1,j2,j3,j4,j5,j6]
-            move_type: 运动类型
-                       0=关节运动, 1=直线运动
-                       2=关节运动至指定偏移角度（相对关节）
-                       3=沿工具坐标系相对直线运动
-                       4=沿用户坐标系相对直线运动
-            user: 用户坐标系编号(0-50, -1表示使用当前)
-            tool: 工具坐标系编号(0-50, -1表示使用当前)
-            a: 加速度比例 (1-100, -1表示使用全局)
-            v: 速度比例 (1-100, -1表示使用全局)
-            coord_type: 坐标系类型(默认CARTESIAN)
+            point:6 coordinate values [x,y,z,rx,ry,rz] or [j1,j2,j3,j4,j5,j6]
+            move_type: Motion type
+                       0=Joint motion, 1=Linear motion
+                       2=Joint motion to specified offset angle (relative joint)
+                       3=Relative linear motion along tool coordinate system
+                       4=Relative linear motion along user coordinate system
+            user: User coordinate system index (0-50, -1 for current)
+            tool: Tool coordinate system index (0-50, -1 for current)
+            a: Acceleration ratio (1-100, -1 for global)
+            v: Velocity ratio (1-100, -1 for global)
+            coord_type: Coordinate system type (default CARTESIAN)
 
         Returns:
             str: ErrorID,{ResultID},RunTo(...);
         """
         if move_type not in [0, 1, 2, 3, 4]:
-            raise ValueError("move_type 必须在 [0, 4] 范围内: 0=关节, 1=直线, "
-                             "2=关节偏移, 3=工具坐标相对直线, 4=用户坐标相对直线")
+            raise ValueError("move_type must be within [0,4] range:0=joint,1=linear, "
+                             "2=joint offset,3=tool coordinate relative linear,4=user coordinate relative linear")
         
         point_str = self._fmt_pose(point, coord_type)
         
@@ -532,20 +532,20 @@ class Motion:
         cmd = f"RunTo({','.join(params)})"
         return self._send_cmd(cmd)
     
-    # ==================== 轨迹复现 ====================
+    # ==================== Trajectory Playback ====================
     
     def GetStartPose(self, trace_name: str, path_type: int = 1) -> str:
         """
-        GetStartPose获取指定轨迹的第一个点位（立即指令)        
+        GetStartPose Get First Point of Specified Trajectory (Immediate Command)        
         Args:
-            trace_name: 轨迹文件名（含后缀.csv）
-            path_type: 轨迹类型 (1-用于复现的轨迹 2-用于拟合的轨迹，默认为1)
+            trace_name: Trajectory file name (with extension.csv)
+            path_type: Trajectory type (1-for playback,2-for fitting, default1)
 
         Returns:
             str: ErrorID,{X,Y,Z,Rx,Ry,Rz},GetStartPose(traceName,pathType);
         """
         if path_type not in [1, 2]:
-            raise ValueError("path_type 必须是1 或 2")
+            raise ValueError("path_type must be1 or2")
         
         cmd = f"GetStartPose(\"{trace_name}\",{path_type})"
         return self._send_cmd(cmd)
@@ -557,22 +557,22 @@ class Motion:
              user: int = -1, tool: int = -1,
              a: int = -1, v: int = -1, speed: int = -1) -> str:
         """
-        MovS拟合运动（队列指令)
-        支持两种调用方式：
-        1. 点位列表方式：MovS([p1, p2, p3, ...], coord_type, freq, user, tool, a, v|speed, freq)
-        2. 文件方式：MovS("xxx.csv", coord_type, freq, user, tool, a, v|speed, freq)
+        MovS Fitting Motion (Queued Command)
+        Supports two calling methods:
+        1. Point list method: MovS([p1, p2, p3, ...], coord_type, freq, user, tool, a, v|speed, freq)
+        2. File method: MovS("xxx.csv", coord_type, freq, user, tool, a, v|speed, freq)
 
         Args:
             trace_or_points: 
-                - str: 轨迹文件名（含后缀，如"xxx.csv"） -> 文件方式
-                - Sequence[Sequence[float]]: 点位列表，每个点位为 [x,y,z,rx,ry,rz] 或 [j1..j6]
-            coord_type: 点位坐标系类型（仅点位列表方式时使用）
-            freq: 滤波系数（范围 0-1, 1表示关闭滤波，-1表示不设置）
-            user: 用户坐标系索引(0-50, -1表示使用当前)
-            tool: 工具坐标系索引(0-50, -1表示使用当前)
-            a: 加速度比例 (1-100, -1表示使用全局)
-            v: 速度比例 (1-100, -1表示使用全局), 与speed互斥
-            speed: 目标速度 (mm/s), 与v互斥（优先speed）
+                - str: Trajectory file name (with extension, e.g."xxx.csv") -> File method
+                - Sequence[Sequence[float]]: Point list, each point is [x,y,z,rx,ry,rz] or [j1..j6]
+            coord_type: Point coordinate system type (only used for point list method)
+            freq: Filter coefficient (range0-1,1=disable filter,-1=not set)
+            user: User coordinate system index (0-50, -1 for current)
+            tool: Tool coordinate system index (0-50, -1 for current)
+            a: Acceleration ratio (1-100, -1 for global)
+            v: Velocity ratio (1-100, -1 for global), mutually exclusive with speed
+            speed: Target speed (mm/s), mutually exclusive with v (speed priority)
 
         Returns:
             str: ErrorID,{ResultID},MovS(...);
@@ -584,10 +584,10 @@ class Motion:
         else:
             points = list(trace_or_points)
             if len(points) < 4 or len(points) > 50:
-                raise ValueError("点位列表方式需要提供 4~50 个点位")
+                raise ValueError("Point list method requires4~50 points")
             for p in points:
                 if len(p) != 6:
-                    raise ValueError("每个点位需要6个值 [x,y,z,rx,ry,rz] 或 [j1..j6]")
+                    raise ValueError("Each point requires6 values [x,y,z,rx,ry,rz] or [j1..j6]")
                 params.append(self._fmt_pose(p, coord_type))
 
         if freq != -1:
@@ -610,15 +610,15 @@ class Motion:
                    multi: float = 1.0, sample: int = 50,
                    freq: float = 0.2, user: int = -1, tool: int = -1) -> str:
         """
-        StartPath复现录制的运动轨迹（队列指令)        
+        StartPath Playback Recorded Trajectory (Queued Command)        
         Args:
-            trace_name: 轨迹文件名（含后缀）
-            is_const: 是否匀速复现(0-原始 1-匀速)
-            multi: 速度倍数 (仅is_const=0时有意义 范围0.25-2)
-            sample: 采样间隔 (ms, 范围8-1000)
-            freq: 滤波系数 (范围0-1, 1表示关闭滤波)
-            user: 用户坐标系索引(0-50, -1表示使用当前)
-            tool: 工具坐标系索引(0-50, -1表示使用当前)
+            trace_name: Trajectory file name (with extension)
+            is_const: Constant speed playback (0-original 1-constant speed)
+            multi: Speed multiplier (only meaningful when is_const=0, range0.25-2)
+            sample: Sampling interval (ms, range8-1000)
+            freq: Filter coefficient (range0-1,1=disable filter)
+            user: User coordinate system index (0-50, -1 for current)
+            tool: Tool coordinate system index (0-50, -1 for current)
 
         Returns:
             str: ErrorID,{ResultID},StartPath(...);
@@ -636,27 +636,27 @@ class Motion:
         cmd = f"StartPath({','.join(params)})"
         return self._send_cmd(cmd)
     
-    # ==================== 相对运动 ====================
+    # ==================== Relative Motion ====================
     
     def RelMovJTool(self, offsetX: float, offsetY: float, offsetZ: float,
                     offsetRx: float, offsetRy: float, offsetRz: float,
                     user: int = -1, tool: int = -1,
                     a: int = -1, v: int = -1, cp: int = -1) -> str:
         """
-        RelMovJTool沿工具坐标系进行相对关节运动（队列指令）
+        RelMovJTool Relative Joint Motion Along Tool Coordinate System (Queued Command)
         
         Args:
-            offsetX: X方向偏移 (mm)
-            offsetY: Y方向偏移 (mm)
-            offsetZ: Z方向偏移 (mm)
-            offsetRx: Rx方向偏移 (度)
-            offsetRy: Ry方向偏移 (度)
-            offsetRz: Rz方向偏移 (度)
-            user: 用户坐标系编号(0-50, -1表示使用当前)
-            tool: 工具坐标系编号(0-50, -1表示使用当前)
-            a: 加速度比例 (1-100, -1表示使用全局)
-            v: 速度比例 (1-100, -1表示使用全局)
-            cp: 平滑过渡比例 (0-100, -1表示不使用)
+            offsetX: X direction offset (mm)
+            offsetY: Y direction offset (mm)
+            offsetZ: Z direction offset (mm)
+            offsetRx: Rx direction offset (degrees)
+            offsetRy: Ry direction offset (degrees)
+            offsetRz: Rz direction offset (degrees)
+            user: User coordinate system index (0-50, -1 for current)
+            tool: Tool coordinate system index (0-50, -1 for current)
+            a: Acceleration ratio (1-100, -1 for global)
+            v: Velocity ratio (1-100, -1 for global)
+            cp: Smoothing ratio (0-100, -1 for disabled)
 
         Returns:
             str: ErrorID,{ResultID},RelMovJTool(...);
@@ -685,22 +685,22 @@ class Motion:
                     a: int = -1, v: int = -1, speed: int = -1,
                     cp: int = -1, r: int = -1) -> str:
         """
-        RelMovLTool沿工具坐标系进行相对直线运动（队列指令）
+        RelMovLTool Relative Linear Motion Along Tool Coordinate System (Queued Command)
         
         Args:
-            offsetX: X方向偏移 (mm)
-            offsetY: Y方向偏移 (mm)
-            offsetZ: Z方向偏移 (mm)
-            offsetRx: Rx方向偏移 (度)
-            offsetRy: Ry方向偏移 (度)
-            offsetRz: Rz方向偏移 (度)
-            user: 用户坐标系编号(0-50, -1表示使用当前)
-            tool: 工具坐标系编号(0-50, -1表示使用当前)
-            a: 加速度比例 (1-100, -1表示使用全局)
-            v: 速度比例 (1-100, -1表示使用全局), 与speed互斥
-            speed: 目标速度 (mm/s), 与v互斥 (speed优先)
-            cp: 平滑过渡比例 (0-100, -1表示不使用), 与r互斥
-            r: 平滑过渡半径 (mm), 与cp互斥 (r优先)
+            offsetX: X direction offset (mm)
+            offsetY: Y direction offset (mm)
+            offsetZ: Z direction offset (mm)
+            offsetRx: Rx direction offset (degrees)
+            offsetRy: Ry direction offset (degrees)
+            offsetRz: Rz direction offset (degrees)
+            user: User coordinate system index (0-50, -1 for current)
+            tool: Tool coordinate system index (0-50, -1 for current)
+            a: Acceleration ratio (1-100, -1 for global)
+            v: Velocity ratio (1-100, -1 for global), mutually exclusive with speed
+            speed: Target speed (mm/s), mutually exclusive with v (speed priority)
+            cp: Smoothing ratio (0-100, -1 for disabled), mutually exclusive with r
+            r: Smoothing radius (mm), mutually exclusive with cp (r priority)
 
         Returns:
             str: ErrorID,{ResultID},RelMovLTool(...);
@@ -732,20 +732,20 @@ class Motion:
                     user: int = -1, tool: int = -1,
                     a: int = -1, v: int = -1, cp: int = -1) -> str:
         """
-        RelMovJUser沿用户坐标系进行相对关节运动（队列指令）
+        RelMovJUser Relative Joint Motion Along User Coordinate System (Queued Command)
         
         Args:
-            offsetX: X方向偏移 (mm)
-            offsetY: Y方向偏移 (mm)
-            offsetZ: Z方向偏移 (mm)
-            offsetRx: Rx方向偏移 (度)
-            offsetRy: Ry方向偏移 (度)
-            offsetRz: Rz方向偏移 (度)
-            user: 用户坐标系编号(0-50, -1表示使用当前)
-            tool: 工具坐标系编号(0-50, -1表示使用当前)
-            a: 加速度比例 (1-100, -1表示使用全局)
-            v: 速度比例 (1-100, -1表示使用全局)
-            cp: 平滑过渡比例 (0-100, -1表示不使用)
+            offsetX: X direction offset (mm)
+            offsetY: Y direction offset (mm)
+            offsetZ: Z direction offset (mm)
+            offsetRx: Rx direction offset (degrees)
+            offsetRy: Ry direction offset (degrees)
+            offsetRz: Rz direction offset (degrees)
+            user: User coordinate system index (0-50, -1 for current)
+            tool: Tool coordinate system index (0-50, -1 for current)
+            a: Acceleration ratio (1-100, -1 for global)
+            v: Velocity ratio (1-100, -1 for global)
+            cp: Smoothing ratio (0-100, -1 for disabled)
 
         Returns:
             str: ErrorID,{ResultID},RelMovJUser(...);
@@ -774,22 +774,22 @@ class Motion:
                     a: int = -1, v: int = -1, speed: int = -1,
                     cp: int = -1, r: int = -1) -> str:
         """
-        RelMovLUser沿用户坐标系进行相对直线运动（队列指令）
+        RelMovLUser Relative Linear Motion Along User Coordinate System (Queued Command)
         
         Args:
-            offsetX: X方向偏移 (mm)
-            offsetY: Y方向偏移 (mm)
-            offsetZ: Z方向偏移 (mm)
-            offsetRx: Rx方向偏移 (度)
-            offsetRy: Ry方向偏移 (度)
-            offsetRz: Rz方向偏移 (度)
-            user: 用户坐标系编号(0-50, -1表示使用当前)
-            tool: 工具坐标系编号(0-50, -1表示使用当前)
-            a: 加速度比例 (1-100, -1表示使用全局)
-            v: 速度比例 (1-100, -1表示使用全局), 与speed互斥
-            speed: 目标速度 (mm/s), 与v互斥 (speed优先)
-            cp: 平滑过渡比例 (0-100, -1表示不使用), 与r互斥
-            r: 平滑过渡半径 (mm), 与cp互斥 (r优先)
+            offsetX: X direction offset (mm)
+            offsetY: Y direction offset (mm)
+            offsetZ: Z direction offset (mm)
+            offsetRx: Rx direction offset (degrees)
+            offsetRy: Ry direction offset (degrees)
+            offsetRz: Rz direction offset (degrees)
+            user: User coordinate system index (0-50, -1 for current)
+            tool: Tool coordinate system index (0-50, -1 for current)
+            a: Acceleration ratio (1-100, -1 for global)
+            v: Velocity ratio (1-100, -1 for global), mutually exclusive with speed
+            speed: Target speed (mm/s), mutually exclusive with v (speed priority)
+            cp: Smoothing ratio (0-100, -1 for disabled), mutually exclusive with r
+            r: Smoothing radius (mm), mutually exclusive with cp (r priority)
 
         Returns:
             str: ErrorID,{ResultID},RelMovLUser(...);
@@ -821,20 +821,20 @@ class Motion:
                      user: int = -1, tool: int = -1,
                      a: int = -1, v: int = -1, cp: int = -1) -> str:
         """
-        RelJointMovJ沿关节坐标系进行相对关节运动（队列指令）
+        RelJointMovJ Relative Joint Motion Along Joint Coordinate System (Queued Command)
         
         Args:
-            offset1: J1关节偏移 (度)
-            offset2: J2关节偏移 (度)
-            offset3: J3关节偏移 (度)
-            offset4: J4关节偏移 (度)
-            offset5: J5关节偏移 (度)
-            offset6: J6关节偏移 (度)
-            user: 用户坐标系编号(0-50, -1表示使用当前)
-            tool: 工具坐标系编号(0-50, -1表示使用当前)
-            a: 加速度比例 (1-100, -1表示使用全局)
-            v: 速度比例 (1-100, -1表示使用全局)
-            cp: 平滑过渡比例 (0-100, -1表示不使用)
+            offset1: J1 joint offset (degrees)
+            offset2: J2 joint offset (degrees)
+            offset3: J3 joint offset (degrees)
+            offset4: J4 joint offset (degrees)
+            offset5: J5 joint offset (degrees)
+            offset6: J6 joint offset (degrees)
+            user: User coordinate system index (0-50, -1 for current)
+            tool: Tool coordinate system index (0-50, -1 for current)
+            a: Acceleration ratio (1-100, -1 for global)
+            v: Velocity ratio (1-100, -1 for global)
+            cp: Smoothing ratio (0-100, -1 for disabled)
 
         Returns:
             str: ErrorID,{ResultID},RelJointMovJ(...);
@@ -860,20 +860,20 @@ class Motion:
     def RelPointTool(self, p: Sequence[float], offset: Sequence[float],
                      coord_type: CoordinateType = CoordinateType.CARTESIAN) -> str:
         """
-        RelPointTool沿工具坐标系笛卡尔点偏移（立即指令）
+        RelPointTool Cartesian Point Offset Along Tool Coordinate System (Immediate Command)
         
         Args:
-            p: 6个值的点位[x,y,z,rx,ry,rz] 或 [j1..j6]
-            offset: 6个值的偏移[offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz]
-            coord_type: 点位坐标系类型。默认为笛卡尔(pose)，也可选关节(joint)
+            p:6-value point [x,y,z,rx,ry,rz] or [j1..j6]
+            offset:6-value offset [offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz]
+            coord_type: Point coordinate system type. Default is Cartesian (pose), can also be joint (joint)
 
         Returns:
             str: ErrorID,{X,Y,Z,Rx,Ry,Rz},RelPointTool(...);
         """
         if len(p) != 6:
-            raise ValueError("p需要6个点位参数")
+            raise ValueError("p requires6 point parameters")
         if len(offset) != 6:
-            raise ValueError("offset需要6个偏移参数[offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz]")
+            raise ValueError("offset requires6 offset parameters[offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz]")
         
         p_str = self._fmt_pose(p, coord_type)
         offset_values = ",".join([f"{v:.6f}" for v in offset])
@@ -883,20 +883,20 @@ class Motion:
     def RelPointUser(self, p: Sequence[float], offset: Sequence[float],
                      coord_type: CoordinateType = CoordinateType.CARTESIAN) -> str:
         """
-        RelPointUser沿用户坐标系笛卡尔点偏移（立即指令）
+        RelPointUser Cartesian Point Offset Along User Coordinate System (Immediate Command)
         
         Args:
-            p: 6个值的点位[x,y,z,rx,ry,rz] 或 [j1..j6]
-            offset: 6个值的偏移[offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz]
-            coord_type: 点位坐标系类型。默认为笛卡尔(pose)，也可选关节(joint)
+            p:6-value point [x,y,z,rx,ry,rz] or [j1..j6]
+            offset:6-value offset [offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz]
+            coord_type: Point coordinate system type. Default is Cartesian (pose), can also be joint (joint)
 
         Returns:
             str: ErrorID,{X,Y,Z,Rx,Ry,Rz},RelPointUser(...);
         """
         if len(p) != 6:
-            raise ValueError("p需要6个点位参数")
+            raise ValueError("p requires6 point parameters")
         if len(offset) != 6:
-            raise ValueError("offset需要6个偏移参数[offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz]")
+            raise ValueError("offset requires6 offset parameters[offsetX,offsetY,offsetZ,offsetRx,offsetRy,offsetRz]")
         
         p_str = self._fmt_pose(p, coord_type)
         offset_values = ",".join([f"{v:.6f}" for v in offset])
@@ -905,41 +905,41 @@ class Motion:
     
     def RelJoint(self, joints: Sequence[float], offset: Sequence[float]) -> str:
         """
-        RelJoint关节点位偏移（立即指令）
+        RelJoint Joint Point Offset (Immediate Command)
         
         Args:
-            joints: 6个关节角度[J1,J2,J3,J4,J5,J6]
-            offset: 6个偏移[offset1,offset2,offset3,offset4,offset5,offset6]
+            joints:6 joint angles [J1,J2,J3,J4,J5,J6]
+            offset:6 offsets [offset1,offset2,offset3,offset4,offset5,offset6]
 
         Returns:
             str: ErrorID,{J1,J2,J3,J4,J5,J6},RelJoint(...);
         """
         if len(joints) != 6:
-            raise ValueError("joints需要6个关节角度[J1,J2,J3,J4,J5,J6]")
+            raise ValueError("joints requires6 joint angles [J1,J2,J3,J4,J5,J6]")
         if len(offset) != 6:
-            raise ValueError("offset需要6个偏移[offset1,offset2,offset3,offset4,offset5,offset6]")
+            raise ValueError("offset requires6 offsets [offset1,offset2,offset3,offset4,offset5,offset6]")
         
         joints_str = ",".join([f"{v:.6f}" for v in joints])
         offset_values = ",".join([f"{v:.6f}" for v in offset])
         cmd = f"RelJoint({joints_str},{{{offset_values}}})"
         return self._send_cmd(cmd)
     
-    # ==================== 指令ID查询 ====================
+    # ==================== Command ID Query ====================
     
     def GetCurrentCommandID(self) -> str:
         """
-        GetCurrentCommandID获取当前执行指令的算法队列ID（立即指令）
+        GetCurrentCommandID Get Algorithm Queue ID of Current Executing Command (Immediate Command)
         
         Returns:
             str: ErrorID,{ResultID},GetCurrentCommandID();
         """
         return self._send_cmd("GetCurrentCommandID()")
     
-    # ==================== 坐标系偏移====================
+    # ==================== Coordinate System Offset ====================
     
     def StartRTOffset(self) -> str:
         """
-        StartRTOffset启动坐标系偏移（队列指令）
+        StartRTOffset Start Coordinate System Offset (Queued Command)
         
         Returns:
             str: ErrorID,{ResultID},StartRTOffset();
@@ -948,7 +948,7 @@ class Motion:
     
     def EndRTOffset(self) -> str:
         """
-        EndRTOffset结束坐标系偏移（队列指令)        
+        EndRTOffset End Coordinate System Offset (Queued Command)        
         Returns:
             str: ErrorID,{ResultID},EndRTOffset();
         """
@@ -957,15 +957,15 @@ class Motion:
     def OffsetPara(self, x: float, y: float, z: float,
                    rx: float, ry: float, rz: float) -> str:
         """
-        OffsetPara设置坐标系偏移值（立即指令)
+        OffsetPara Set Coordinate System Offset Values (Immediate Command)
         
         Args:
-            x: X方向偏移 (mm)
-            y: Y方向偏移 (mm)
-            z: Z方向偏移 (mm)
-            rx: Rx方向偏移 (度)
-            ry: Ry方向偏移 (度)
-            rz: Rz方向偏移 (度)
+            x: X direction offset (mm)
+            y: Y direction offset (mm)
+            z: Z direction offset (mm)
+            rx: Rx direction offset (degrees)
+            ry: Ry direction offset (degrees)
+            rz: Rz direction offset (degrees)
 
         Returns:
             str: ErrorID,{},OffsetPara(...);
@@ -973,14 +973,14 @@ class Motion:
         cmd = f"OffsetPara({x:.6f},{y:.6f},{z:.6f},{rx:.6f},{ry:.6f},{rz:.6f})"
         return self._send_cmd(cmd)
     
-    # ==================== 轨迹恢复 ====================
+    # ==================== Trajectory Recovery ====================
     
     def SetResumeOffset(self, distance: float) -> str:
         """
-        SetResumeOffset设置轨迹恢复的回退距离（立即指令）
+        SetResumeOffset Set Trajectory Recovery Retraction Distance (Immediate Command)
         
         Args:
-            distance: 回退距离 (mm)
+            distance: Retraction distance (mm)
 
         Returns:
             str: ErrorID,{},SetResumeOffset(distance);
@@ -989,7 +989,7 @@ class Motion:
     
     def PathRecovery(self) -> str:
         """
-        PathRecovery开始轨迹恢复（立即指令)        
+        PathRecovery Start Trajectory Recovery (Immediate Command)        
         Returns:
             str: ErrorID,{},PathRecovery();
         """
@@ -997,7 +997,7 @@ class Motion:
     
     def PathRecoveryStop(self) -> str:
         """
-        PathRecoveryStop轨迹恢复过程中停止机器人（立即指令）
+        PathRecoveryStop Stop Robot During Trajectory Recovery (Immediate Command)
         
         Returns:
             str: ErrorID,{},PathRecoveryStop();
@@ -1006,9 +1006,9 @@ class Motion:
     
     def PathRecoveryStatus(self) -> str:
         """
-        PathRecoveryStatus查询轨迹恢复状态（立即指令)        
+        PathRecoveryStatus Query Trajectory Recovery Status (Immediate Command)        
         Returns:
             str: ErrorID,{status},PathRecoveryStatus();
-                 status: 0-已回到暂停位置 1-偏差较小, 2-偏差较大
+                 status: 0-returned to pause position,1-small deviation,2-large deviation
         """
         return self._send_cmd("PathRecoveryStatus()")

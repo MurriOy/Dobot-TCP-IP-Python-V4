@@ -1,60 +1,60 @@
 # Copyright (c) 2026 Dobot
 # Licensed under the MIT License
 
-"""IO相关模块 - 数字IO、模拟IO、末端IO控制"""
+"""IO related module - Digital IO, Analog IO, End-effector IO control"""
 
 from typing import List, Union
 from ..core.connection import DobotConnection
 
 
 class IO:
-    """IO模块 - 处理所有IO相关指令"""
+    """IO module - Handles all IO-related commands"""
 
     def __init__(self, connection: DobotConnection):
         self.connection = connection
 
     def _send_cmd(self, command: str) -> str:
-        """发送命令并接收响应"""
+        """Send command and receive response"""
         return self.connection.send_receive_text(command)
 
-    # ==================== 数字输出端口 ====================
+    # ==================== Digital Output Ports ====================
 
     def DO(self, index: int, status: int, time: float = None) -> str:
         """
-        设置数字输出端口状态（队列指令）
+        Set digital output port status (queued command)
         Args:
-            index: DO端口索引 (1-based)
-            status: 状态(0=Off, 1=On)
-            time: 输出持续时间(秒)。当status=1时有效，到达时间后自动变为0。
+            index: DO port index (1-based)
+            status: Status (0=Off, 1=On)
+            time: Output duration in seconds. Valid when status=1, automatically changes to 0 after the time elapses.
 
         Returns:
             str: ErrorID,{ResultID},DO(index,status,time);
         """
         if status not in [0, 1]:
-            raise ValueError("DO状态必须是0或1")
+            raise ValueError("DO status must be 0 or 1")
         if time is not None:
             return self._send_cmd(f"DO({index},{status},{time:.3f})")
         return self._send_cmd(f"DO({index},{status})")
 
     def DOInstant(self, index: int, status: int) -> str:
         """
-        设置数字输出端口状态（立即指令）
+        Set digital output port status (immediate command)
         Args:
-            index: DO端口索引 (1-based)
-            status: 状态(0=Off, 1=On)
+            index: DO port index (1-based)
+            status: Status (0=Off, 1=On)
 
         Returns:
             str: ErrorID,{},DOInstant(index,status);
         """
         if status not in [0, 1]:
-            raise ValueError("DO状态必须是0或1")
+            raise ValueError("DO status must be 0 or 1")
         return self._send_cmd(f"DOInstant({index},{status})")
 
     def GetDO(self, index: int) -> str:
         """
-        获取数字输出端口状态（立即指令）
+        Get digital output port status (immediate command)
         Args:
-            index: DO端口索引 (1-based)
+            index: DO port index (1-based)
 
         Returns:
             str: ErrorID,{status},GetDO(index);
@@ -63,33 +63,33 @@ class IO:
 
     def DOGroup(self, *index_value_pairs) -> str:
         """
-        设置多个数字输出端口状态（队列指令）
+        Set multiple digital output port status (queued command)
         Args:
-            *index_value_pairs: 端口索引和状态的成对参数，如 DOGroup(4,1,6,0,2,1,7,0)
+            *index_value_pairs: Paired parameters of port index and status, e.g. DOGroup(4,1,6,0,2,1,7,0)
 
         Returns:
             str: ErrorID,{ResultID},DOGroup(index1,value1,index2,value2,...);
         """
         if len(index_value_pairs) % 2 != 0:
-            raise ValueError("DOGroup参数必须是偶数个（index与value成对）")
+            raise ValueError("DOGroup parameters must be even in number (index and value paired)")
         params = []
         for i in range(0, len(index_value_pairs), 2):
             index = index_value_pairs[i]
             value = index_value_pairs[i + 1]
             if not isinstance(index, int):
-                raise ValueError("DOGroup的index必须是int类型")
+                raise ValueError("DOGroup index must be of int type")
             if value not in [0, 1]:
-                raise ValueError("DOGroup的value必须是0或1")
+                raise ValueError("DOGroup value must be 0 or 1")
             params.append(str(index))
             params.append(str(value))
         return self._send_cmd(f"DOGroup({','.join(params)})")
 
     def DOGroupDEC(self, indices: Union[List[int], str], value: int) -> str:
         """
-        通过赋值十进制设置多个数字输出端口状态（队列指令）
+        Set multiple digital output port status by decimal value (queued command)
         Args:
-            indices: 端口索引列表，如[1,2,3,4,5] 或字符串 "{1,2,3,4,5}"
-            value: 十进制值
+            indices: Port index list, e.g. [1,2,3,4,5] or string "{1,2,3,4,5}"
+            value: Decimal value
         Returns:
             str: ErrorID,{ResultID},DOGroupDEC({index1,index2,...,indexN},value);
         """
@@ -101,9 +101,9 @@ class IO:
 
     def GetDOGroup(self, *indices) -> str:
         """
-        获取多个数字输出端口状态（立即指令）
+        Get multiple digital output port status (immediate command)
         Args:
-            *indices: 要读取的DO端口编号，如 GetDOGroup(1,2)
+            *indices: DO port numbers to read, e.g. GetDOGroup(1,2)
 
         Returns:
             str: ErrorID,{status1,status2,...},GetDOGroup(index1,index2,...);
@@ -113,10 +113,10 @@ class IO:
 
     def GetDOGroupDEC(self, indices: Union[List[int], str]) -> str:
         """
-        获取多个数字输出端口当前状态，返回值为十进制数（立即指令）
+        Get current status of multiple digital output ports, returns decimal value (immediate command)
 
         Args:
-            indices: 端口索引列表，如[1,2,3] 或字符串 "{1,2,3}"
+            indices: Port index list, e.g. [1,2,3] or string "{1,2,3}"
 
         Returns:
             str: ErrorID,{value},GetDOGroupDEC({index1,...,indexN});
@@ -127,13 +127,13 @@ class IO:
             indices_str = indices
         return self._send_cmd(f"GetDOGroupDEC({indices_str})")
 
-    # ==================== 数字输入端口 ====================
+    # ==================== Digital Input Ports ====================
 
     def DI(self, index: int) -> str:
         """
-        获取DI端口的状态（立即指令）
+        Get DI port status (immediate command)
         Args:
-            index: DI端口索引 (1-based)
+            index: DI port index (1-based)
 
         Returns:
             str: ErrorID,{status},DI(index);
@@ -142,9 +142,9 @@ class IO:
 
     def DIGroup(self, *indices) -> str:
         """
-        获取多个DI端口的状态（立即指令）
+        Get status of multiple DI ports (immediate command)
         Args:
-            *indices: 要读取的DI端口编号，如 DIGroup(4,6,2,7)
+            *indices: DI port numbers to read, e.g. DIGroup(4,6,2,7)
 
         Returns:
             str: ErrorID,{status1,status2,...},DIGroup(index1,index2,...);
@@ -154,10 +154,10 @@ class IO:
 
     def DIGroupDEC(self, indices: Union[List[int], str]) -> str:
         """
-        获取多个DI端口的状态，返回值为十进制数（队列指令）
+        Get status of multiple DI ports, returns decimal value (queued command)
 
         Args:
-            indices: 端口索引列表，如[1,2] 或字符串 "{1,2}"
+            indices: Port index list, e.g. [1,2] or string "{1,2}"
 
         Returns:
             str: ErrorID,{value},DIGroupDEC({index1,index2,...,indexN});
@@ -168,14 +168,14 @@ class IO:
             indices_str = indices
         return self._send_cmd(f"DIGroupDEC({indices_str})")
 
-    # ==================== 模拟输出端口 ====================
+    # ==================== Analog Output Ports ====================
 
     def AO(self, index: int, value: float) -> str:
         """
-        设置模拟输出端口的值（队列指令）
+        Set analog output port value (queued command)
         Args:
-            index: AO端口索引 (1-based)
-            value: 模拟值(0.0-10.0V)
+            index: AO port index (1-based)
+            value: Analog value (0.0-10.0V)
 
         Returns:
             str: ErrorID,{ResultID},AO(index,value);
@@ -184,10 +184,10 @@ class IO:
 
     def AOInstant(self, index: int, value: float) -> str:
         """
-        设置模拟输出端口的值（立即指令）
+        Set analog output port value (immediate command)
         Args:
-            index: AO端口索引 (1-based)
-            value: 模拟值(0.0-10.0V)
+            index: AO port index (1-based)
+            value: Analog value (0.0-10.0V)
 
         Returns:
             str: ErrorID,{},AOInstant(index,value);
@@ -196,104 +196,104 @@ class IO:
 
     def GetAO(self, index: int) -> str:
         """
-        获取模拟输出端口的值（立即指令）
+        Get analog output port value (immediate command)
         Args:
-            index: AO端口索引 (1-based)
+            index: AO port index (1-based)
 
         Returns:
             str: ErrorID,{value},GetAO(index);
         """
         return self._send_cmd(f"GetAO({index})")
 
-    # ==================== 模拟输入端口 ====================
+    # ==================== Analog Input Ports ====================
 
     def AI(self, index: int) -> str:
         """
-        获取AI端口的值（立即指令）
+        Get AI port value (immediate command)
         Args:
-            index: AI端口索引 (1-based)
+            index: AI port index (1-based)
 
         Returns:
             str: ErrorID,{value},AI(index);
         """
         return self._send_cmd(f"AI({index})")
 
-    # ==================== 末端数字输出端口 ====================
+    # ==================== End-effector Digital Output Ports ====================
 
     def ToolDO(self, index: int, status: int) -> str:
         """
-        设置末端数字输出端口状态（队列指令）
+        Set end-effector digital output port status (queued command)
         Args:
-            index: 末端DO端口索引 (0-1)
-            status: 状态(0=Off, 1=On)
+            index: End-effector DO port index (0-1)
+            status: Status (0=Off, 1=On)
 
         Returns:
             str: ErrorID,{ResultID},ToolDO(index,status);
         """
         if status not in [0, 1]:
-            raise ValueError("DO状态必须是0或1")
+            raise ValueError("DO status must be 0 or 1")
         return self._send_cmd(f"ToolDO({index},{status})")
 
     def ToolDOInstant(self, index: int, status: int) -> str:
         """
-        设置末端数字输出端口状态（立即指令）
+        Set end-effector digital output port status (immediate command)
         Args:
-            index: 末端DO端口索引 (0-1)
-            status: 状态(0=Off, 1=On)
+            index: End-effector DO port index (0-1)
+            status: Status (0=Off, 1=On)
 
         Returns:
             str: ErrorID,{},ToolDOInstant(index,status);
         """
         if status not in [0, 1]:
-            raise ValueError("DO状态必须是0或1")
+            raise ValueError("DO status must be 0 or 1")
         return self._send_cmd(f"ToolDOInstant({index},{status})")
 
     def GetToolDO(self, index: int) -> str:
         """
-        获取末端数字输出端口状态（立即指令）
+        Get end-effector digital output port status (immediate command)
         Args:
-            index: 末端DO端口索引 (0-1)
+            index: End-effector DO port index (0-1)
 
         Returns:
             str: ErrorID,{status},GetToolDO(index);
         """
         return self._send_cmd(f"GetToolDO({index})")
 
-    # ==================== 末端数字输入端口 ====================
+    # ==================== End-effector Digital Input Ports ====================
 
     def ToolDI(self, index: int) -> str:
         """
-        获取末端DI端口的状态（立即指令）
+        Get end-effector DI port status (immediate command)
         Args:
-            index: 末端DI端口索引
+            index: End-effector DI port index
         Returns:
             str: ErrorID,{status},ToolDI(index);
         """
         return self._send_cmd(f"ToolDI({index})")
 
-    # ==================== 末端模拟输入端口 ====================
+    # ==================== End-effector Analog Input Ports ====================
 
     def ToolAI(self, index: int) -> str:
         """
-        获取末端AI端口的值（立即指令）
+        Get end-effector AI port value (immediate command)
         Args:
-            index: 末端AI端口索引
+            index: End-effector AI port index
         Returns:
             str: ErrorID,{value},ToolAI(index);
         """
         return self._send_cmd(f"ToolAI({index})")
 
-    # ==================== 末端工具设置 ====================
+    # ==================== End-effector Tool Settings ====================
 
     def SetTool485(self, baud: int, parity: str = "N", stopbit: int = 1, identify: int = None) -> str:
         """
-        设置末端485通信格式（立即指令）
+        Set end-effector 485 communication format (immediate command)
 
         Args:
-            baud: 波特率
-            parity: 校验位("O"=奇校验, "E"=偶校验, "N"=无校验) 默认"N"
-            stopbit: 停止位 默认1
-            identify: 辨识参数（可选）
+            baud: Baud rate
+            parity: Parity bit ("O"=Odd, "E"=Even, "N"=None) default "N"
+            stopbit: Stop bit default 1
+            identify: Identification parameter (optional)
         Returns:
             str: ErrorID,{},SetTool485(baud,parity,stopbit[,identify]);
         """
@@ -303,24 +303,24 @@ class IO:
 
     def SetToolPower(self, status: int) -> str:
         """
-        设置末端工具供电状态（立即指令）
+        Set end-effector tool power status (immediate command)
         Args:
-            status: 供电状态(0-关闭, 1-开启)
+            status: Power status (0-Off, 1-On)
 
         Returns:
             str: ErrorID,{},SetToolPower(status);
         """
         if status not in [0, 1]:
-            raise ValueError("状态必须是0或1")
+            raise ValueError("Status must be 0 or 1")
         return self._send_cmd(f"SetToolPower({status})")
 
     def SetToolMode(self, mode: int, type: int = None, identify: int = None) -> str:
         """
-        设置末端复用端子的模式（立即指令）
+        Set end-effector multiplexing terminal mode (immediate command)
         Args:
-            mode: 模式值
-            type: 类型值（可选）
-            identify: 辨识参数（可选）
+            mode: Mode value
+            type: Type value (optional)
+            identify: Identification parameter (optional)
         Returns:
             str: ErrorID,{},SetToolMode(mode[,type[,identify]]);
         """
