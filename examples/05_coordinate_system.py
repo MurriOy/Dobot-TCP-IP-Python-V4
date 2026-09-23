@@ -10,7 +10,7 @@ import time
 
 
 def main():
-    ROBOT_IP = "192.168.1.100"
+    ROBOT_IP = "192.168.100.51"
     
     try:
         with DobotRobot(ROBOT_IP) as robot:
@@ -23,7 +23,12 @@ def main():
             robot.robot_control.ClearError()
             robot.robot_control.EnableRobot(load=1.0)
             robot.robot_control.SpeedFactor(30)
-            
+            robot.robot_control.User(0)
+            robot.robot_control.Tool(0)
+            pose = robot.robot_control.GetPose()
+            print(f"Current pose: {pose}")
+            robot.robot_control.DisableRobot()
+
             # ========== Set User Coordinate System ==========
             print("\n--- Set User Coordinate System ---")
             
@@ -94,7 +99,7 @@ def main():
             safe_pose = [0, -30, -60, 0, 90, 0]
             robot.motion.MovJ(safe_pose, CoordinateType.JOINT)
             time.sleep(3)
-            
+
             # Disable robot
             robot.robot_control.DisableRobot()
             

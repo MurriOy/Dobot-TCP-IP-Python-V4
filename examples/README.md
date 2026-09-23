@@ -15,6 +15,7 @@ This directory contains example code for the DOBOT SDK, categorized by functiona
 | 06 | `06_force_and_conveyor.py` | Force control and conveyor |
 | 07 | `07_status_monitor.py` | Status monitoring |
 | 08 | `08_multi_thread_control.py` | Multi-thread control |
+| 09 | `09_flange_pose_rtb.py` | Flange pose as SE3 + quaternion for Robotics Toolbox for Python |
 
 ## Running Examples
 
@@ -42,6 +43,9 @@ python examples/07_status_monitor.py
 
 # Run multi-thread control example
 python examples/08_multi_thread_control.py
+
+# Run flange pose (SE3 / quaternion) example for Robotics Toolbox
+python examples/09_flange_pose_rtb.py
 ```
 
 ## Usage Notes
@@ -52,6 +56,9 @@ python examples/08_multi_thread_control.py
 4. **Install dependencies**: Ensure necessary dependencies are installed
    ```bash
    pip install numpy requests
+   # Optional — only for example 09 (Robotics Toolbox SE3 / quaternion):
+   pip install spatialmath-python
+   # or: pip install roboticstoolbox-python
    ```
 
 ## Example Structure
