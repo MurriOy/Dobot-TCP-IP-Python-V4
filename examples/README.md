@@ -16,6 +16,7 @@ This directory contains example code for the DOBOT SDK, categorized by functiona
 | 07 | `07_status_monitor.py` | Status monitoring |
 | 08 | `08_multi_thread_control.py` | Multi-thread control |
 | 09 | `09_flange_pose_rtb.py` | Flange pose as SE3 + quaternion for Robotics Toolbox for Python |
+| 10 | `10_blocking_relmovltool.py` | Blocking RelMovLTool (wait for motion complete via feedback) |
 
 ## Running Examples
 
@@ -46,6 +47,9 @@ python examples/08_multi_thread_control.py
 
 # Run flange pose (SE3 / quaternion) example for Robotics Toolbox
 python examples/09_flange_pose_rtb.py
+
+# Run blocking relative tool motion example
+python examples/10_blocking_relmovltool.py
 ```
 
 ## Usage Notes
