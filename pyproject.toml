@@ -7,7 +7,7 @@ name = "dobot_sdk"
 version = "2.0.0"
 description = "DOBOT TCP/IP Python SDK V4 - 机器人控制SDK"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "DOBOT", email = "support@dobot.cn"}
@@ -25,6 +25,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
+    "bilogger",
     "numpy>=1.19.0",
     "requests>=2.25.0",
     "roboticstoolbox-python>=1.1.1",
@@ -69,3 +70,6 @@ exclude_lines = [
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
 ]
+
+[tool.uv.sources]
+bilogger = { path = "bilogger-0.1.0-py3-none-any.whl" }
