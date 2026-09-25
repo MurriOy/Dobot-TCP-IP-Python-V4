@@ -27,6 +27,7 @@ classifiers = [
 dependencies = [
     "numpy>=1.19.0",
     "requests>=2.25.0",
+    "roboticstoolbox-python>=1.1.1",
 ]
 
 [project.optional-dependencies]

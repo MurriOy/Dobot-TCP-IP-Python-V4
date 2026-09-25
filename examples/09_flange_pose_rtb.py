@@ -221,7 +221,7 @@ def main():
             offset = T * SE3.Trans(0, 0, 0.1)
             print(f"  example offset position ({UNIT}): {offset.t}")
 
-            robot.robot_control.DisableRobot()
+            # robot.robot_control.DisableRobot()
             print("\n" + "=" * 50)
             print("Flange pose example completed")
             print("=" * 50)
