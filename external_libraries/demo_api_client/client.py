@@ -160,6 +160,71 @@ def detect_2d(session: requests.Session, model_name, match_threshold) -> Dict[st
     return body
 
 
+def detect_2d_debug(session: requests.Session, model_name: str,
+                    match_threshold: float = None) -> Dict[str, Any]:
+    """Debug variant of detect_2d (GET /detect_2d_debug).
+
+    Runs the same detection as detect_2d but also stores a rendered debug
+    image on the server (retrievable via get_detect_2d_debug_image).
+
+    The response is a non-standard JSON dict (not the Result envelope):
+        - Error:   {"success": False, "error": {"code": ..., "message": ...}}
+        - No det:  {"detected": False, "model_name": ..., "timestamp": ...}
+        - Det:     {"detected": True, "model_name": ...,
+                    "normalized_centre_point_coordinates": [nx, ny],
+                    "centre_point_coordinates": [px, py],
+                    "angle": float, "diameter": float, "timestamp": float,
+                    "detections_selected": [...]}
+
+    Returns the parsed response body.
+    """
+    log.info("GET /detect_2d_debug (model_name=%s)", model_name)
+    endpoint = f"{BASE_URL}/detect_2d_debug"
+    params = {"model_name": model_name}
+    if match_threshold is not None:
+        params["match_threshold"] = match_threshold
+    log_request("GET", endpoint, params)
+    response = session.get(endpoint, params=params, timeout=REQUEST_TIMEOUT)
+    body = log_response(response, "GET /detect_2d_debug")
+
+    if body.get("success") is False:
+        log.warning("Detection failed: %s", body.get("error", {}).get("message"))
+    elif body.get("detected"):
+        log.info("Detected - normalized center: %s, angle: %s",
+                 body.get("normalized_centre_point_coordinates"),
+                 body.get("angle"))
+    else:
+        log.info("No object detected")
+    return body
+
+
+def get_detect_2d_debug_image(session: requests.Session,
+                              save_path: str = None) -> bytes:
+    """Retrieve the debug image from the last detect_2d_debug call.
+
+    GET /detect_2d_debug_image returns a PNG image (raw bytes). If save_path
+    is given the bytes are also written to disk.
+
+    Returns the raw PNG bytes, or None if no debug image is available.
+    """
+    log.info("GET /detect_2d_debug_image")
+    endpoint = f"{BASE_URL}/detect_2d_debug_image"
+    log_request("GET", endpoint)
+    response = session.get(endpoint, timeout=REQUEST_TIMEOUT)
+
+    content_type = response.headers.get("Content-Type", "")
+    if not content_type.startswith("image/"):
+        log.warning("No debug image available (Content-Type: %s)", content_type)
+        return None
+
+    log.info("Debug image retrieved (%d bytes)", len(response.content))
+    if save_path:
+        with open(save_path, "wb") as f:
+            f.write(response.content)
+        log.info("Debug image saved to %s", save_path)
+    return response.content
+
+
 def delete_test_model(session: requests.Session) -> None:
     """Delete the test model."""
     log.info("POST /delete_model")

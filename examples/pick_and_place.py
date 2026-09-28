@@ -103,19 +103,19 @@ SCAN_Y = -350.0         # mm, scan center Y (world)
 SCAN_ORIENTATION = [-180.0, 0.0, -180.0]   # look straight down (optical Z = -world Z)
 
 # Gripper travel heights (world Z), with the gripper tool active
-APPROACH_Z = 150.0      # mm, safe travel / approach height above the plane
-PICK_Z = 90.0           # mm, descent height at pick (≈ plane; adjust for cup/object)
+APPROACH_Z = 200.0      # mm, safe travel / approach height above the plane
+PICK_Z = 79.0           # mm, descent height at pick (≈ plane; adjust for cup/object)
 PICK_ORIENTATION = [-180.0, 0.0, -180.0]   # gripper pointing down
 
 # Place position (world, with gripper tool active)
 PLACE_X = 200.0
 PLACE_Y = -350.0
-PLACE_Z = 90.0
+PLACE_Z = 100.0
 
 # Suction control (end-effector ToolDO)
-SUCTION_PORT = 0        # ToolDO index (0 or 1)
+SUCTION_PORT = 1        # ToolDO index (0 or 1)
 SUCTION_ON_DELAY = 0.5  # s, let vacuum establish after turning on
-SUCTION_OFF_DELAY = 0.3  # s, pause before lifting after release
+SUCTION_OFF_DELAY = 0.7  # s, pause before lifting after release
 
 # Vision detection
 MODEL_NAME = "paper_cup"           # must already exist on the vision server
@@ -233,19 +233,25 @@ def scan_and_detect(robot, session):
           f"{c_world[2]:.2f}] mm")
 
     print("\n--- Detect ---")
-    body = vision_client.detect_2d(session, MODEL_NAME, MATCH_THRESHOLD)
-    if not body.get("success"):
+    body = vision_client.detect_2d_debug(session, MODEL_NAME, MATCH_THRESHOLD)
+    if body.get("success") is False:
         err = body.get("error", {})
         print(f"  detection failed: {err.get('code')}: {err.get('message')}")
         return None
-    detections = body.get("data", {}).get("detections", [])
-    if not detections:
+    if not body.get("detected"):
         print("  no object detected")
         return None
 
-    det = detections[0]
-    nx, ny = det["center"]
+    nx, ny = body["normalized_centre_point_coordinates"]
     print(f"  detection center (normalized): nx={nx:.4f} ny={ny:.4f}")
+
+    # Save the debug image for inspection
+    debug_path = os.environ.get(
+        "DEBUG_IMAGE_PATH",
+        os.path.join(EXAMPLES_DIR, "detect_2d_debug.png"),
+    )
+    vision_client.get_detect_2d_debug_image(session, save_path=debug_path)
+    print(f"  debug image saved to {debug_path}")
 
     obj = back_project_to_world(nx, ny, R_wcam, c_world)
     print(f"  object (world): [{obj[0]:.2f} {obj[1]:.2f} {obj[2]:.2f}] mm")
@@ -326,16 +332,17 @@ def main() -> None:
             vision_client.get_initial_status(session)
 
             try:
-                obj = scan_and_detect(robot, session)
-                if obj is None:
-                    print("\nNothing to pick — finishing.")
-                else:
-                    if not pick(robot, obj):
-                        print("\nPick failed — aborting.")
-                    elif not place(robot):
-                        print("\nPlace failed — aborting.")
+                while True:
+                    obj = scan_and_detect(robot, session)
+                    if obj is None:
+                        print("\nNothing to pick — trying again.")
                     else:
-                        print("\nPick and place completed.")
+                        if not pick(robot, obj):
+                            print("\nPick failed — aborting.")
+                        elif not place(robot):
+                            print("\nPlace failed — aborting.")
+                        else:
+                            print("\nPick and place completed.")
             finally:
                 # Return to a safe pose (gripper tool) before shutting down
                 print("\nReturning to safe pose...")
@@ -346,7 +353,7 @@ def main() -> None:
                     pass
                 print("\nStopping monitor / disabling robot...")
                 robot.StopFeedbackMonitor()
-                robot.robot_control.DisableRobot()
+                # robot.robot_control.DisableRobot()
 
             print("\n" + "=" * 50)
             print("Done")
