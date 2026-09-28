@@ -307,8 +307,13 @@ def get_status_after_calibration(session: requests.Session) -> None:
         log.info(f"Calibration in progress: {status.get('calibration_in_progress')}")
 
 
-def detect_calibration_pattern(session: requests.Session) -> None:
-    """Detect calibration pattern (extrinsic)."""
+def detect_calibration_pattern(session: requests.Session) -> Dict[str, Any]:
+    """Detect calibration pattern (extrinsic).
+
+    Returns the parsed response body so callers can read the detected pose:
+        body["data"]["position"]     -> [x, y, z] in meters (OpenCV optical frame)
+        body["data"]["orientation"]  -> [x, y, z, w] unit quaternion (scipy order)
+    """
     log.info("POST /detect_calibration_pattern")
     endpoint = f"{BASE_URL}/detect_calibration_pattern"
     payload = {"pattern": {"name": "RectangleDotPatternStaggered", "data": {}}}
@@ -325,6 +330,7 @@ def detect_calibration_pattern(session: requests.Session) -> None:
         log.warning(
             f"Calibration pattern detection failed: {body.get('error', {}).get('message')}"
         )
+    return body
 
 
 def get_camera_setting(session: requests.Session, name: str) -> None:
@@ -437,7 +443,8 @@ if __name__ == "__main__":
     # get_camera_setting(session, "exposure_time")
     # get_camera_setting(session, "gain")
 
-    detect_calibration_pattern(session)
+    data = detect_calibration_pattern(session)
+    print(data)
     # get_image(session)
     # detect_2d(session)
 
