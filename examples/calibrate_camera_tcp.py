@@ -16,7 +16,7 @@ Per position i:
     gripper2base  (T_g2b)  : actual flange pose in world, read from the
                              feedback stream (User 0 / Tool 0 active):
                              tool_vector_actual -> R = Rz(rz)Ry(ry)Rx(rx)
-                             (SE3.RPY order='zyx'), translation in mm.
+                             (scipy euler 'xyz'), translation in mm.
     target2cam    (T_t2c)  : detect_calibration_pattern response:
                              position (m -> mm) and orientation [x,y,z,w]
                              (scipy as_quat order, OpenCV optical frame).
@@ -54,7 +54,6 @@ except ImportError:
           "  pip install opencv-python")
     sys.exit(1)
 
-from spatialmath import SE3  # noqa: E402
 from scipy.spatial.transform import Rotation  # noqa: E402
 
 EXAMPLES_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -88,18 +87,31 @@ HAND_EYE_METHOD = cv2.CALIB_HAND_EYE_PARK
 # ==================== Pose conversions ====================
 
 def dobot_euler_to_matrix(rx: float, ry: float, rz: float) -> np.ndarray:
-    """Dobot fixed-axis Euler R = Rz(rz)Ry(ry)Rx(rx) -> 3x3 (deg input)."""
-    return np.asarray(SE3.RPY(rx, ry, rz, order="zyx", unit="deg").R,
-                      dtype=np.float64)
+    """Dobot fixed-axis Euler R = Rz(rz)Ry(ry)Rx(rx) -> 3x3 (deg input).
+
+    Equivalent to spatialmath SE3.RPY(rx,ry,rz, order='zyx'): scipy lowercase
+    'xyz' (intrinsic xyz == extrinsic zyx) builds the same R = RzRyRx.
+    """
+    return Rotation.from_euler("xyz", [rx, ry, rz], degrees=True).as_matrix(
+    ).astype(np.float64)
+
+
+def _orthonormalize(R: np.ndarray) -> np.ndarray:
+    """Nearest proper rotation matrix (fixes cv2 numerical drift)."""
+    U, _, Vt = np.linalg.svd(R)
+    D = np.eye(3)
+    D[2, 2] = np.linalg.det(U @ Vt)
+    return (U @ D @ Vt)
 
 
 def matrix_to_dobot_pose(R: np.ndarray, t: np.ndarray):
-    """3x3 rotation + 3 translation (mm) -> [x,y,z,rx,ry,rz] (mm / deg)."""
-    T = np.eye(4)
-    T[:3, :3] = R
-    T[:3, 3] = t
-    se3 = SE3(T)
-    rx, ry, rz = se3.rpy(order="zyx", unit="deg")
+    """3x3 rotation + 3 translation (mm) -> [x,y,z,rx,ry,rz] (mm / deg).
+
+    R is orthonormalized first so a slightly non-SE(3) matrix from
+    cv2.calibrateHandEye does not raise.
+    """
+    R = _orthonormalize(np.asarray(R, dtype=np.float64))
+    rx, ry, rz = Rotation.from_matrix(R).as_euler("xyz", degrees=True)
     return [float(t[0]), float(t[1]), float(t[2]),
             float(rx), float(ry), float(rz)]
 
