@@ -26,7 +26,8 @@ classifiers = [
 ]
 dependencies = [
     "bilogger",
-    "numpy>=1.19.0",
+    "numpy==1.26.4",
+    "opencv-python==4.7.0.72",
     "requests>=2.25.0",
     "roboticstoolbox-python>=1.1.1",
 ]
