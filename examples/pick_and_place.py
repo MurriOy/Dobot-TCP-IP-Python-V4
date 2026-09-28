@@ -119,7 +119,7 @@ SUCTION_OFF_DELAY = 0.7  # s, pause before lifting after release
 
 # Vision detection
 MODEL_NAME = "paper_cup"           # must already exist on the vision server
-MATCH_THRESHOLD = None          # or a float, e.g. 0.3
+MATCH_THRESHOLD = 0.01          # or a float, e.g. 0.3
 
 # Safe / home pose (world, gripper tool)
 SAFE_POSE = [0.0, -300.0, 300.0, -180.0, 0.0, -180.0]
@@ -245,11 +245,13 @@ def scan_and_detect(robot, session):
     nx, ny = body["normalized_centre_point_coordinates"]
     print(f"  detection center (normalized): nx={nx:.4f} ny={ny:.4f}")
 
-    # Save the debug image for inspection
-    debug_path = os.environ.get(
-        "DEBUG_IMAGE_PATH",
-        os.path.join(EXAMPLES_DIR, "detect_2d_debug.png"),
+    # Save the debug image for inspection (timestamped so it isn't overwritten)
+    debug_dir = os.environ.get(
+        "DEBUG_IMAGE_DIR", os.path.join(EXAMPLES_DIR, "debug_images"),
     )
+    os.makedirs(debug_dir, exist_ok=True)
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    debug_path = os.path.join(debug_dir, f"detect_2d_debug_{timestamp}.png")
     vision_client.get_detect_2d_debug_image(session, save_path=debug_path)
     print(f"  debug image saved to {debug_path}")
 
@@ -351,8 +353,9 @@ def main() -> None:
                     move_to(robot, "safe", SAFE_POSE)
                 except Exception:
                     pass
-                print("\nStopping monitor / disabling robot...")
+                print("\nStopping monitor...")
                 robot.StopFeedbackMonitor()
+                robot.io.ToolDO(SUCTION_PORT, 0)
                 # robot.robot_control.DisableRobot()
 
             print("\n" + "=" * 50)
