@@ -112,6 +112,15 @@ PLACE_X = 200.0
 PLACE_Y = -350.0
 PLACE_Z = 100.0
 
+PLACE_POSITIONS = [
+    (-140, -400, PLACE_Z),
+    (-140, -300, PLACE_Z),
+    (-140, -200, PLACE_Z),
+    (-240, -400, PLACE_Z),
+    (-240, -300, PLACE_Z),
+    (-240, -200, PLACE_Z)
+]
+
 # Suction control (end-effector ToolDO)
 SUCTION_PORT = 1        # ToolDO index (0 or 1)
 SUCTION_ON_DELAY = 0.5  # s, let vacuum establish after turning on
@@ -301,6 +310,18 @@ def place(robot):
         return False
     return True
 
+def main_loop(robot, session):
+    obj = scan_and_detect(robot, session)
+    if obj is None:
+        print("\nNothing to pick — trying again.")
+    else:
+        if not pick(robot, obj):
+            print("\nPick failed — aborting.")
+        elif not place(robot):
+            print("\nPlace failed — aborting.")
+        else:
+            print("\nPick and place completed.")
+
 
 def main() -> None:
     session = requests.Session()
@@ -335,16 +356,7 @@ def main() -> None:
 
             try:
                 while True:
-                    obj = scan_and_detect(robot, session)
-                    if obj is None:
-                        print("\nNothing to pick — trying again.")
-                    else:
-                        if not pick(robot, obj):
-                            print("\nPick failed — aborting.")
-                        elif not place(robot):
-                            print("\nPlace failed — aborting.")
-                        else:
-                            print("\nPick and place completed.")
+                    main_loop(robot, session)
             finally:
                 # Return to a safe pose (gripper tool) before shutting down
                 print("\nReturning to safe pose...")
@@ -378,6 +390,6 @@ def main() -> None:
 if __name__ == "__main__":
     main()
     # with DobotRobot(ROBOT_IP) as robot:
-    #     robot.robot_control.Tool(CAMERA_TOOL_INDEX)
+    #     robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
     #     scan_pose = [SCAN_X, SCAN_Y, SCAN_Z] + list(SCAN_ORIENTATION)
     #     move_to(robot, "scan", scan_pose)
