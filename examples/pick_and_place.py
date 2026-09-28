@@ -88,14 +88,14 @@ GRIPPER_TOOL_INDEX = 11
 
 # Camera TCP: paste the result printed by calibrate_camera_tcp.py
 # [x, y, z, rx, ry, rz] in mm / deg (camera optical frame in flange).
-CAMERA_TCP = [-79.8088, -1.9769, 48.5972, -2.2512, 0.2884, -89.6780]
-
+# CAMERA_TCP = [-79.8088, -1.9769, 48.5972, -2.2512, 0.2884, -89.6780]
+CAMERA_TCP = [-83.9743, -3.6767, 51.0055, -2.4953, 0.7329, -90.2043]
 # Gripper TCP: your suction-cup TCP [x, y, z, rx, ry, rz] in mm / deg
 # (cup contact point in flange).
 GRIPPER_TCP = [0.0, 0.0, 83.0, 0.0, 0.0, 0.0]
 
 # Work plane and camera focus
-WORK_PLANE_Z = 90.0     # mm, where objects lie / gripper contacts (world Z)
+WORK_PLANE_Z = 68.0     # mm, where objects lie / gripper contacts (world Z)
 FOCUS_DISTANCE = 300.0  # mm, camera->plane distance
 SCAN_Z = WORK_PLANE_Z + FOCUS_DISTANCE  # 440 mm, camera optical-center height
 SCAN_X = 0.0            # mm, scan center X (world) -- adjust to your workspace
@@ -104,7 +104,7 @@ SCAN_ORIENTATION = [-180.0, 0.0, -180.0]   # look straight down (optical Z = -wo
 
 # Gripper travel heights (world Z), with the gripper tool active
 APPROACH_Z = 200.0      # mm, safe travel / approach height above the plane
-PICK_Z = 78.0           # mm, descent height at pick (≈ plane; adjust for cup/object)
+PICK_Z = 67.0           # mm, descent height at pick (≈ plane; adjust for cup/object)
 PICK_ORIENTATION = [-180.0, 0.0, -180.0]   # gripper pointing down
 
 # Place position (world, with gripper tool active)
@@ -113,12 +113,12 @@ PLACE_Y = -350.0
 PLACE_Z = 100.0
 
 PLACE_POSITIONS = [
-    (-140, -400, PLACE_Z),
-    (-140, -300, PLACE_Z),
-    (-140, -200, PLACE_Z),
-    (-240, -400, PLACE_Z),
-    (-240, -300, PLACE_Z),
-    (-240, -200, PLACE_Z)
+    [-140, -400, PLACE_Z],
+    [-140, -300, PLACE_Z],
+    [-140, -200, PLACE_Z],
+    [-240, -400, PLACE_Z],
+    [-240, -300, PLACE_Z],
+    [-240, -200, PLACE_Z]
 ]
 
 # Suction control (end-effector ToolDO)
@@ -310,7 +310,20 @@ def place(robot):
         return False
     return True
 
-def main_loop(robot, session):
+def pick_and_stack_loop(robot, session):
+    obj = scan_and_detect(robot, session)
+    if obj is None:
+        print("\nNothing to pick — trying again.")
+    else:
+        if not pick(robot, obj):
+            print("\nPick failed — aborting.")
+        elif not place(robot):
+            print("\nPlace failed — aborting.")
+        else:
+            print("\nPick and place completed.")
+
+
+def pick_and_place_loop(robot, session):
     obj = scan_and_detect(robot, session)
     if obj is None:
         print("\nNothing to pick — trying again.")
@@ -356,7 +369,11 @@ def main() -> None:
 
             try:
                 while True:
-                    main_loop(robot, session)
+                    pick_and_stack_loop(robot, session)
+                # robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
+                # for idx, position in enumerate(PLACE_POSITIONS):
+                #     drop_pose = position + list(PICK_ORIENTATION)
+                #     move_to(robot, f"place_{idx}", drop_pose)
             finally:
                 # Return to a safe pose (gripper tool) before shutting down
                 print("\nReturning to safe pose...")
