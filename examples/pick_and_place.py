@@ -104,13 +104,14 @@ SCAN_ORIENTATION = [-180.0, 0.0, -180.0]   # look straight down (optical Z = -wo
 
 # Gripper travel heights (world Z), with the gripper tool active
 APPROACH_Z = 200.0      # mm, safe travel / approach height above the plane
-PICK_Z = 67.0           # mm, descent height at pick (≈ plane; adjust for cup/object)
+# PICK_Z = 67.0           # mm, descent height at pick (≈ plane; adjust for cup/object) # cup
+PICK_Z = 49.0           # mm, for can_01
 PICK_ORIENTATION = [-180.0, 0.0, -180.0]   # gripper pointing down
 
 # Place position (world, with gripper tool active)
 PLACE_X = 200.0
 PLACE_Y = -350.0
-PLACE_Z = 100.0
+PLACE_Z = 60.0
 
 PLACE_POSITIONS = [
     [-140, -400, PLACE_Z],
@@ -127,7 +128,8 @@ SUCTION_ON_DELAY = 0.5  # s, let vacuum establish after turning on
 SUCTION_OFF_DELAY = 0.7  # s, pause before lifting after release
 
 # Vision detection
-MODEL_NAME = "paper_cup"           # must already exist on the vision server
+# MODEL_NAME = "paper_cup"           # must already exist on the vision server
+MODEL_NAME = "can_01"
 MATCH_THRESHOLD = 0.01          # or a float, e.g. 0.3
 
 # Safe / home pose (world, gripper tool)
