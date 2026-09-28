@@ -104,7 +104,7 @@ SCAN_ORIENTATION = [-180.0, 0.0, -180.0]   # look straight down (optical Z = -wo
 
 # Gripper travel heights (world Z), with the gripper tool active
 APPROACH_Z = 200.0      # mm, safe travel / approach height above the plane
-PICK_Z = 79.0           # mm, descent height at pick (≈ plane; adjust for cup/object)
+PICK_Z = 78.0           # mm, descent height at pick (≈ plane; adjust for cup/object)
 PICK_ORIENTATION = [-180.0, 0.0, -180.0]   # gripper pointing down
 
 # Place position (world, with gripper tool active)
@@ -377,3 +377,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+    # with DobotRobot(ROBOT_IP) as robot:
+    #     robot.robot_control.Tool(CAMERA_TOOL_INDEX)
+    #     scan_pose = [SCAN_X, SCAN_Y, SCAN_Z] + list(SCAN_ORIENTATION)
+    #     move_to(robot, "scan", scan_pose)
