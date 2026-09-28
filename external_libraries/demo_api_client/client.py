@@ -130,8 +130,14 @@ def create_model(session: requests.Session, model_name, override) -> None:
         log.warning("Failed to create model: %s", body.get("error", {}).get("message"))
 
 
-def detect_2d(session: requests.Session, model_name, match_threshold) -> None:
-    """Detect 2D with the test model."""
+def detect_2d(session: requests.Session, model_name, match_threshold) -> Dict[str, Any]:
+    """Detect 2D with the test model.
+
+    Returns the parsed response body so callers can read the detections:
+        body["data"]["detections"][0]["center"]    -> [nx, ny] normalized image plane
+        body["data"]["detections"][0]["angle"]      -> radians (or null)
+        body["data"]["detections"][0]["diameter"]   -> normalized diameter
+    """
     log.info("POST /detect_2d")
     endpoint = f"{BASE_URL}/detect_2d"
     payload = {"model_name": model_name, "parameters": {}}
@@ -151,7 +157,7 @@ def detect_2d(session: requests.Session, model_name, match_threshold) -> None:
             )
     else:
         log.warning("Detection failed: %s", body.get("error", {}).get("message"))
-    return response
+    return body
 
 
 def delete_test_model(session: requests.Session) -> None:
