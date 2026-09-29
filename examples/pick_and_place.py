@@ -173,12 +173,14 @@ PLACE_Y = -350.0
 PLACE_Z = 60.0
 
 PLACE_POSITIONS = [
+    [-140, -500, PLACE_Z],
     [-140, -400, PLACE_Z],
     [-140, -300, PLACE_Z],
-    [-140, -200, PLACE_Z],
+    # [-140, -200, PLACE_Z],
+    [-240, -500, PLACE_Z],
     [-240, -400, PLACE_Z],
     [-240, -300, PLACE_Z],
-    [-240, -200, PLACE_Z]
+    # [-240, -200, PLACE_Z]
 ]
 
 # Suction control (end-effector ToolDO)
@@ -443,6 +445,59 @@ def place(robot):
     return True
 
 
+def check_place_positions(robot, positions=None):
+    """Move the gripper to each place position in turn, pausing for ENTER.
+
+    For every entry in PLACE_POSITIONS the gripper tool is selected, the arm
+    travels to APPROACH_Z above the position, descends to the position itself,
+    then waits for ENTER before lifting off and moving to the next one.
+
+    Args:
+        robot: connected DobotRobot with feedback monitor running
+        positions: list of [x, y, z] (world, mm); defaults to PLACE_POSITIONS
+
+    Returns:
+        True if all positions were reached, False if a move failed.
+    """
+    if positions is None:
+        positions = PLACE_POSITIONS
+
+    logger.info("\n--- Check place positions (gripper tool) ---")
+    robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
+
+    for idx, position in enumerate(positions):
+        x, y, z = position[:3]
+        approach = [x, y, APPROACH_Z] + list(PICK_ORIENTATION)
+        descend = [x, y, z] + list(PICK_ORIENTATION)
+
+        if not move_to(robot, f"check_{idx} approach", approach,
+                       tool=GRIPPER_TOOL_INDEX):
+            logger.warning("Skipping position %d/%d (approach failed)",
+                           idx + 1, len(positions))
+            continue
+        if not movl_and_wait(robot, descend, f"check_{idx} descend",
+                             tool=GRIPPER_TOOL_INDEX):
+            logger.warning("Skipping position %d/%d (descend failed)",
+                           idx + 1, len(positions))
+            continue
+
+        logger.info("Position %d/%d: [%.2f %.2f %.2f] mm reached.",
+                    idx + 1, len(positions), x, y, z)
+        try:
+            input("  Press ENTER to move to the next position...")
+        except EOFError:
+            logger.info("No input available — stopping check.")
+            break
+
+        if not movl_and_wait(robot, approach, f"check_{idx} lift",
+                             tool=GRIPPER_TOOL_INDEX):
+            logger.warning("Lift after position %d failed", idx + 1)
+            return False
+
+    logger.info("Place position check finished.")
+    return True
+
+
 def pick_and_stack_loop(robot, session):
     obj = double_scan_and_detect(robot, session)
     if obj is None:
@@ -509,10 +564,8 @@ def main() -> None:
             try:
                 while True:
                     pick_and_place_loop(robot, session)
-                # robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
-                # for idx, position in enumerate(PLACE_POSITIONS):
-                #     drop_pose = position + list(PICK_ORIENTATION)
-                #     move_to(robot, f"place_{idx}", drop_pose)
+                    # robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
+                    # check_place_positions(robot)
             finally:
                 # Return to a safe pose (gripper tool) before shutting down
                 logger.info("\nReturning to safe pose...")
