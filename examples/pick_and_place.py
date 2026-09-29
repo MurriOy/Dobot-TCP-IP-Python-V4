@@ -133,7 +133,8 @@ MODEL_NAME = "can_01"
 MATCH_THRESHOLD = 0.01          # or a float, e.g. 0.3
 
 # Safe / home pose (world, gripper tool)
-SAFE_POSE = [0.0, -300.0, 300.0, -180.0, 0.0, -180.0]
+# SAFE_POSE = [0.0, -300.0, 300.0, -180.0, 0.0, -180.0]
+SAFE_POSE = [SCAN_X, SCAN_Y, SCAN_Z, -180.0, 0.0, -180.0]
 
 # Persist registered tool frames on the controller (1 = persist, 0 = session only)
 SET_TOOL_PERSIST = 1
@@ -229,11 +230,12 @@ def movl_and_wait(robot, pose, label: str, timeout: float = MOVE_TIMEOUT) -> boo
 
 # ==================== Workflow ====================
 
-def scan_and_detect(robot, session):
+def scan_and_detect(robot, session, scan_pose=None):
     """Move to scan pose, detect object -> object world position [x, y, z]."""
     print("\n--- Scan (camera tool) ---")
     robot.robot_control.Tool(CAMERA_TOOL_INDEX)
-    scan_pose = [SCAN_X, SCAN_Y, SCAN_Z] + list(SCAN_ORIENTATION)
+    if scan_pose is None:
+        scan_pose = [SCAN_X, SCAN_Y, SCAN_Z] + list(SCAN_ORIENTATION)
     if not move_to(robot, "scan", scan_pose):
         return None
 
@@ -269,6 +271,18 @@ def scan_and_detect(robot, session):
     obj = back_project_to_world(nx, ny, R_wcam, c_world)
     print(f"  object (world): [{obj[0]:.2f} {obj[1]:.2f} {obj[2]:.2f}] mm")
     return obj
+
+
+def move_camera_above_object(robot, obj):
+    """Move camera above the object, go to scan height."""
+    print("\n--- Scan (camera tool) ---")
+    robot.robot_control.Tool(CAMERA_TOOL_INDEX)
+
+    scan_position = [obj[0], obj[1], SCAN_Z] + list(SCAN_ORIENTATION)
+    if not move_to(robot, "approach scan", scan_position):
+        return False
+
+    return True
 
 
 def pick(robot, obj):
@@ -330,12 +344,18 @@ def pick_and_place_loop(robot, session):
     if obj is None:
         print("\nNothing to pick — trying again.")
     else:
-        if not pick(robot, obj):
-            print("\nPick failed — aborting.")
-        elif not place(robot):
-            print("\nPlace failed — aborting.")
+        print("\nDetect again from above the object.")
+        above_object_pose = [obj[0], obj[1], SCAN_Z] + list(SCAN_ORIENTATION)
+        obj = scan_and_detect(robot, session, scan_pose=above_object_pose)
+        if obj is None:
+            print("\nNothing to pick when over the object — trying again.")
         else:
-            print("\nPick and place completed.")
+            if not pick(robot, obj):
+                print("\nPick failed — aborting.")
+            elif not place(robot):
+                print("\nPlace failed — aborting.")
+            else:
+                print("\nPick and place completed.")
 
 
 def main() -> None:
@@ -371,7 +391,7 @@ def main() -> None:
 
             try:
                 while True:
-                    pick_and_stack_loop(robot, session)
+                    pick_and_place_loop(robot, session)
                 # robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
                 # for idx, position in enumerate(PLACE_POSITIONS):
                 #     drop_pose = position + list(PICK_ORIENTATION)
