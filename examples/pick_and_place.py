@@ -44,12 +44,18 @@ Environment:
     ROBOT_IP       robot dashboard IP (default 192.168.100.51)
     VISION_API_URL vision API base URL (default http://localhost:8000)
 
+Logging:
+    Configured with logging.config.dictConfig. Console output plus a rotating
+    file at <repo>/log/pick_and_place.log (10 files x 10 MB).
+
 Requires: numpy, scipy, requests, bilogger (vision client), camera API running.
 """
 
+import logging
 import os
 import sys
 import time
+from logging.config import dictConfig
 
 import numpy as np
 import requests
@@ -63,6 +69,57 @@ sys.path.insert(0, ROOT_DIR)
 sys.path.insert(0, EXAMPLES_DIR)
 sys.path.insert(0, CLIENT_DIR)
 
+
+# ==================== Logging (dictConfig) ====================
+
+LOG_DIR = os.path.join(ROOT_DIR, "log")
+LOG_FILE = os.path.join(LOG_DIR, "pick_and_place.log")
+
+LOGGING_CONFIG = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "console": {"format": "%(message)s"},
+        "file": {
+            "format": "%(asctime)s - %(levelname)s - %(module)s.%(funcName)s:%(lineno)d - %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "console",
+            "stream": "ext://sys.stdout",
+        },
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "DEBUG",
+            "formatter": "file",
+            "filename": LOG_FILE,
+            "maxBytes": 10 * 1024 * 1024,  # 10 MB per file
+            "backupCount": 10,             # keep 10 rotated files
+            "encoding": "utf-8",
+        },
+    },
+    "loggers": {
+        "pick_and_place": {
+            "level": "DEBUG",
+            "handlers": ["console", "file"],
+            "propagate": False,
+        },
+    },
+}
+
+
+def setup_logging() -> logging.Logger:
+    """Configure logging (console + rotating file) and return the script logger."""
+    os.makedirs(LOG_DIR, exist_ok=True)
+    dictConfig(LOGGING_CONFIG)
+    return logging.getLogger("pick_and_place")
+
+
+logger = setup_logging()
+
 from dobot_sdk import DobotRobot, CoordinateType  # noqa: E402,F401
 from check_camera_calibration_positions import (  # noqa: E402
     wait_for_motion_complete,
@@ -71,9 +128,9 @@ from check_camera_calibration_positions import (  # noqa: E402
 try:
     import client as vision_client
 except ImportError as e:
-    print(f"Failed to import vision API client from {CLIENT_DIR}: {e}")
-    print("Ensure 'requests' and 'bilogger' are installed and the vision API "
-          "client dependencies are available.")
+    logger.error("Failed to import vision API client from %s: %s", CLIENT_DIR, e)
+    logger.error("Ensure 'requests' and 'bilogger' are installed and the vision API "
+                 "client dependencies are available.")
     sys.exit(1)
 
 
@@ -235,35 +292,36 @@ def move_to(robot, label: str, pose, tool: int, user: int = 0,
     if len(pose) != 6:
         raise ValueError(f"{label}: pose requires 6 values [x,y,z,rx,ry,rz]")
 
-    print(f"\n--- {label} ---")
-    print(f"  target: {pose} (tool={tool}, user={user})")
+    logger.info("\n--- %s ---", label)
+    logger.info("  target: %s (tool=%s, user=%s)", pose, tool, user)
     response = robot.motion.MovJ(pose, CoordinateType.CARTESIAN,
                                  user=user, tool=tool)
-    print(f"  MovJ response: {response}")
+    logger.info("  MovJ response: %s", response)
 
     ok = wait_for_motion_complete(robot, timeout=timeout)
     if not ok:
-        print(f"  [TIMEOUT] {label} not reached within {timeout}s")
+        logger.warning("  [TIMEOUT] %s not reached within %ss", label, timeout)
         return False
 
     status = robot.GetStatus()
     if status is not None:
         p = status.tool_vector_actual
-        print(f"  actual: X={p.x:.2f} Y={p.y:.2f} Z={p.z:.2f} mm | "
-              f"Rx={p.rx:.2f} Ry={p.ry:.2f} Rz={p.rz:.2f} deg")
+        logger.info("  actual: X=%.2f Y=%.2f Z=%.2f mm | "
+                    "Rx=%.2f Ry=%.2f Rz=%.2f deg",
+                    p.x, p.y, p.z, p.rx, p.ry, p.rz)
     return True
 
 
 def movl_and_wait(robot, pose, label: str, tool: int, user: int = 0,
                   timeout: float = MOVE_TIMEOUT) -> bool:
     """Linear move (MovL) to an absolute pose with explicit tool; block."""
-    print(f"  MovL {label}: {pose} (tool={tool}, user={user})")
+    logger.info("  MovL %s: %s (tool=%s, user=%s)", label, pose, tool, user)
     response = robot.motion.MovL(pose, CoordinateType.CARTESIAN,
                                  user=user, tool=tool)
-    print(f"    response: {response}")
+    logger.info("    response: %s", response)
     ok = wait_for_motion_complete(robot, timeout=timeout)
     if not ok:
-        print(f"  [TIMEOUT] {label} not reached within {timeout}s")
+        logger.warning("  [TIMEOUT] %s not reached within %ss", label, timeout)
     return ok
 
 
@@ -271,7 +329,7 @@ def movl_and_wait(robot, pose, label: str, tool: int, user: int = 0,
 
 def scan_and_detect(robot, session, scan_pose=None):
     """Move to scan pose, detect object -> object world position [x, y, z]."""
-    print("\n--- Scan (camera tool) ---")
+    logger.info("\n--- Scan (camera tool) ---")
     robot.robot_control.Tool(CAMERA_TOOL_INDEX)
     if scan_pose is None:
         scan_pose = [SCAN_X, SCAN_Y, SCAN_Z] + list(SCAN_ORIENTATION)
@@ -281,21 +339,21 @@ def scan_and_detect(robot, session, scan_pose=None):
     # Actual camera pose in world (from real flange pose + camera TCP)
     R_g2b, t_g2b = read_flange_pose(robot)
     R_wcam, c_world = camera_pose_in_world(R_g2b, t_g2b, CAMERA_TCP)
-    print(f"  camera center (world): [{c_world[0]:.2f} {c_world[1]:.2f} "
-          f"{c_world[2]:.2f}] mm")
+    logger.info("  camera center (world): [%.2f %.2f %.2f] mm",
+                c_world[0], c_world[1], c_world[2])
 
-    print("\n--- Detect ---")
+    logger.info("\n--- Detect ---")
     body = vision_client.detect_2d_debug(session, MODEL_NAME, MATCH_THRESHOLD)
     if body.get("success") is False:
         err = body.get("error", {})
-        print(f"  detection failed: {err.get('code')}: {err.get('message')}")
+        logger.warning("  detection failed: %s: %s", err.get("code"), err.get("message"))
         return None
     if not body.get("detected"):
-        print("  no object detected")
+        logger.info("  no object detected")
         return None
 
     nx, ny = body["normalized_centre_point_coordinates"]
-    print(f"  detection center (normalized): nx={nx:.4f} ny={ny:.4f}")
+    logger.info("  detection center (normalized): nx=%.4f ny=%.4f", nx, ny)
 
     # Save the debug image for inspection (timestamped so it isn't overwritten)
     debug_dir = os.environ.get(
@@ -305,10 +363,10 @@ def scan_and_detect(robot, session, scan_pose=None):
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     debug_path = os.path.join(debug_dir, f"detect_2d_debug_{timestamp}.png")
     vision_client.get_detect_2d_debug_image(session, save_path=debug_path)
-    print(f"  debug image saved to {debug_path}")
+    logger.info("  debug image saved to %s", debug_path)
 
     obj = back_project_to_world(nx, ny, R_wcam, c_world)
-    print(f"  object (world): [{obj[0]:.2f} {obj[1]:.2f} {obj[2]:.2f}] mm")
+    logger.info("  object (world): [%.2f %.2f %.2f] mm", obj[0], obj[1], obj[2])
     return obj
 
 
@@ -317,10 +375,10 @@ def double_scan_and_detect(robot, session):
     -> detect object -> object world position [x, y, z]."""
     obj = scan_and_detect(robot, session)
     if obj is None:
-        print("  no object detected")
+        logger.info("  no object detected")
         return None
     else:
-        print("  moving on top of the object")
+        logger.info("  moving on top of the object")
         above_object_pose = [obj[0], obj[1], SCAN_Z] + list(SCAN_ORIENTATION)
         obj = scan_and_detect(robot, session, scan_pose=above_object_pose)
         return obj
@@ -339,7 +397,7 @@ def double_scan_and_detect(robot, session):
 
 def pick(robot, obj):
     """Move above the object, descend, engage suction, lift."""
-    print("\n--- Pick (gripper tool) ---")
+    logger.info("\n--- Pick (gripper tool) ---")
     robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
 
     approach = [obj[0], obj[1], APPROACH_Z] + list(PICK_ORIENTATION)
@@ -351,7 +409,7 @@ def pick(robot, obj):
                          tool=GRIPPER_TOOL_INDEX):
         return False
 
-    print("  suction ON")
+    logger.info("  suction ON")
     robot.io.ToolDO(SUCTION_PORT, 1)
     time.sleep(SUCTION_ON_DELAY)
 
@@ -363,7 +421,7 @@ def pick(robot, obj):
 
 def place(robot):
     """Move to the place position, descend, release, lift."""
-    print("\n--- Place (gripper tool) ---")
+    logger.info("\n--- Place (gripper tool) ---")
     approach = [PLACE_X, PLACE_Y, APPROACH_Z] + list(PICK_ORIENTATION)
     if not move_to(robot, "approach place", approach, tool=GRIPPER_TOOL_INDEX):
         return False
@@ -373,7 +431,7 @@ def place(robot):
                          tool=GRIPPER_TOOL_INDEX):
         return False
 
-    print("  suction OFF")
+    logger.info("  suction OFF")
     robot.io.ToolDO(SUCTION_PORT, 0)
     time.sleep(SUCTION_OFF_DELAY)
 
@@ -382,30 +440,31 @@ def place(robot):
         return False
     return True
 
+
 def pick_and_stack_loop(robot, session):
     obj = double_scan_and_detect(robot, session)
     if obj is None:
-        print("\nNothing to pick — trying again.")
+        logger.info("\nNothing to pick — trying again.")
     else:
         if not pick(robot, obj):
-            print("\nPick failed — aborting.")
+            logger.warning("\nPick failed — aborting.")
         elif not place(robot):
-            print("\nPlace failed — aborting.")
+            logger.warning("\nPlace failed — aborting.")
         else:
-            print("\nPick and place completed.")
+            logger.info("\nPick and place completed.")
 
 
 def pick_and_place_loop(robot, session):
     obj = double_scan_and_detect(robot, session)
     if obj is None:
-        print("\nNothing to pick — trying again.")
+        logger.info("\nNothing to pick — trying again.")
     else:
         if not pick(robot, obj):
-            print("\nPick failed — aborting.")
+            logger.warning("\nPick failed — aborting.")
         elif not place(robot):
-            print("\nPlace failed — aborting.")
+            logger.warning("\nPlace failed — aborting.")
         else:
-            print("\nPick and place completed.")
+            logger.info("\nPick and place completed.")
 
 
 def main() -> None:
@@ -414,13 +473,13 @@ def main() -> None:
 
     try:
         with DobotRobot(ROBOT_IP) as robot:
-            print("=" * 50)
-            print("Pick and Place (vision-driven)")
-            print("=" * 50)
-            print(f"Robot: {ROBOT_IP} | Vision API: {VISION_API_URL}")
-            print(f"Work plane Z={WORK_PLANE_Z} mm | Focus={FOCUS_DISTANCE} mm "
-                  f"| Scan Z={SCAN_Z} mm")
-            print(f"Model: {MODEL_NAME} | Suction ToolDO port: {SUCTION_PORT}")
+            logger.info("=" * 50)
+            logger.info("Pick and Place (vision-driven)")
+            logger.info("=" * 50)
+            logger.info("Robot: %s | Vision API: %s", ROBOT_IP, VISION_API_URL)
+            logger.info("Work plane Z=%s mm | Focus=%s mm | Scan Z=%s mm",
+                        WORK_PLANE_Z, FOCUS_DISTANCE, SCAN_Z)
+            logger.info("Model: %s | Suction ToolDO port: %s", MODEL_NAME, SUCTION_PORT)
 
             robot.robot_control.RequestControl()
             robot.robot_control.ClearError()
@@ -428,16 +487,16 @@ def main() -> None:
             robot.robot_control.SpeedFactor(SPEED_FACTOR)
 
             # Register tool coordinate systems on the controller
-            resp = robot.robot_control.SetTool(CAMERA_TOOL_INDEX, CAMERA_TCP,
-                                                type=SET_TOOL_PERSIST)
-            print(f"  SetTool(camera {CAMERA_TOOL_INDEX}): {resp}")
+            resp = robot.robot_control.SetTool(
+                CAMERA_TOOL_INDEX, CAMERA_TCP, type=SET_TOOL_PERSIST)
+            logger.info("  SetTool(camera %s): %s", CAMERA_TOOL_INDEX, resp)
             if not resp.startswith("0,"):
-                print(f"  [WARNING] SetTool camera failed: {resp}")
-            resp = robot.robot_control.SetTool(GRIPPER_TOOL_INDEX, GRIPPER_TCP,
-                                                type=SET_TOOL_PERSIST)
-            print(f"  SetTool(gripper {GRIPPER_TOOL_INDEX}): {resp}")
+                logger.warning("  [WARNING] SetTool camera failed: %s", resp)
+            resp = robot.robot_control.SetTool(
+                GRIPPER_TOOL_INDEX, GRIPPER_TCP, type=SET_TOOL_PERSIST)
+            logger.info("  SetTool(gripper %s): %s", GRIPPER_TOOL_INDEX, resp)
             if not resp.startswith("0,"):
-                print(f"  [WARNING] SetTool gripper failed: {resp}")
+                logger.warning("  [WARNING] SetTool gripper failed: %s", resp)
 
             # Required for move_to()'s / movl_and_wait()'s blocking wait
             robot.StartFeedbackMonitor()
@@ -454,31 +513,29 @@ def main() -> None:
                 #     move_to(robot, f"place_{idx}", drop_pose)
             finally:
                 # Return to a safe pose (gripper tool) before shutting down
-                print("\nReturning to safe pose...")
+                logger.info("\nReturning to safe pose...")
                 robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
                 try:
                     move_to(robot, "safe", SAFE_POSE,
                             tool=GRIPPER_TOOL_INDEX)
                 except Exception:
                     pass
-                print("\nStopping monitor...")
+                logger.info("\nStopping monitor...")
                 robot.StopFeedbackMonitor()
                 robot.io.ToolDO(SUCTION_PORT, 0)
                 # robot.robot_control.DisableRobot()
 
-            print("\n" + "=" * 50)
-            print("Done")
-            print("=" * 50)
+            logger.info("\n" + "=" * 50)
+            logger.info("Done")
+            logger.info("=" * 50)
 
-    except requests.exceptions.ConnectionError:
-        print("\nConnection error: ensure the vision API server is running "
-              f"on {VISION_API_URL}")
-    except requests.exceptions.Timeout:
-        print("\nVision API request timeout")
+    except requests.exceptions.ConnectionError as e:
+        logger.error("Connection error: ensure the vision API server is running "
+                     "on %s: %s", VISION_API_URL, e)
+    except requests.exceptions.Timeout as e:
+        logger.error("Vision API request timeout: %s", e)
     except Exception as e:
-        print(f"\nError: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.exception(e)
     finally:
         session.close()
 
