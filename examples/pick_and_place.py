@@ -140,8 +140,10 @@ ROBOT_IP = os.environ.get("ROBOT_IP", "192.168.100.51")
 VISION_API_URL = os.environ.get("VISION_API_URL", "http://localhost:8000")
 
 # Tool coordinate system indices (1-50) registered on the controller.
-CAMERA_TOOL_INDEX = 10
-GRIPPER_TOOL_INDEX = 11
+CAMERA_TOOL_INDEX = 3
+GRIPPER_TOOL_INDEX = 4
+# CAMERA_TOOL_INDEX = 2
+# GRIPPER_TOOL_INDEX = 2
 
 # Camera TCP: paste the result printed by calibrate_camera_tcp.py
 # [x, y, z, rx, ry, rz] in mm / deg (camera optical frame in flange).
@@ -153,16 +155,16 @@ GRIPPER_TCP = [0.0, 0.0, 83.0, 0.0, 0.0, 0.0]
 
 # Work plane and camera focus
 WORK_PLANE_Z = 68.0     # mm, where objects lie / gripper contacts (world Z)
-FOCUS_DISTANCE = 300.0  # mm, camera->plane distance
+FOCUS_DISTANCE = 332.0  # mm, camera->plane distance
 SCAN_Z = WORK_PLANE_Z + FOCUS_DISTANCE  # 440 mm, camera optical-center height
-SCAN_X = 0.0            # mm, scan center X (world) -- adjust to your workspace
-SCAN_Y = -350.0         # mm, scan center Y (world)
-SCAN_ORIENTATION = [-180.0, 0.0, -180.0]   # look straight down (optical Z = -world Z)
+SCAN_X = 83.0            # mm, scan center X (world) -- adjust to your workspace
+SCAN_Y = -353.0         # mm, scan center Y (world)
+SCAN_ORIENTATION = [177.5047, -0.7329, -89.7957]   # look straight down (optical Z = -world Z)
 
 # Gripper travel heights (world Z), with the gripper tool active
 APPROACH_Z = 200.0      # mm, safe travel / approach height above the plane
 # PICK_Z = 67.0           # mm, descent height at pick (≈ plane; adjust for cup/object) # cup
-PICK_Z = 49.0           # mm, for can_01
+PICK_Z = 51.0           # mm, for can_01
 PICK_ORIENTATION = [-180.0, 0.0, -180.0]   # gripper pointing down
 
 # Place position (world, with gripper tool active)
@@ -197,7 +199,7 @@ SAFE_POSE = [SCAN_X, SCAN_Y, SCAN_Z, -180.0, 0.0, -180.0]
 SET_TOOL_PERSIST = 1
 
 # Speed
-SPEED_FACTOR = 20
+SPEED_FACTOR = 10
 
 # Motion timeouts
 MOVE_TIMEOUT = 30.0
