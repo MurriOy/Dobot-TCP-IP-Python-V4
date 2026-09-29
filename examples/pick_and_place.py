@@ -273,16 +273,29 @@ def scan_and_detect(robot, session, scan_pose=None):
     return obj
 
 
-def move_camera_above_object(robot, obj):
-    """Move camera above the object, go to scan height."""
-    print("\n--- Scan (camera tool) ---")
-    robot.robot_control.Tool(CAMERA_TOOL_INDEX)
+def double_scan_and_detect(robot, session):
+    """Move to scan pose, detect object -> move to scan pose above the detected object
+    -> detect object -> object world position [x, y, z]."""
+    obj = scan_and_detect(robot, session)
+    if obj is None:
+        print("  no object detected")
+        return None
+    else:
+        print("  moving on top of the object")
+        above_object_pose = [obj[0], obj[1], SCAN_Z] + list(SCAN_ORIENTATION)
+        obj = scan_and_detect(robot, session, scan_pose=above_object_pose)
+        return obj
 
-    scan_position = [obj[0], obj[1], SCAN_Z] + list(SCAN_ORIENTATION)
-    if not move_to(robot, "approach scan", scan_position):
-        return False
-
-    return True
+# def move_camera_above_object(robot, obj):
+#     """Move camera above the object, go to scan height."""
+#     print("\n--- Scan (camera tool) ---")
+#     robot.robot_control.Tool(CAMERA_TOOL_INDEX)
+#
+#     scan_position = [obj[0], obj[1], SCAN_Z] + list(SCAN_ORIENTATION)
+#     if not move_to(robot, "approach scan", scan_position):
+#         return False
+#
+#     return True
 
 
 def pick(robot, obj):
@@ -327,7 +340,7 @@ def place(robot):
     return True
 
 def pick_and_stack_loop(robot, session):
-    obj = scan_and_detect(robot, session)
+    obj = double_scan_and_detect(robot, session)
     if obj is None:
         print("\nNothing to pick — trying again.")
     else:
@@ -340,22 +353,16 @@ def pick_and_stack_loop(robot, session):
 
 
 def pick_and_place_loop(robot, session):
-    obj = scan_and_detect(robot, session)
+    obj = double_scan_and_detect(robot, session)
     if obj is None:
         print("\nNothing to pick — trying again.")
     else:
-        print("\nDetect again from above the object.")
-        above_object_pose = [obj[0], obj[1], SCAN_Z] + list(SCAN_ORIENTATION)
-        obj = scan_and_detect(robot, session, scan_pose=above_object_pose)
-        if obj is None:
-            print("\nNothing to pick when over the object — trying again.")
+        if not pick(robot, obj):
+            print("\nPick failed — aborting.")
+        elif not place(robot):
+            print("\nPlace failed — aborting.")
         else:
-            if not pick(robot, obj):
-                print("\nPick failed — aborting.")
-            elif not place(robot):
-                print("\nPlace failed — aborting.")
-            else:
-                print("\nPick and place completed.")
+            print("\nPick and place completed.")
 
 
 def main() -> None:
