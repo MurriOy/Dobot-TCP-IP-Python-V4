@@ -65,7 +65,7 @@ sys.path.insert(0, CLIENT_DIR)
 
 from dobot_sdk import DobotRobot, CoordinateType  # noqa: E402,F401
 from check_camera_calibration_positions import (  # noqa: E402
-    move_to, wait_for_motion_complete,
+    wait_for_motion_complete,
 )
 
 try:
@@ -217,10 +217,49 @@ def back_project_to_world(nx: float, ny: float, R_wcam, c_world,
 
 # ==================== Motion helpers ====================
 
-def movl_and_wait(robot, pose, label: str, timeout: float = MOVE_TIMEOUT) -> bool:
-    """Linear move (MovL) to an absolute pose using the active tool; block."""
-    print(f"  MovL {label}: {pose}")
-    response = robot.motion.MovL(pose, CoordinateType.CARTESIAN)
+def move_to(robot, label: str, pose, tool: int, user: int = 0,
+            timeout: float = MOVE_TIMEOUT) -> bool:
+    """Joint move (MovJ) to an absolute Cartesian pose with explicit tool; block.
+
+    Args:
+        robot: connected DobotRobot with feedback monitor running
+        label: display name of the target position
+        pose: [x, y, z, rx, ry, rz] in mm / degrees (user coordinate system)
+        tool: tool coordinate system index (0-50) — passed explicitly to MovJ
+        user: user coordinate system index (default 0 = world)
+        timeout: max wait for motion completion (seconds)
+
+    Returns:
+        True if the move completed, False on timeout.
+    """
+    if len(pose) != 6:
+        raise ValueError(f"{label}: pose requires 6 values [x,y,z,rx,ry,rz]")
+
+    print(f"\n--- {label} ---")
+    print(f"  target: {pose} (tool={tool}, user={user})")
+    response = robot.motion.MovJ(pose, CoordinateType.CARTESIAN,
+                                 user=user, tool=tool)
+    print(f"  MovJ response: {response}")
+
+    ok = wait_for_motion_complete(robot, timeout=timeout)
+    if not ok:
+        print(f"  [TIMEOUT] {label} not reached within {timeout}s")
+        return False
+
+    status = robot.GetStatus()
+    if status is not None:
+        p = status.tool_vector_actual
+        print(f"  actual: X={p.x:.2f} Y={p.y:.2f} Z={p.z:.2f} mm | "
+              f"Rx={p.rx:.2f} Ry={p.ry:.2f} Rz={p.rz:.2f} deg")
+    return True
+
+
+def movl_and_wait(robot, pose, label: str, tool: int, user: int = 0,
+                  timeout: float = MOVE_TIMEOUT) -> bool:
+    """Linear move (MovL) to an absolute pose with explicit tool; block."""
+    print(f"  MovL {label}: {pose} (tool={tool}, user={user})")
+    response = robot.motion.MovL(pose, CoordinateType.CARTESIAN,
+                                 user=user, tool=tool)
     print(f"    response: {response}")
     ok = wait_for_motion_complete(robot, timeout=timeout)
     if not ok:
@@ -236,7 +275,7 @@ def scan_and_detect(robot, session, scan_pose=None):
     robot.robot_control.Tool(CAMERA_TOOL_INDEX)
     if scan_pose is None:
         scan_pose = [SCAN_X, SCAN_Y, SCAN_Z] + list(SCAN_ORIENTATION)
-    if not move_to(robot, "scan", scan_pose):
+    if not move_to(robot, "scan", scan_pose, tool=CAMERA_TOOL_INDEX):
         return None
 
     # Actual camera pose in world (from real flange pose + camera TCP)
@@ -304,18 +343,20 @@ def pick(robot, obj):
     robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
 
     approach = [obj[0], obj[1], APPROACH_Z] + list(PICK_ORIENTATION)
-    if not move_to(robot, "approach pick", approach):
+    if not move_to(robot, "approach pick", approach, tool=GRIPPER_TOOL_INDEX):
         return False
 
     descend = [obj[0], obj[1], PICK_Z] + list(PICK_ORIENTATION)
-    if not movl_and_wait(robot, descend, "descend to pick"):
+    if not movl_and_wait(robot, descend, "descend to pick",
+                         tool=GRIPPER_TOOL_INDEX):
         return False
 
     print("  suction ON")
     robot.io.ToolDO(SUCTION_PORT, 1)
     time.sleep(SUCTION_ON_DELAY)
 
-    if not movl_and_wait(robot, approach, "lift after pick"):
+    if not movl_and_wait(robot, approach, "lift after pick",
+                         tool=GRIPPER_TOOL_INDEX):
         return False
     return True
 
@@ -324,18 +365,20 @@ def place(robot):
     """Move to the place position, descend, release, lift."""
     print("\n--- Place (gripper tool) ---")
     approach = [PLACE_X, PLACE_Y, APPROACH_Z] + list(PICK_ORIENTATION)
-    if not move_to(robot, "approach place", approach):
+    if not move_to(robot, "approach place", approach, tool=GRIPPER_TOOL_INDEX):
         return False
 
     descend = [PLACE_X, PLACE_Y, PLACE_Z] + list(PICK_ORIENTATION)
-    if not movl_and_wait(robot, descend, "descend to place"):
+    if not movl_and_wait(robot, descend, "descend to place",
+                         tool=GRIPPER_TOOL_INDEX):
         return False
 
     print("  suction OFF")
     robot.io.ToolDO(SUCTION_PORT, 0)
     time.sleep(SUCTION_OFF_DELAY)
 
-    if not movl_and_wait(robot, approach, "lift after place"):
+    if not movl_and_wait(robot, approach, "lift after place",
+                         tool=GRIPPER_TOOL_INDEX):
         return False
     return True
 
@@ -385,10 +428,16 @@ def main() -> None:
             robot.robot_control.SpeedFactor(SPEED_FACTOR)
 
             # Register tool coordinate systems on the controller
-            robot.robot_control.SetTool(CAMERA_TOOL_INDEX, CAMERA_TCP,
-                                        type=SET_TOOL_PERSIST)
-            robot.robot_control.SetTool(GRIPPER_TOOL_INDEX, GRIPPER_TCP,
-                                        type=SET_TOOL_PERSIST)
+            resp = robot.robot_control.SetTool(CAMERA_TOOL_INDEX, CAMERA_TCP,
+                                                type=SET_TOOL_PERSIST)
+            print(f"  SetTool(camera {CAMERA_TOOL_INDEX}): {resp}")
+            if not resp.startswith("0,"):
+                print(f"  [WARNING] SetTool camera failed: {resp}")
+            resp = robot.robot_control.SetTool(GRIPPER_TOOL_INDEX, GRIPPER_TCP,
+                                                type=SET_TOOL_PERSIST)
+            print(f"  SetTool(gripper {GRIPPER_TOOL_INDEX}): {resp}")
+            if not resp.startswith("0,"):
+                print(f"  [WARNING] SetTool gripper failed: {resp}")
 
             # Required for move_to()'s / movl_and_wait()'s blocking wait
             robot.StartFeedbackMonitor()
@@ -408,7 +457,8 @@ def main() -> None:
                 print("\nReturning to safe pose...")
                 robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
                 try:
-                    move_to(robot, "safe", SAFE_POSE)
+                    move_to(robot, "safe", SAFE_POSE,
+                            tool=GRIPPER_TOOL_INDEX)
                 except Exception:
                     pass
                 print("\nStopping monitor...")
