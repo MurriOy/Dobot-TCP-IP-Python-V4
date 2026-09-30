@@ -157,8 +157,8 @@ GRIPPER_TCP = [0.0, 0.0, 83.0, 0.0, 0.0, 0.0]
 
 # Work plane and camera focus
 WORK_PLANE_Z = 68.0     # mm, where objects lie / gripper contacts (world Z)
-FOCUS_DISTANCE = 332.0  # mm, camera->plane distance
-SCAN_Z = WORK_PLANE_Z + FOCUS_DISTANCE  # 440 mm, camera optical-center height
+FOCUS_DISTANCE = 290.0  # mm, camera->plane distance
+SCAN_Z = WORK_PLANE_Z + FOCUS_DISTANCE  # camera optical-center height
 SCAN_X = 83.0            # mm, scan center X (world) -- adjust to your workspace
 SCAN_Y = -353.0         # mm, scan center Y (world)
 SCAN_ORIENTATION = [177.5047, -0.7329, -89.7957]   # look straight down (optical Z = -world Z)
@@ -176,9 +176,9 @@ PLACE_Z = 60.0
 
 SCAN_PLACE_POSITIONS = [
     [100, -300, PLACE_Z],
-    [20, -300, PLACE_Z],
+    [30, -300, PLACE_Z],
     [100, -425, PLACE_Z],
-    [20, -425, PLACE_Z],
+    [30, -425, PLACE_Z],
 ]
 
 PLACE_POSITIONS = [
@@ -196,6 +196,15 @@ PLACE_POSITIONS = [
 SUCTION_PORT = 1        # ToolDO index (0 or 1)
 SUCTION_ON_DELAY = 0.5  # s, let vacuum establish after turning on
 SUCTION_OFF_DELAY = 0.7  # s, pause before lifting after release
+
+# Suction verification: end-effector DI port that goes high when vacuum is
+# established (object attached). After turning suction on, ToolDI is polled;
+# if not attached the gripper descends 1 mm lower and re-checks, up to
+# SUCTION_VERIFY_RETRIES times before declaring the pick failed.
+SUCTION_DI_PORT = 1
+SUCTION_VERIFY_RETRIES = 3
+SUCTION_VERIFY_STEP = 1.0  # mm, extra descent per retry
+SUCTION_VERIFY_DELAY = 0.3  # s, wait before re-checking after descending
 
 # Vision detection
 # MODEL_NAME = "paper_cup"           # must already exist on the vision server
@@ -219,6 +228,11 @@ SPEED_FACTOR = 10
 
 # Motion timeouts
 MOVE_TIMEOUT = 30.0
+
+# GetPose parsing retries on malformed responses (ValueError from
+# parse_get_pose). Override with the GET_POSE_RETRIES environment variable.
+GET_POSE_RETRIES = int(os.environ.get("GET_POSE_RETRIES", "3"))
+GET_POSE_RETRY_DELAY = 0.1  # s, pause between retries
 
 
 # ==================== Pose helpers ====================
@@ -250,17 +264,38 @@ def parse_get_pose(response: str):
     return values
 
 
+def parse_tool_di(response: str) -> int:
+    """Parse ToolDI response 'ErrorID,{status},ToolDI(index);' -> status (0/1)."""
+    start = response.find("{")
+    end = response.find("}", start + 1)
+    if start == -1 or end == -1:
+        raise ValueError(f"Malformed ToolDI response: {response!r}")
+    return int(response[start + 1:end].strip())
+
+
 def read_flange_pose(robot):
     """Actual flange pose in world (User 0 / Tool 0) -> (R 3x3, t 3 mm).
 
     GetPose(user=0, tool=0) always returns world + flange regardless of the
-    currently selected User/Tool.
+    currently selected User/Tool. Retries up to GET_POSE_RETRIES times on a
+    malformed response (ValueError from parse_get_pose).
     """
-    raw = robot.robot_control.GetPose(user=0, tool=0)
-    x, y, z, rx, ry, rz = parse_get_pose(raw)
-    R = dobot_euler_to_matrix(rx, ry, rz)
-    t = np.array([x, y, z], dtype=np.float64)
-    return R, t
+    last_err = None
+    for attempt in range(GET_POSE_RETRIES):
+        try:
+            raw = robot.robot_control.GetPose(user=0, tool=0)
+            x, y, z, rx, ry, rz = parse_get_pose(raw)
+            R = dobot_euler_to_matrix(rx, ry, rz)
+            t = np.array([x, y, z], dtype=np.float64)
+            return R, t
+        except ValueError as e:
+            last_err = e
+            logger.warning("  GetPose parse failed (attempt %d/%d): %s",
+                           attempt + 1, GET_POSE_RETRIES, e)
+            time.sleep(GET_POSE_RETRY_DELAY)
+    raise ValueError(
+        f"GetPose failed after {GET_POSE_RETRIES} retries: {last_err}"
+    )
 
 
 def camera_pose_in_world(R_g2b, t_g2b, camera_tcp):
@@ -413,8 +448,20 @@ def double_scan_and_detect(robot, session):
 #     return True
 
 
+def suction_attached(robot) -> bool:
+    """Return True if the vacuum-sense DI port reads high (object attached)."""
+    response = robot.io.ToolDI(SUCTION_DI_PORT)
+    return parse_tool_di(response) == 1
+
+
 def pick(robot, obj):
-    """Move above the object, descend, engage suction, lift."""
+    """Move above the object, descend, engage suction, verify grip, lift.
+
+    After turning suction on the vacuum-sense DI port is checked. If the
+    object is not attached the gripper descends SUCTION_VERIFY_STEP mm lower
+    and re-checks, up to SUCTION_VERIFY_RETRIES times. If the object is still
+    not attached the pick fails (suction is released before returning).
+    """
     logger.info("\n--- Pick (gripper tool) ---")
     robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
 
@@ -422,7 +469,8 @@ def pick(robot, obj):
     if not move_to(robot, "approach pick", approach, tool=GRIPPER_TOOL_INDEX):
         return False
 
-    descend = [obj[0], obj[1], PICK_Z] + list(PICK_ORIENTATION)
+    current_z = PICK_Z
+    descend = [obj[0], obj[1], current_z] + list(PICK_ORIENTATION)
     if not movl_and_wait(robot, descend, "descend to pick",
                          tool=GRIPPER_TOOL_INDEX):
         return False
@@ -430,6 +478,32 @@ def pick(robot, obj):
     logger.info("  suction ON")
     robot.io.ToolDO(SUCTION_PORT, 1)
     time.sleep(SUCTION_ON_DELAY)
+
+    for attempt in range(SUCTION_VERIFY_RETRIES + 1):
+        if suction_attached(robot):
+            logger.info("  object attached (DI_%d high, attempt %d/%d)",
+                        SUCTION_DI_PORT, attempt + 1, SUCTION_VERIFY_RETRIES + 1)
+            break
+        logger.info("  object not attached (attempt %d/%d)",
+                    attempt + 1, SUCTION_VERIFY_RETRIES + 1)
+        if attempt < SUCTION_VERIFY_RETRIES:
+            current_z -= SUCTION_VERIFY_STEP
+            logger.info("  descending %.1f mm lower (Z=%.1f)",
+                        SUCTION_VERIFY_STEP, current_z)
+            descend = [obj[0], obj[1], current_z] + list(PICK_ORIENTATION)
+            if not movl_and_wait(robot, descend, "descend for suction retry",
+                                 tool=GRIPPER_TOOL_INDEX):
+                return False
+            robot.io.ToolDO(SUCTION_PORT, 1)
+            time.sleep(SUCTION_VERIFY_DELAY)
+    else:
+        logger.warning("  suction verification failed after %d retries — "
+                       "releasing and aborting pick.", SUCTION_VERIFY_RETRIES)
+        robot.io.ToolDO(SUCTION_PORT, 0)
+        time.sleep(SUCTION_OFF_DELAY)
+        movl_and_wait(robot, approach, "lift after failed pick",
+                      tool=GRIPPER_TOOL_INDEX)
+        return False
 
     if not movl_and_wait(robot, approach, "lift after pick",
                          tool=GRIPPER_TOOL_INDEX):
