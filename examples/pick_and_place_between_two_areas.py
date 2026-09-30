@@ -148,7 +148,8 @@ GRIPPER_TOOL_INDEX = 4
 # Camera TCP: paste the result printed by calibrate_camera_tcp.py
 # [x, y, z, rx, ry, rz] in mm / deg (camera optical frame in flange).
 # CAMERA_TCP = [-79.8088, -1.9769, 48.5972, -2.2512, 0.2884, -89.6780]
-CAMERA_TCP = [-83.9743, -3.6767, 51.0055, -2.4953, 0.7329, -90.2043]
+# CAMERA_TCP = [-83.9743, -3.6767, 51.0055, -2.4953, 0.7329, -90.2043]
+CAMERA_TCP = [-82.5572, -5.5128, 52.3811, -2.4461, 0.5140, -90.0617]
 # Gripper TCP: your suction-cup TCP [x, y, z, rx, ry, rz] in mm / deg
 # (cup contact point in flange).
 GRIPPER_TCP = [0.0, 0.0, 83.0, 0.0, 0.0, 0.0]

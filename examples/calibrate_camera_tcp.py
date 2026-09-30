@@ -79,7 +79,7 @@ except ImportError as e:
 ROBOT_IP = os.environ.get("ROBOT_IP", "192.168.100.51")
 VISION_API_URL = os.environ.get("VISION_API_URL", "http://localhost:8000")
 
-SETTLE_SECONDS = 1.0     # let the arm settle (vibration) before reading pose
+SETTLE_SECONDS = 3.0     # let the arm settle (vibration) before reading pose
 MIN_PAIRS = 3           # minimum valid pose pairs for hand-eye
 HAND_EYE_METHOD = cv2.CALIB_HAND_EYE_PARK
 
@@ -272,14 +272,8 @@ def main() -> None:
             robot.StartFeedbackMonitor()
             time.sleep(0.5)
 
-            try:
-                vision_client.get_initial_status(session)
-                R_g2b, t_g2b, R_t2c, t_t2c = collect_pairs(robot, session)
-            finally:
-                pass
-                # print("\nStopping monitor / disabling robot...")
-                # robot.StopFeedbackMonitor()
-                # robot.robot_control.DisableRobot()
+            vision_client.get_initial_status(session)
+            R_g2b, t_g2b, R_t2c, t_t2c = collect_pairs(robot, session)
 
             tcp = solve_hand_eye(R_g2b, t_g2b, R_t2c, t_t2c)
             if tcp is None:
