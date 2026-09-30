@@ -170,9 +170,9 @@ PICK_Z = 51.0           # mm, for can_01
 PICK_ORIENTATION = [-180.0, 0.0, -180.0]   # gripper pointing down
 
 # Place position (world, with gripper tool active)
-PLACE_X = 200.0
-PLACE_Y = -350.0
-PLACE_Z = 60.0
+# PLACE_X = 200.0
+# PLACE_Y = -350.0
+PLACE_Z = 52.0
 
 SCAN_PLACE_POSITIONS = [
     [100, -320, PLACE_Z],
@@ -219,6 +219,11 @@ EMPTY_SCAN_RETRIES = int(os.environ.get("EMPTY_SCAN_RETRIES", "3"))
 # Consecutive pick failures on the same object before aborting Phase A.
 # Override with the MAX_PICK_RETRIES environment variable.
 MAX_PICK_RETRIES = int(os.environ.get("MAX_PICK_RETRIES", "3"))
+
+# Stacking: max objects per PLACE_POSITIONS slot and object height.
+# Override MAX_STACK with the MAX_STACK environment variable.
+MAX_STACK = int(os.environ.get("MAX_STACK", "2"))
+OBJECT_HEIGHT = 72.0  # mm, height of one object (calibrate to your object)
 
 # Safe / home pose (world, gripper tool)
 # SAFE_POSE = [0.0, -300.0, 300.0, -180.0, 0.0, -180.0]
@@ -458,14 +463,22 @@ def suction_attached(robot) -> bool:
     return parse_tool_di(response) == 1
 
 
-def pick(robot, obj):
+def pick(robot, obj, pick_z=None):
     """Move above the object, descend, engage suction, verify grip, lift.
 
     After turning suction on the vacuum-sense DI port is checked. If the
     object is not attached the gripper descends SUCTION_VERIFY_STEP mm lower
     and re-checks, up to SUCTION_VERIFY_RETRIES times. If the object is still
     not attached the pick fails (suction is released before returning).
+
+    Args:
+        robot: connected DobotRobot with feedback monitor running
+        obj: [x, y, z] object position (world, mm)
+        pick_z: descend height; defaults to PICK_Z (use pick_z_for_stack
+            when picking from a stacked slot)
     """
+    if pick_z is None:
+        pick_z = PICK_Z
     logger.info("\n--- Pick (gripper tool) ---")
     robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
 
@@ -473,7 +486,7 @@ def pick(robot, obj):
     if not move_to(robot, "approach pick", approach, tool=GRIPPER_TOOL_INDEX):
         return False
 
-    current_z = PICK_Z
+    current_z = pick_z
     descend = [obj[0], obj[1], current_z] + list(PICK_ORIENTATION)
     if not movl_and_wait(robot, descend, "descend to pick",
                          tool=GRIPPER_TOOL_INDEX):
@@ -515,18 +528,20 @@ def pick(robot, obj):
     return True
 
 
-def place_at(robot, position, label="place"):
+def place_at(robot, position, label="place", z_offset=0.0):
     """Move to the given place position, descend, release, lift.
 
     Args:
         robot: connected DobotRobot with feedback monitor running
         position: [x, y, z] target (world, mm, gripper tool active)
         label: display name used in log messages
+        z_offset: added to the target Z (e.g. for placing on a stack)
 
     Returns:
         True if the place completed, False on failure.
     """
     x, y, z = position[:3]
+    z += z_offset
     logger.info("\n--- Place: %s (gripper tool) ---", label)
     approach = [x, y, APPROACH_Z] + list(PICK_ORIENTATION)
     if not move_to(robot, f"approach {label}", approach, tool=GRIPPER_TOOL_INDEX):
@@ -608,12 +623,31 @@ def next_free_slot(filled):
     return None
 
 
-def pick_from_scan_to_slots(robot, session, place_filled):
-    """Phase A: pick from the scan area into PLACE_POSITIONS slots, one by one.
+def next_stackable_slot(stack_counts):
+    """Return the index of the first slot with count < MAX_STACK, or None."""
+    for i, count in enumerate(stack_counts):
+        if count < MAX_STACK:
+            return i
+    return None
+
+
+def place_z_for_stack(stack_counts, slot):
+    """Z for placing on top of the current stack at *slot*."""
+    return PLACE_POSITIONS[slot][2] + stack_counts[slot] * OBJECT_HEIGHT
+
+
+def pick_z_for_stack(stack_counts, slot):
+    """Z for picking the top object from the stack at *slot*."""
+    return PICK_Z + (stack_counts[slot] - 1) * OBJECT_HEIGHT
+
+
+def pick_from_scan_to_slots(robot, session, place_stack):
+    """Phase A: pick from the scan area into PLACE_POSITIONS slots, stacking.
 
     Uses double_scan_and_detect to locate objects in the scan area. Each
-    detected object is picked and placed into the next free PLACE_POSITIONS
-    slot, whose occupancy is tracked in *place_filled*.
+    detected object is picked and placed into the next stackable
+    PLACE_POSITIONS slot, whose stack count is tracked in *place_stack*.
+    Each slot holds up to MAX_STACK objects.
 
     Returns:
         True if the scan area is empty (EMPTY_SCAN_RETRIES consecutive
@@ -625,7 +659,7 @@ def pick_from_scan_to_slots(robot, session, place_filled):
     miss_count = 0
     pick_failures = 0
     while miss_count < EMPTY_SCAN_RETRIES:
-        slot = next_free_slot(place_filled)
+        slot = next_stackable_slot(place_stack)
         if slot is None:
             logger.info("All PLACE_POSITIONS slots are full — aborting.")
             return False
@@ -638,8 +672,9 @@ def pick_from_scan_to_slots(robot, session, place_filled):
             continue
 
         miss_count = 0
-        logger.info("  placing into slot %d/%d",
-                    slot + 1, len(PLACE_POSITIONS))
+        logger.info("  placing into slot %d/%d (stack %d/%d)",
+                    slot + 1, len(PLACE_POSITIONS),
+                    place_stack[slot] + 1, MAX_STACK)
         if not pick(robot, obj):
             pick_failures += 1
             logger.warning("  pick failed - trying again (%d/%d).",
@@ -649,26 +684,28 @@ def pick_from_scan_to_slots(robot, session, place_filled):
                              pick_failures)
                 return False
             continue
-        if not place_at(robot, PLACE_POSITIONS[slot], label=f"slot {slot + 1}"):
+        if not place_at(robot, PLACE_POSITIONS[slot], label=f"slot {slot + 1}",
+                        z_offset=place_stack[slot] * OBJECT_HEIGHT):
             logger.warning("  place failed - aborting.")
             return False
         pick_failures = 0
-        place_filled[slot] = True
-        logger.info("  slot %d/%d filled.",
-                    slot + 1, len(PLACE_POSITIONS))
+        place_stack[slot] += 1
+        logger.info("  slot %d/%d now has %d/%d objects.",
+                    slot + 1, len(PLACE_POSITIONS),
+                    place_stack[slot], MAX_STACK)
 
     logger.info("Scan area empty after %d consecutive misses.",
                 EMPTY_SCAN_RETRIES)
     return True
 
 
-def transfer_slots_to_scan(robot, place_filled):
-    """Phase B: batch-transfer filled PLACE_POSITIONS to SCAN_PLACE_POSITIONS.
+def transfer_slots_to_scan(robot, place_stack):
+    """Phase B: batch-transfer stacked PLACE_POSITIONS to SCAN_PLACE_POSITIONS.
 
-    Picks each filled PLACE_POSITIONS slot (known coordinates, no vision) and
-    places into the next free SCAN_PLACE_POSITIONS slot. Objects that don't
-    fit in the (fewer) scan slots are left in PLACE_POSITIONS for the next
-    cycle.
+    Picks the top object from each non-empty PLACE_POSITIONS slot (known
+    coordinates, no vision) and places into the next free
+    SCAN_PLACE_POSITIONS slot. Objects that don't fit in the (fewer) scan
+    slots are left in PLACE_POSITIONS for the next cycle.
 
     Returns:
         True if the transfer completed (or partially completed when the scan
@@ -677,8 +714,10 @@ def transfer_slots_to_scan(robot, place_filled):
     scan_filled = [False] * len(SCAN_PLACE_POSITIONS)
     logger.info("\n=== Phase B: PLACE_POSITIONS -> SCAN_PLACE_POSITIONS ===")
 
-    for src_idx, filled in enumerate(place_filled):
-        if not filled:
+    src_idx = 0
+    while src_idx < len(place_stack):
+        if place_stack[src_idx] == 0:
+            src_idx += 1
             continue
         dst_idx = next_free_slot(scan_filled)
         if dst_idx is None:
@@ -686,33 +725,35 @@ def transfer_slots_to_scan(robot, place_filled):
                         "remaining objects in PLACE_POSITIONS.")
             break
 
-        logger.info("  moving slot %d -> scan slot %d",
-                    src_idx + 1, dst_idx + 1)
-        if not pick(robot, PLACE_POSITIONS[src_idx]):
+        logger.info("  moving slot %d (stack %d/%d) -> scan slot %d",
+                    src_idx + 1, place_stack[src_idx], MAX_STACK, dst_idx + 1)
+        if not pick(robot, PLACE_POSITIONS[src_idx],
+                    pick_z=pick_z_for_stack(place_stack, src_idx)):
             logger.warning("  pick failed — aborting.")
             return False
         if not place_at(robot, SCAN_PLACE_POSITIONS[dst_idx],
                         label=f"scan slot {dst_idx + 1}"):
             logger.warning("  place failed — aborting.")
             return False
-        place_filled[src_idx] = False
+        place_stack[src_idx] -= 1
         scan_filled[dst_idx] = True
-        logger.info("  slot %d -> scan slot %d done.",
-                    src_idx + 1, dst_idx + 1)
+        logger.info("  slot %d -> scan slot %d done (slot now has %d/%d).",
+                    src_idx + 1, dst_idx + 1,
+                    place_stack[src_idx], MAX_STACK)
 
     logger.info("Phase B complete.")
     return True
 
 
-def run_cycle(robot, session, place_filled):
+def run_cycle(robot, session, place_stack):
     """Run one full cycle: Phase A (scan -> slots) then Phase B (slots -> scan).
 
     Returns:
         True to continue cycling, False to abort the main loop.
     """
-    if not pick_from_scan_to_slots(robot, session, place_filled):
+    if not pick_from_scan_to_slots(robot, session, place_stack):
         return False
-    if not transfer_slots_to_scan(robot, place_filled):
+    if not transfer_slots_to_scan(robot, place_stack):
         return False
     return True
 
@@ -754,12 +795,12 @@ def main() -> None:
 
             vision_client.get_initial_status(session)
 
-            # place_filled[i] tracks whether PLACE_POSITIONS[i] holds an object.
-            place_filled = [False] * len(PLACE_POSITIONS)
+            # place_stack[i] tracks how many objects are stacked in slot i.
+            place_stack = [0] * len(PLACE_POSITIONS)
 
             try:
                 while True:
-                    if not run_cycle(robot, session, place_filled):
+                    if not run_cycle(robot, session, place_stack):
                         logger.info("Aborting main loop.")
                         break
             finally:

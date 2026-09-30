@@ -170,9 +170,9 @@ PICK_Z = 51.0           # mm, for can_01
 PICK_ORIENTATION = [-180.0, 0.0, -180.0]   # gripper pointing down
 
 # Place position (world, with gripper tool active)
-PLACE_X = 200.0
-PLACE_Y = -350.0
-PLACE_Z = 60.0
+# PLACE_X = 200.0
+# PLACE_Y = -350.0
+PLACE_Z = 52.0
 
 SCAN_PLACE_POSITIONS = [
     [100, -320, PLACE_Z],
