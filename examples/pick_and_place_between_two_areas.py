@@ -177,8 +177,8 @@ PLACE_Z = 52.0
 SCAN_PLACE_POSITIONS = [
     [100, -320, PLACE_Z],
     [30, -320, PLACE_Z],
-    [100, -425, PLACE_Z],
-    [30, -425, PLACE_Z],
+    [100, -405, PLACE_Z],
+    [30, -405, PLACE_Z],
 ]
 
 PLACE_POSITIONS = [
