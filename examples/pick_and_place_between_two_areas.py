@@ -120,10 +120,11 @@ def setup_logging() -> logging.Logger:
 
 logger = setup_logging()
 
-from dobot_sdk import DobotRobot, CoordinateType  # noqa: E402,F401
 from check_camera_calibration_positions import (  # noqa: E402
     wait_for_motion_complete,
 )
+
+from dobot_sdk import CoordinateType, DobotRobot  # noqa: E402,F401
 
 try:
     import client as vision_client
@@ -200,6 +201,11 @@ SUCTION_OFF_DELAY = 0.7  # s, pause before lifting after release
 # MODEL_NAME = "paper_cup"           # must already exist on the vision server
 MODEL_NAME = "can_01"
 MATCH_THRESHOLD = 0.01          # or a float, e.g. 0.3
+
+# Phase A: consecutive empty scans before switching to Phase B (batch transfer
+# from PLACE_POSITIONS back to SCAN_PLACE_POSITIONS). Override with the
+# EMPTY_SCAN_RETRIES environment variable.
+EMPTY_SCAN_RETRIES = int(os.environ.get("EMPTY_SCAN_RETRIES", "3"))
 
 # Safe / home pose (world, gripper tool)
 # SAFE_POSE = [0.0, -300.0, 300.0, -180.0, 0.0, -180.0]
@@ -431,15 +437,25 @@ def pick(robot, obj):
     return True
 
 
-def place(robot):
-    """Move to the place position, descend, release, lift."""
-    logger.info("\n--- Place (gripper tool) ---")
-    approach = [PLACE_X, PLACE_Y, APPROACH_Z] + list(PICK_ORIENTATION)
-    if not move_to(robot, "approach place", approach, tool=GRIPPER_TOOL_INDEX):
+def place_at(robot, position, label="place"):
+    """Move to the given place position, descend, release, lift.
+
+    Args:
+        robot: connected DobotRobot with feedback monitor running
+        position: [x, y, z] target (world, mm, gripper tool active)
+        label: display name used in log messages
+
+    Returns:
+        True if the place completed, False on failure.
+    """
+    x, y, z = position[:3]
+    logger.info("\n--- Place: %s (gripper tool) ---", label)
+    approach = [x, y, APPROACH_Z] + list(PICK_ORIENTATION)
+    if not move_to(robot, f"approach {label}", approach, tool=GRIPPER_TOOL_INDEX):
         return False
 
-    descend = [PLACE_X, PLACE_Y, PLACE_Z] + list(PICK_ORIENTATION)
-    if not movl_and_wait(robot, descend, "descend to place",
+    descend = [x, y, z] + list(PICK_ORIENTATION)
+    if not movl_and_wait(robot, descend, f"descend to {label}",
                          tool=GRIPPER_TOOL_INDEX):
         return False
 
@@ -447,7 +463,7 @@ def place(robot):
     robot.io.ToolDO(SUCTION_PORT, 0)
     time.sleep(SUCTION_OFF_DELAY)
 
-    if not movl_and_wait(robot, approach, "lift after place",
+    if not movl_and_wait(robot, approach, f"lift after {label}",
                          tool=GRIPPER_TOOL_INDEX):
         return False
     return True
@@ -506,30 +522,113 @@ def check_place_positions(robot, positions=None):
     return True
 
 
-def pick_and_stack_loop(robot, session):
-    obj = double_scan_and_detect(robot, session)
-    if obj is None:
-        logger.info("\nNothing to pick — trying again.")
-    else:
-        if not pick(robot, obj):
-            logger.warning("\nPick failed — aborting.")
-        elif not place(robot):
-            logger.warning("\nPlace failed — aborting.")
-        else:
-            logger.info("\nPick and place completed.")
+def next_free_slot(filled):
+    """Return the index of the first False entry, or None if all are True."""
+    for i, is_filled in enumerate(filled):
+        if not is_filled:
+            return i
+    return None
 
 
-def pick_and_place_loop(robot, session):
-    obj = double_scan_and_detect(robot, session)
-    if obj is None:
-        logger.info("\nNothing to pick — trying again.")
-    else:
+def pick_from_scan_to_slots(robot, session, place_filled):
+    """Phase A: pick from the scan area into PLACE_POSITIONS slots, one by one.
+
+    Uses double_scan_and_detect to locate objects in the scan area. Each
+    detected object is picked and placed into the next free PLACE_POSITIONS
+    slot, whose occupancy is tracked in *place_filled*.
+
+    Returns:
+        True if the scan area is empty (EMPTY_SCAN_RETRIES consecutive
+        misses) and Phase B should run, False if all PLACE_POSITIONS slots
+        are full (abort — Phase B assumes the scan area is empty) or a
+        pick/place failed.
+    """
+    logger.info("\n=== Phase A: scan area -> PLACE_POSITIONS ===")
+    miss_count = 0
+    while miss_count < EMPTY_SCAN_RETRIES:
+        slot = next_free_slot(place_filled)
+        if slot is None:
+            logger.info("All PLACE_POSITIONS slots are full — aborting.")
+            return False
+
+        obj = double_scan_and_detect(robot, session)
+        if obj is None:
+            miss_count += 1
+            logger.info("  nothing to pick (miss %d/%d)",
+                        miss_count, EMPTY_SCAN_RETRIES)
+            continue
+
+        miss_count = 0
+        logger.info("  placing into slot %d/%d",
+                    slot + 1, len(PLACE_POSITIONS))
         if not pick(robot, obj):
-            logger.warning("\nPick failed — aborting.")
-        elif not place(robot):
-            logger.warning("\nPlace failed — aborting.")
-        else:
-            logger.info("\nPick and place completed.")
+            logger.warning("  pick failed — aborting.")
+            return False
+        if not place_at(robot, PLACE_POSITIONS[slot], label=f"slot {slot + 1}"):
+            logger.warning("  place failed — aborting.")
+            return False
+        place_filled[slot] = True
+        logger.info("  slot %d/%d filled.",
+                    slot + 1, len(PLACE_POSITIONS))
+
+    logger.info("Scan area empty after %d consecutive misses.",
+                EMPTY_SCAN_RETRIES)
+    return True
+
+
+def transfer_slots_to_scan(robot, place_filled):
+    """Phase B: batch-transfer filled PLACE_POSITIONS to SCAN_PLACE_POSITIONS.
+
+    Picks each filled PLACE_POSITIONS slot (known coordinates, no vision) and
+    places into the next free SCAN_PLACE_POSITIONS slot. Objects that don't
+    fit in the (fewer) scan slots are left in PLACE_POSITIONS for the next
+    cycle.
+
+    Returns:
+        True if the transfer completed (or partially completed when the scan
+        slots filled up), False if a pick/place failed.
+    """
+    scan_filled = [False] * len(SCAN_PLACE_POSITIONS)
+    logger.info("\n=== Phase B: PLACE_POSITIONS -> SCAN_PLACE_POSITIONS ===")
+
+    for src_idx, filled in enumerate(place_filled):
+        if not filled:
+            continue
+        dst_idx = next_free_slot(scan_filled)
+        if dst_idx is None:
+            logger.info("  all SCAN_PLACE_POSITIONS full — leaving the "
+                        "remaining objects in PLACE_POSITIONS.")
+            break
+
+        logger.info("  moving slot %d -> scan slot %d",
+                    src_idx + 1, dst_idx + 1)
+        if not pick(robot, PLACE_POSITIONS[src_idx]):
+            logger.warning("  pick failed — aborting.")
+            return False
+        if not place_at(robot, SCAN_PLACE_POSITIONS[dst_idx],
+                        label=f"scan slot {dst_idx + 1}"):
+            logger.warning("  place failed — aborting.")
+            return False
+        place_filled[src_idx] = False
+        scan_filled[dst_idx] = True
+        logger.info("  slot %d -> scan slot %d done.",
+                    src_idx + 1, dst_idx + 1)
+
+    logger.info("Phase B complete.")
+    return True
+
+
+def run_cycle(robot, session, place_filled):
+    """Run one full cycle: Phase A (scan -> slots) then Phase B (slots -> scan).
+
+    Returns:
+        True to continue cycling, False to abort the main loop.
+    """
+    if not pick_from_scan_to_slots(robot, session, place_filled):
+        return False
+    if not transfer_slots_to_scan(robot, place_filled):
+        return False
+    return True
 
 
 def main() -> None:
@@ -569,11 +668,14 @@ def main() -> None:
 
             vision_client.get_initial_status(session)
 
+            # place_filled[i] tracks whether PLACE_POSITIONS[i] holds an object.
+            place_filled = [False] * len(PLACE_POSITIONS)
+
             try:
                 while True:
-                    pick_and_place_loop(robot, session)
-                    # robot.robot_control.Tool(GRIPPER_TOOL_INDEX)
-                    # check_place_positions(robot)
+                    if not run_cycle(robot, session, place_filled):
+                        logger.info("Aborting main loop.")
+                        break
             finally:
                 # Return to a safe pose (gripper tool) before shutting down
                 logger.info("\nReturning to safe pose...")
@@ -609,4 +711,3 @@ if __name__ == "__main__":
     #     robot.robot_control.Tool(CAMERA_TOOL_INDEX)
     #     scan_pose = [SCAN_X, SCAN_Y, SCAN_Z] + list(SCAN_ORIENTATION)
     #     move_to(robot, "scan", scan_pose, tool=CAMERA_TOOL_INDEX)
-
