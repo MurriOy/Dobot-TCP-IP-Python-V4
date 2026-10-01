@@ -389,21 +389,8 @@ def movl_and_wait(robot, pose, label: str, tool: int, user: int = 0,
 
 # ==================== Workflow ====================
 
-def scan_and_detect(robot, session, scan_pose=None):
-    """Move to scan pose, detect object -> object world position [x, y, z]."""
-    logger.info("\n--- Scan (camera tool) ---")
-    robot.robot_control.Tool(CAMERA_TOOL_INDEX)
-    if scan_pose is None:
-        scan_pose = [SCAN_X, SCAN_Y, SCAN_Z] + list(SCAN_ORIENTATION)
-    if not move_to(robot, "scan", scan_pose, tool=CAMERA_TOOL_INDEX):
-        return None
-
-    # Actual camera pose in world (from real flange pose + camera TCP)
-    R_g2b, t_g2b = read_flange_pose(robot)
-    R_wcam, c_world = camera_pose_in_world(R_g2b, t_g2b, CAMERA_TCP)
-    logger.info("  camera center (world): [%.2f %.2f %.2f] mm",
-                c_world[0], c_world[1], c_world[2])
-
+def detect_object(session):
+    """Run vision detection, return (nx, ny) normalized center or None."""
     logger.info("\n--- Detect ---")
     body = vision_client.detect_2d_debug(session, MODEL_NAME, MATCH_THRESHOLD)
     if body.get("success") is False:
@@ -417,7 +404,6 @@ def scan_and_detect(robot, session, scan_pose=None):
     nx, ny = body["normalized_centre_point_coordinates"]
     logger.info("  detection center (normalized): nx=%.4f ny=%.4f", nx, ny)
 
-    # Save the debug image for inspection (timestamped so it isn't overwritten)
     debug_dir = os.environ.get(
         "DEBUG_IMAGE_DIR", os.path.join(EXAMPLES_DIR, "debug_images"),
     )
@@ -426,24 +412,45 @@ def scan_and_detect(robot, session, scan_pose=None):
     debug_path = os.path.join(debug_dir, f"detect_2d_debug_{timestamp}.png")
     vision_client.get_detect_2d_debug_image(session, save_path=debug_path)
     logger.info("  debug image saved to %s", debug_path)
+    return nx, ny
 
-    obj = back_project_to_world(nx, ny, R_wcam, c_world)
+
+def scan_and_detect(robot, session, scan_pose=None, plane_z=WORK_PLANE_Z):
+    """Move to scan pose, detect object -> object world position [x, y, z]."""
+    logger.info("\n--- Scan (camera tool) ---")
+    robot.robot_control.Tool(CAMERA_TOOL_INDEX)
+    if scan_pose is None:
+        scan_pose = [SCAN_X, SCAN_Y, SCAN_Z] + list(SCAN_ORIENTATION)
+    if not move_to(robot, "scan", scan_pose, tool=CAMERA_TOOL_INDEX):
+        return None
+
+    R_g2b, t_g2b = read_flange_pose(robot)
+    R_wcam, c_world = camera_pose_in_world(R_g2b, t_g2b, CAMERA_TCP)
+    logger.info("  camera center (world): [%.2f %.2f %.2f] mm",
+                c_world[0], c_world[1], c_world[2])
+
+    result = detect_object(session)
+    if result is None:
+        return None
+    nx, ny = result
+
+    obj = back_project_to_world(nx, ny, R_wcam, c_world, plane_z=plane_z)
     logger.info("  object (world): [%.2f %.2f %.2f] mm", obj[0], obj[1], obj[2])
     return obj
 
 
-def double_scan_and_detect(robot, session):
+def double_scan_and_detect(robot, session, plane_z=WORK_PLANE_Z):
     """Move to scan pose, detect object -> move to scan pose above the detected object
     -> detect object -> object world position [x, y, z]."""
-    obj = scan_and_detect(robot, session)
+    obj = scan_and_detect(robot, session, plane_z=plane_z)
     if obj is None:
         logger.info("  no object detected")
         return None
     else:
         logger.info("  moving on top of the object")
-        #TODO: move the camera above object so that it looks exactly at it's center from FOCUS_DISTANCE
         above_object_pose = [obj[0], obj[1], SCAN_Z] + list(SCAN_ORIENTATION)
-        obj = scan_and_detect(robot, session, scan_pose=above_object_pose)
+        obj = scan_and_detect(robot, session, scan_pose=above_object_pose,
+                              plane_z=plane_z)
         return obj
 
 # def move_camera_above_object(robot, obj):
