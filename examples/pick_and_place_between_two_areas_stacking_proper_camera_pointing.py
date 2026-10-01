@@ -334,6 +334,24 @@ def back_project_to_world(nx: float, ny: float, R_wcam, c_world,
     return c_world + s * r_world
 
 
+def camera_center_for_object(obj, R_wcam, focus_distance=FOCUS_DISTANCE,
+                             plane_z=WORK_PLANE_Z) -> np.ndarray:
+    """Camera center position such that the optical axis passes through *obj*.
+
+    The camera is tilted (not perfectly perpendicular to the work plane), so
+    placing the camera TCP directly above the object center would make the
+    optical axis miss it. This computes the offset camera center that puts
+    the optical axis (center ray, nx=0 ny=0) exactly on *obj* at the given
+    focus distance above *plane_z*.
+    """
+    r_z = R_wcam @ np.array([0, 0, 1.0], dtype=np.float64)
+    if abs(r_z[2]) < 1e-6:
+        raise RuntimeError("Camera ray nearly parallel to the work plane; "
+                           "check scan orientation / camera TCP")
+    t = -focus_distance / r_z[2]
+    return obj + t * r_z
+
+
 # ==================== Motion helpers ====================
 
 def move_to(robot, label: str, pose, tool: int, user: int = 0,
@@ -448,7 +466,11 @@ def double_scan_and_detect(robot, session, plane_z=WORK_PLANE_Z):
         return None
     else:
         logger.info("  moving on top of the object")
-        above_object_pose = [obj[0], obj[1], SCAN_Z] + list(SCAN_ORIENTATION)
+        R_g2b, t_g2b = read_flange_pose(robot)
+        R_wcam, _ = camera_pose_in_world(R_g2b, t_g2b, CAMERA_TCP)
+        c_desired = camera_center_for_object(obj, R_wcam, FOCUS_DISTANCE,
+                                             plane_z)
+        above_object_pose = c_desired.tolist() + list(SCAN_ORIENTATION)
         obj = scan_and_detect(robot, session, scan_pose=above_object_pose,
                               plane_z=plane_z)
         return obj
