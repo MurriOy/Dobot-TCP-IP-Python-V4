@@ -349,7 +349,7 @@ def camera_center_for_object(obj, R_wcam, focus_distance=FOCUS_DISTANCE,
         raise RuntimeError("Camera ray nearly parallel to the work plane; "
                            "check scan orientation / camera TCP")
     t = -focus_distance / r_z[2]
-    return obj + t * r_z
+    return obj - t * r_z
 
 
 # ==================== Motion helpers ====================
